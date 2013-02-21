@@ -1,0 +1,30 @@
+{
+  "name": "commonjs-everywhere",
+  "version": "0.0.1",
+  "description": "build a commonJS project for the browser (like browserify but not broken)",
+  "main": "lib/index.js",
+  "directories": {
+    "bin": "bin",
+    "lib": "lib",
+    "test": "test"
+  },
+  "dependencies": {
+    "escodegen": "~0.0.17",
+    "esprima": "~1.0.2",
+    "resolve": "~0.3.0",
+    "estraverse": "~0.0.4",
+    "coffee-script-redux": "~2.0.0-beta3"
+  },
+  "devDependencies": {
+    "mocha": "~1.8.1"
+  },
+  "scripts": {
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:michaelficarra/commonjs-everywhere"
+  },
+  "author": "michaelficarra",
+  "license": "BSD"
+}
