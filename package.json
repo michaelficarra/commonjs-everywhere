@@ -14,7 +14,7 @@
     "resolve": "~0.3.0",
     "estraverse": "~0.0.4",
     "coffee-script-redux": "~2.0.0-beta3",
-    "jedediah": "~0.0.1"
+    "jedediah": "~0.1.0"
   },
   "devDependencies": {
     "mocha": "~1.8.1"

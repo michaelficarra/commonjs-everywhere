@@ -5,14 +5,12 @@ escodegen = require 'escodegen'
 Jedediah = require 'jedediah'
 CJSEverywhere = require './index'
 
-flagSpec = [
-]
-paramSpec = [
-  [['export', 'x'], 'NAME', 'export the given entry module as NAME']
-  [['output', 'o'], 'FILE', 'output to FILE instead of stdout']
-  [['root',   'r'], 'DIR', 'unqualified requires are relative to DIR (default: cwdv)']
-]
-optionParser = new Jedediah flagSpec, paramSpec
+optionParser = new Jedediah
+
+optionParser.addParameter 'export', 'x', 'NAME', 'export the given entry module as NAME'
+optionParser.addParameter 'output', 'o', 'FILE', 'output to FILE instead of stdout'
+optionParser.addParameter 'root', 'r', 'DIR', 'unqualified requires are relative to DIR (default: cwdv)'
+
 [options, positionalArgs] = optionParser.parse process.argv
 
 unless positionalArgs.length is 1
