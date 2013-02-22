@@ -9,12 +9,13 @@
     "test": "test"
   },
   "dependencies": {
-    "escodegen": "~0.0.17",
-    "esprima": "~1.0.2",
-    "resolve": "~0.3.0",
-    "estraverse": "~0.0.4",
     "coffee-script-redux": "~2.0.0-beta3",
-    "jedediah": "~0.1.0"
+    "escodegen": "~0.0.17",
+    "esmangle": "~0.0.10",
+    "esprima": "~1.0.2",
+    "estraverse": "~0.0.4",
+    "jedediah": "~0.1.0",
+    "resolve": "~0.3.0"
   },
   "devDependencies": {
     "mocha": "~1.8.1"

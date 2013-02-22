@@ -8,6 +8,7 @@ CJSEverywhere = require './index'
 optionParser = new Jedediah
 
 optionParser.addOption 'help', off, 'display this help message'
+optionParser.addOption 'minify', 'm', off, 'minify output'
 optionParser.addParameter 'export', 'x', 'NAME', 'export the given entry module as NAME'
 optionParser.addParameter 'output', 'o', 'FILE', 'output to FILE instead of stdout'
 optionParser.addParameter 'root', 'r', 'DIR', 'unqualified requires are relative to DIR (default: cwdv)'
@@ -29,6 +30,9 @@ unless positionalArgs.length is 1
 
 root = if options.root then path.resolve options.root else process.cwd()
 combined = CJSEverywhere.build positionalArgs[0], options.export, root
+if options.minify
+  esmangle = require 'esmangle'
+  combined = esmangle.mangle (esmangle.optimize combined), destructive: yes
 js = escodegen.generate combined
 
 if options.output
