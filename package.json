@@ -24,7 +24,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:michaelficarra/commonjs-everywhere"
+    "url": "git@github.com:michaelficarra/commonjs-everywhere.git"
   },
   "author": "michaelficarra",
   "license": "BSD"
