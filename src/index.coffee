@@ -91,6 +91,7 @@ exports.relativeResolve = relativeResolve = (root, givenPath, cwd) ->
 
 
 exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
+  entryPoint = path.resolve entryPoint
   options.aliases ?= {}
 
   handlers =
@@ -101,7 +102,7 @@ exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
   for own ext, handler of options.handlers ? {}
     handlers[ext] = handler
 
-  worklist = [path.resolve entryPoint]
+  worklist = [entryPoint]
   processed = {}
 
   while worklist.length
