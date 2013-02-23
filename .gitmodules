@@ -1,0 +1,3 @@
+[submodule "core/node"]
+	path = core/node
+	url = git://github.com/joyent/node.git
