@@ -1,6 +1,6 @@
 {
   "name": "commonjs-everywhere",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "build a commonJS project for the browser (like browserify but not broken)",
   "main": "lib/index.js",
   "directories": {
@@ -9,9 +9,9 @@
     "test": "test"
   },
   "dependencies": {
-    "coffee-script-redux": "~2.0.0-beta3",
+    "coffee-script-redux": "~2.0.0-beta4",
     "escodegen": "~0.0.17",
-    "esmangle": "~0.0.10",
+    "esmangle": "git://github.com/michaelficarra/esmangle.git#static-evaluation-of-logical-operators",
     "esprima": "~1.0.2",
     "estraverse": "~0.0.4",
     "jedediah": "~0.1.0",

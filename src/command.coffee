@@ -11,7 +11,8 @@ optionParser.addOption 'help', off, 'display this help message'
 optionParser.addOption 'minify', 'm', off, 'minify output'
 optionParser.addParameter 'export', 'x', 'NAME', 'export the given entry module as NAME'
 optionParser.addParameter 'output', 'o', 'FILE', 'output to FILE instead of stdout'
-optionParser.addParameter 'root', 'r', 'DIR', 'unqualified requires are relative to DIR (default: cwdv)'
+optionParser.addParameter 'root', 'r', 'DIR', 'unqualified requires are relative to DIR (default: cwd)'
+optionParser.addParameter 'source-map-file', 'FILE', 'output a source map to FILE'
 
 [options, positionalArgs] = optionParser.parse process.argv
 
@@ -29,13 +30,45 @@ unless positionalArgs.length is 1
   throw new Error "wrong number of entry points given; expected 1"
 
 root = if options.root then path.resolve options.root else process.cwd()
-combined = CJSEverywhere.build positionalArgs[0], options.export, root
+combined = CJSEverywhere.cjsify positionalArgs[0], root, options
+
+escodegenFormat =
+  indent:
+    style: '  '
+    base: 0
+  renumber: yes
+  hexadecimal: yes
+  quotes: 'auto'
+  parentheses: no
+
 if options.minify
   esmangle = require 'esmangle'
   combined = esmangle.mangle (esmangle.optimize combined), destructive: yes
-js = escodegen.generate combined
+  escodegenFormat =
+    indent:
+      style: ''
+      base: 0
+    renumber: yes
+    hexadecimal: yes
+    quotes: 'auto'
+    escapeless: yes
+    compact: yes
+    parentheses: no
+    semicolons: no
+
+{code, map} = escodegen.generate combined,
+  comment: no
+  sourceMap: yes
+  sourceMapWithCode: yes
+  sourceMapRoot: root
+  format: escodegenFormat
+
+
+if options['source-map-file']
+  fs.writeFileSync options['source-map-file'], "#{map}"
+  code += "\n/*\n//@ sourceMappingURL=#{options['source-map-file']}\n*/"
 
 if options.output
-  fs.writeFileSync options.output, js
+  fs.writeFileSync options.output, code
 else
-  process.stdout.write "#{js}\n"
+  process.stdout.write "#{code}\n"

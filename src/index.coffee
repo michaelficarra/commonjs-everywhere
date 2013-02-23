@@ -17,14 +17,14 @@ function require(file){
   if(!resolved)
     throw new Error('Failed to resolve module ' + file);
 
-  var dirname = file.slice(0, file.lastIndexOf('/') + 1);
   var process = {
     title: 'browser',
     browser: true,
     env: {},
     argv: [],
     nextTick: function(fn){ setTimeout(fn, 0); },
-    cwd: function(){ return dirname; }
+    cwd: function(){ return '/'; },
+    chdir: function(){}
   };
   var module$ = {
     id: file,
@@ -35,6 +35,7 @@ function require(file){
     parent: null,
     children: []
   };
+  var dirname = file.slice(0, file.lastIndexOf('/') + 1);
   resolved.call(module$.exports, module$, module$.exports, dirname, file, process);
   module$.loaded = true;
   return require.cache[file] = module$.exports;
@@ -49,7 +50,7 @@ require.resolve = function(file){
 require.define = function(file, fn){ require.modules[file] = fn; };
 '''
 
-wrap = (file, statements) ->
+wrap = (name, program) ->
   type: 'ExpressionStatement'
   expression:
     type: 'CallExpression'
@@ -59,7 +60,7 @@ wrap = (file, statements) ->
       object: { type: 'Identifier', name: 'require' }
       property: { type: 'Identifier', name: 'define' }
     arguments: [
-      { type: 'Literal', value: file }
+      { type: 'Literal', value: name }
       {
         type: 'FunctionExpression'
         id: null
@@ -73,7 +74,7 @@ wrap = (file, statements) ->
         defaults: []
         body:
           type: 'BlockStatement'
-          body: statements
+          body: program.body
       }
     ]
 
@@ -87,33 +88,43 @@ exports.relativeResolve = relativeResolve = (root, givenPath, cwd) ->
     resolvedPath
 
 
-exports.build = (entryPoint, exposeAs, projectRoot) ->
-  projectRoot ?= path.dirname path.resolve entryPoint
+exports.cjsify = (entryPoint, root = path.cwd(), options = {}) ->
+  options.aliases ?= {}
+
+  handlers =
+    '.coffee': (coffee, canonicalName) ->
+      CoffeeScript.compile (CoffeeScript.parse coffee, raw: yes), bare: yes
+    '.json': (json, canonicalName) ->
+      esprima.parse "module.exports = #{json}", loc: yes, source: canonicalName
+  for own ext, handler of options.handlers ? {}
+    handlers[ext] = handler
 
   worklist = [path.resolve entryPoint]
-  built = {}
-  aliases = {'/lib/make-request.js': '/lib/make-request-browser.js'}
+  processed = {}
 
   while worklist.length
     filename = worklist.pop()
-    canonicalName = relativeResolve projectRoot, filename
-    continue if {}.hasOwnProperty.call built, canonicalName
+    canonicalName = relativeResolve root, filename
+    continue if {}.hasOwnProperty.call processed, canonicalName
 
-    if {}.hasOwnProperty.call aliases, canonicalName
-      filename = resolve.sync (path.join projectRoot, aliases[canonicalName]), extensions: EXTENSIONS
+    if {}.hasOwnProperty.call options.aliases, canonicalName
+      filename = resolve.sync "./#{options.aliases[canonicalName]}", basedir: root, extensions: EXTENSIONS
 
     if resolve.isCore filename
-      filename = path.resolve path.join __dirname, '..', 'core', filename
+      filename = path.resolve path.join __dirname, '..', 'core', "#{filename}.js"
       unless fs.existsSync filename
-        filename = path.resolve path.join __dirname, '..', 'core', 'undefined'
+        filename = path.resolve path.join __dirname, '..', 'core', 'undefined.js'
 
+    extname = path.extname filename
     fileContents = fs.readFileSync filename
-    if '.coffee' is path.extname filename
-      fileContents = CoffeeScript.cs2js fileContents
-    if '.json' is path.extname filename
-      fileContents = "module.exports = #{fileContents}"
-    ast = esprima.parse fileContents
-    built[canonicalName] = ast
+
+    processed[canonicalName] = ast =
+      if {}.hasOwnProperty.call handlers, extname
+        handlers[extname](fileContents, canonicalName)
+      else # assume JS
+        esprima.parse fileContents, loc: yes, source: canonicalName
+    ast.loc ?= {}
+    ast.loc.source = path.relative root, filename
     estraverse.replace ast,
       enter: (node, parents) ->
         return unless node.type is 'CallExpression' and node.callee.type is 'Identifier' and node.callee.name is 'require'
@@ -127,16 +138,21 @@ exports.build = (entryPoint, exposeAs, projectRoot) ->
           callee: node.callee
           arguments: [
             type: 'Literal'
-            value: relativeResolve projectRoot, node.arguments[0].value, path.dirname filename
+            value: relativeResolve root, node.arguments[0].value, path.dirname filename
           ]
         }
 
   outputProgram = esprima.parse PRELUDE
-  for own canonicalName, ast of built
-    outputProgram.body.push wrap canonicalName, ast.body
+  for own canonicalName, ast of processed
+    source = ast.loc.source
+    ast = wrap canonicalName, ast
+    estraverse.traverse ast, enter: (node) ->
+      if node.loc? then node.loc.source = source
+      return
+    outputProgram.body.push ast
 
   # expose the entry point
-  if exposeAs?
+  if options.export?
     outputProgram.body.push
       type: 'ExpressionStatement'
       expression:
@@ -146,13 +162,13 @@ exports.build = (entryPoint, exposeAs, projectRoot) ->
           type: 'MemberExpression'
           computed: true
           object: { type: 'Identifier', name: 'global' }
-          property: { type: 'Literal', value: exposeAs }
+          property: { type: 'Literal', value: options.export }
         right:
           type: 'CallExpression'
           callee: { type: 'Identifier', name: 'require' }
-          arguments: [{ type: 'Literal', value: relativeResolve projectRoot, entryPoint }]
+          arguments: [{ type: 'Literal', value: relativeResolve root, entryPoint }]
 
-  # wrap everything in IIFE for safety, define global var
+  # wrap everything in IIFE for safety; define global var
   outputProgram.body = [{
     type: 'ExpressionStatement'
     expression:
