@@ -90,7 +90,7 @@ exports.relativeResolve = relativeResolve = (root, givenPath, cwd) ->
     resolvedPath
 
 
-exports.cjsify = (entryPoint, root = path.cwd(), options = {}) ->
+exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
   options.aliases ?= {}
 
   handlers =
