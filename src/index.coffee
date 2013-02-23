@@ -78,10 +78,12 @@ wrap = (name, program) ->
       }
     ]
 
+resolvePath = (root, givenPath, cwd) ->
+  try resolve.sync givenPath, basedir: cwd or root, extensions: EXTENSIONS
+  catch e then resolve.sync (path.join root, givenPath), extensions: EXTENSIONS
+
 exports.relativeResolve = relativeResolve = (root, givenPath, cwd) ->
-  resolvedPath =
-    try resolve.sync givenPath, basedir: cwd or root, extensions: EXTENSIONS
-    catch e then resolve.sync (path.join root, givenPath), extensions: EXTENSIONS
+  resolvedPath = resolvePath root, givenPath, cwd
   if fs.existsSync resolvedPath
     "/#{path.relative root, resolvedPath}"
   else
@@ -132,7 +134,7 @@ exports.cjsify = (entryPoint, root = path.cwd(), options = {}) ->
           badRequireError filename, node, '`require` must be given exactly one argument'
         unless node.arguments[0].type is 'Literal' and typeof node.arguments[0].value is 'string'
           badRequireError filename, node, 'argument of `require` must be a constant string'
-        worklist.push resolve.sync node.arguments[0].value, basedir: (path.dirname filename), extensions: EXTENSIONS
+        worklist.push resolvePath root, node.arguments[0].value, path.dirname filename
         {
           type: 'CallExpression'
           callee: node.callee
