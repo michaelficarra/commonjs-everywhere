@@ -111,7 +111,7 @@ exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
     continue if {}.hasOwnProperty.call processed, canonicalName
 
     if {}.hasOwnProperty.call options.aliases, canonicalName
-      filename = resolve.sync "./#{options.aliases[canonicalName]}", basedir: root, extensions: EXTENSIONS
+      filename = resolvePath root, options.aliases[canonicalName]
 
     if resolve.isCore filename
       filename = path.resolve path.join __dirname, '..', 'core', "#{filename}.js"
