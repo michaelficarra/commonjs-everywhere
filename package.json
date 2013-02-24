@@ -9,7 +9,7 @@
     "test": "test"
   },
   "dependencies": {
-    "coffee-script-redux": "~2.0.0-beta4",
+    "coffee-script-redux": "git://github.com/michaelficarra/CoffeeScriptRedux.git#master",
     "escodegen": "~0.0.17",
     "esmangle": "~0.0.10",
     "esprima": "~1.0.2",
