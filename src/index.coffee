@@ -80,7 +80,10 @@ wrap = (name, program) ->
 
 resolvePath = (root, givenPath, cwd) ->
   try resolve.sync givenPath, basedir: cwd or root, extensions: EXTENSIONS
-  catch e then resolve.sync (path.join root, givenPath), extensions: EXTENSIONS
+  catch e
+    try resolve.sync (path.join root, givenPath), extensions: EXTENSIONS
+    catch e then throw new Error "Cannot find module \"#{givenPath}\" in \"#{root}\""
+
 
 exports.relativeResolve = relativeResolve = (root, givenPath, cwd) ->
   resolvedPath = resolvePath root, givenPath, cwd
