@@ -10,3 +10,6 @@
 [submodule "core/vm-browserify"]
 	path = core/vm-browserify
 	url = git://github.com/substack/vm-browserify.git
+[submodule "core/node-querystring"]
+	path = core/node-querystring
+	url = git://github.com/visionmedia/node-querystring.git
