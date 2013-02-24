@@ -3,7 +3,7 @@ suite 'module resolution', ->
   setup ->
     @resolve = (givenPath, cwd) ->
       root = path.join __dirname, 'fixtures'
-      relativeResolve root, givenPath, path.resolve path.join root, cwd
+      relativeResolve ['.js', '.coffee'], root, givenPath, path.resolve path.join root, cwd
 
   test 'node modules', ->
     eq '/node_modules/node-module-name/index.js', @resolve 'node-module-name'

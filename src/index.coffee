@@ -6,8 +6,6 @@ esprima = require 'esprima'
 estraverse = require 'estraverse'
 CoffeeScript = require 'coffee-script-redux'
 
-EXTENSIONS = ['.js', '.coffee', '.json']
-
 PRELUDE = '''
 function require(file){
   if({}.hasOwnProperty.call(require.cache, file))
@@ -78,15 +76,15 @@ wrap = (name, program) ->
       }
     ]
 
-resolvePath = (root, givenPath, cwd) ->
-  try resolve.sync givenPath, basedir: cwd or root, extensions: EXTENSIONS
+resolvePath = (extensions, root, givenPath, cwd) ->
+  try resolve.sync givenPath, {basedir: cwd or root, extensions}
   catch e
-    try resolve.sync (path.join root, givenPath), extensions: EXTENSIONS
+    try resolve.sync (path.join root, givenPath), {extensions}
     catch e then throw new Error "Cannot find module \"#{givenPath}\" in \"#{root}\""
 
 
-exports.relativeResolve = relativeResolve = (root, givenPath, cwd) ->
-  resolvedPath = resolvePath root, givenPath, cwd
+exports.relativeResolve = relativeResolve = (extensions, root, givenPath, cwd) ->
+  resolvedPath = resolvePath extensions, root, givenPath, cwd
   if fs.existsSync resolvedPath
     "/#{path.relative root, resolvedPath}"
   else
@@ -104,17 +102,18 @@ exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
       esprima.parse "module.exports = #{json}", loc: yes, source: canonicalName
   for own ext, handler of options.handlers ? {}
     handlers[ext] = handler
+  extensions = ['.js', (ext for own ext of handlers)...]
 
   worklist = [entryPoint]
   processed = {}
 
   while worklist.length
     filename = worklist.pop()
-    canonicalName = relativeResolve root, filename
+    canonicalName = relativeResolve extensions, root, filename
     continue if {}.hasOwnProperty.call processed, canonicalName
 
     if {}.hasOwnProperty.call options.aliases, canonicalName
-      filename = resolvePath root, options.aliases[canonicalName]
+      filename = resolvePath extensions, root, options.aliases[canonicalName]
 
     if resolve.isCore filename
       filename = path.resolve path.join __dirname, '..', 'core', "#{filename}.js"
@@ -139,13 +138,13 @@ exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
         unless node.arguments[0].type is 'Literal' and typeof node.arguments[0].value is 'string'
           badRequireError filename, node, 'argument of `require` must be a constant string'
         cwd = path.dirname fs.realpathSync filename
-        worklist.push resolvePath cwd, node.arguments[0].value
+        worklist.push resolvePath extensions, cwd, node.arguments[0].value
         {
           type: 'CallExpression'
           callee: node.callee
           arguments: [
             type: 'Literal'
-            value: relativeResolve root, node.arguments[0].value, cwd
+            value: relativeResolve extensions, root, node.arguments[0].value, cwd
           ]
         }
 
@@ -173,7 +172,7 @@ exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
         right:
           type: 'CallExpression'
           callee: { type: 'Identifier', name: 'require' }
-          arguments: [{ type: 'Literal', value: relativeResolve root, entryPoint }]
+          arguments: [{ type: 'Literal', value: relativeResolve extensions, root, entryPoint }]
 
   # wrap everything in IIFE for safety; define global var
   outputProgram.body = [{
