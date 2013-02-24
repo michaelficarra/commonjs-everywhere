@@ -1,1 +1,1 @@
-node/lib/crypto.js
+crypto-browserify/index.js

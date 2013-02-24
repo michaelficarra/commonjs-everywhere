@@ -1,0 +1,1 @@
+vm-browserify/index.js
