@@ -164,11 +164,7 @@ exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
       expression:
         type: 'AssignmentExpression'
         operator: '='
-        left:
-          type: 'MemberExpression'
-          computed: true
-          object: { type: 'Identifier', name: 'global' }
-          property: { type: 'Literal', value: options.export }
+        left: buildExportExpression options.export.split /\./
         right:
           type: 'CallExpression'
           callee: { type: 'Identifier', name: 'require' }
@@ -189,3 +185,22 @@ exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
   }]
 
   outputProgram
+
+
+buildExportExpression = (members) ->
+  if members.length is 1
+    {
+      type: 'MemberExpression'
+      computed: true
+      object: { type: 'Identifier', name: 'global' }
+      property: { type: 'Literal', value: members[0] }
+    }
+  else
+    member = members.pop()
+
+    {
+      type: 'MemberExpression'
+      computed: true
+      object: buildExportExpression members
+      property: { type: 'Literal', value: member }
+    }
