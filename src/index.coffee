@@ -157,18 +157,25 @@ exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
       return
     outputProgram.body.push ast
 
+
   # expose the entry point
   if options.export?
+    exportExpression = (esprima.parse options.export).body[0].expression
+    lhs =
+      if exportExpression.type is 'Identifier'
+        type: 'MemberExpression'
+          computed: false
+          object: { type: 'Identifier', name: 'global' }
+          property: { type: 'Identifier', value: exportExpression.name }
+      else
+        exportExpression
+
     outputProgram.body.push
       type: 'ExpressionStatement'
       expression:
         type: 'AssignmentExpression'
         operator: '='
-        left:
-          type: 'MemberExpression'
-          computed: true
-          object: { type: 'Identifier', name: 'global' }
-          property: { type: 'Literal', value: options.export }
+        left: lhs
         right:
           type: 'CallExpression'
           callee: { type: 'Identifier', name: 'require' }
