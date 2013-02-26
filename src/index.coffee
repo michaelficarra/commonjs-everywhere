@@ -138,7 +138,7 @@ exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
         unless node.arguments[0].type is 'Literal' and typeof node.arguments[0].value is 'string'
           badRequireError filename, node, 'argument of `require` must be a constant string'
         cwd = path.dirname fs.realpathSync filename
-        worklist.push resolvePath extensions, cwd, node.arguments[0].value
+        worklist.push resolvePath extensions, root, node.arguments[0].value, cwd
         {
           type: 'CallExpression'
           callee: node.callee
