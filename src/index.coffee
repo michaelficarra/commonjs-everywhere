@@ -138,7 +138,7 @@ exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
         unless node.arguments[0].type is 'Literal' and typeof node.arguments[0].value is 'string'
           badRequireError filename, node, 'argument of `require` must be a constant string'
         cwd = path.dirname fs.realpathSync filename
-        worklist.push resolvePath extensions, cwd, node.arguments[0].value
+        worklist.push resolvePath extensions, root, node.arguments[0].value, cwd
         {
           type: 'CallExpression'
           callee: node.callee
@@ -164,11 +164,7 @@ exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
       expression:
         type: 'AssignmentExpression'
         operator: '='
-        left:
-          type: 'MemberExpression'
-          computed: true
-          object: { type: 'Identifier', name: 'global' }
-          property: { type: 'Literal', value: options.export }
+        left: buildExportExpression options.export.split /\./
         right:
           type: 'CallExpression'
           callee: { type: 'Identifier', name: 'require' }
@@ -189,3 +185,22 @@ exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
   }]
 
   outputProgram
+
+
+buildExportExpression = (members) ->
+  if members.length is 1
+    {
+      type: 'MemberExpression'
+      computed: true
+      object: { type: 'Identifier', name: 'global' }
+      property: { type: 'Literal', value: members[0] }
+    }
+  else
+    member = members.pop()
+
+    {
+      type: 'MemberExpression'
+      computed: true
+      object: buildExportExpression members
+      property: { type: 'Literal', value: member }
+    }
