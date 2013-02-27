@@ -43,9 +43,9 @@ jsAst = (require 'commonjs-everywhere').cjsify 'src/entry-file.coffee', __dirnam
   aliases:
     '/src/module-that-only-works-in-node.coffee': '/src/module-that-does-the-same-thing-in-the-browser.coffee'
   handlers:
-    '.roy': (roySource) ->
+    '.roy': (roySource, filename) ->
       # the Roy compiler outputs JS code right now, so we parse it with esprima
-      (require 'esprima').parse (require 'roy').compile roySource
+      (require 'esprima').parse (require 'roy').compile roySource, {filename}
 
 {map, code} = (require 'escodegen').generate jsAst,
   sourceMapRoot: __dirname
