@@ -1,6 +1,6 @@
 {
   "name": "commonjs-everywhere",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "build a commonJS project for the browser (like browserify but not broken)",
   "main": "lib/index.js",
   "directories": {
