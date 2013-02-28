@@ -157,29 +157,34 @@ exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
       return
     outputProgram.body.push ast
 
+  requireEntryPoint =
+    type: 'CallExpression'
+    callee: { type: 'Identifier', name: 'require' }
+    arguments: [{ type: 'Literal', value: relativeResolve extensions, root, entryPoint }]
 
-  # expose the entry point
+  # require/expose the entry point
   if options.export?
     exportExpression = (esprima.parse options.export).body[0].expression
-    lhs =
+    lhsExpression =
       if exportExpression.type is 'Identifier'
         type: 'MemberExpression'
-          computed: false
-          object: { type: 'Identifier', name: 'global' }
-          property: { type: 'Identifier', value: exportExpression.name }
+        computed: false
+        object: { type: 'Identifier', name: 'global' }
+        property: { type: 'Identifier', name: exportExpression.name }
       else
         exportExpression
-
     outputProgram.body.push
       type: 'ExpressionStatement'
       expression:
         type: 'AssignmentExpression'
         operator: '='
-        left: lhs
-        right:
-          type: 'CallExpression'
-          callee: { type: 'Identifier', name: 'require' }
-          arguments: [{ type: 'Literal', value: relativeResolve extensions, root, entryPoint }]
+        left: lhsExpression
+        right: requireEntryPoint
+  else
+    outputProgram.body.push
+      type: 'ExpressionStatement'
+      expression: requireEntryPoint
+
 
   # wrap everything in IIFE for safety; define global var
   outputProgram.body = [{
