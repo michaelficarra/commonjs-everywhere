@@ -11,9 +11,9 @@ CommonJS (node module) browser bundler with source maps from the minified JS bun
 ### CLI
 
     $ bin/cjsify --help
-  
+
       Usage: cjsify OPT* path/to/entry-file.{js,coffee,json} OPT*
-      
+
       -m, --minify            minify output
       -o, --output FILE       output to FILE instead of stdout
       -r, --root DIR          unqualified requires are relative to DIR (default: cwd)
@@ -31,11 +31,36 @@ Example:
 * `entryPoint` is a file relative to `process.cwd()` that will be the initial module marked for inclusion in the bundle as well as the exported module
 * `root` is the directory to which unqualified requires are relative; defaults to `process.cwd()`
 * `options` is an optional object (defaulting to `{}`) with zero or more of the following properties
-    * `export`: a variable name to add to the global scope; assigned the exported object from the `entryPoint` module
+    * `export`: a variable name to add to the global scope; assigned the exported object from the `entryPoint` module. Any valid [Left-Hand-Side Expression](http://es5.github.com/#x11.2) may be given instead.
     * `aliases`: an object whose keys and values are `root`-rooted paths (`/src/file.js`), representing values that will replace requires that resolve to the associated keys
     * `handlers`: an object whose keys are file extensions (`'.roy'`) and whose values are functions from the file contents to a Spidermonkey-format JS AST like the one esprima produces. Handles for CoffeeScript and JSON are included by default. If no handler is defined for a file extension, it is assumed to be JavaScript.
 
-Example:
+
+## Examples
+
+### CLI example
+
+Say we have the following directory tree:
+
+```
+* todos/
+  * components/
+    * users/
+      - model.coffee
+    * todos/
+      - index.coffee
+  * public/
+    * javascripts/
+```
+Running the following command will export `index.coffee` and its dependencies as `App.Todos`.
+
+```
+jsify -o public/javascripts/app.js -x App.Todos -r components components/todos/index.coffee
+```
+
+Since the above command specifies `components` as the root directory for unqualified requires, we are able to require `components/users/model.coffee` with `require 'users/model'`. The output file will be `public/javascripts/app.js`.
+
+### Example with aliases and handlers
 
 ```coffee
 jsAst = (require 'commonjs-everywhere').cjsify 'src/entry-file.coffee', __dirname,
