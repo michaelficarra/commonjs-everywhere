@@ -60,7 +60,7 @@ cjsify -o public/javascripts/app.js -x App.Todos -r components components/todos/
 
 Since the above command specifies `components` as the root directory for unqualified requires, we are able to require `components/users/model.coffee` with `require 'users/model'`. The output file will be `public/javascripts/app.js`.
 
-### Example with aliases and handlers
+### JS Example
 
 ```coffee
 jsAst = (require 'commonjs-everywhere').cjsify 'src/entry-file.coffee', __dirname,

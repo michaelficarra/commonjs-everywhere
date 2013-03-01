@@ -1,7 +1,21 @@
 {
   "name": "commonjs-everywhere",
   "version": "0.3.0",
-  "description": "build a commonJS project for the browser (like browserify but not broken)",
+  "description": "CommonJS browser bundler with aliasing, extensibility, and source maps from the minified JS bundle",
+  "homepage": "https://github.com/michaelficarra/commonjs-everywhere",
+  "keywords": [
+    "CommonJS",
+    "CommonJS Everywhere",
+    "browser",
+    "build",
+    "cjsify",
+    "browserify",
+    "dependency resolution"
+  ],
+  "author": { "name": "Michael Ficarra", "email": "git@michael.ficarra.me" },
+  "repository": { "type": "git", "url": "git://github.com/michaelficarra/commonjs-everywhere.git" },
+  "bugs": "https://github.com/michaelficarra/commonjs-everywhere/issues",
+  "engines": { "node": "~0.8.0||~0.10.0" },
   "main": "lib/index.js",
   "directories": {
     "bin": "bin",
@@ -23,10 +37,7 @@
   "scripts": {
     "test": "make test"
   },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:michaelficarra/commonjs-everywhere.git"
-  },
-  "author": "michaelficarra",
-  "license": "BSD"
+  "licenses": [
+    { "type": "BSD", "url": "https://github.com/michaelficarra/commonjs-everywhere/blob/master/LICENSE" }
+  ]
 }
