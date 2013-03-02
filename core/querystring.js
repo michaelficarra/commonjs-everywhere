@@ -1,1 +1,1 @@
-node-querystring/index.js
+../node_modules/querystring/index.js

@@ -1,1 +1,1 @@
-crypto-browserify/index.js
+../node_modules/crypto-browserify/index.js

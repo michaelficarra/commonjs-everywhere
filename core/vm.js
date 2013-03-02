@@ -1,1 +1,1 @@
-vm-browserify/index.js
+../node_modules/vm-browserify/index.js

@@ -29,8 +29,13 @@
     "esprima": "~1.0.2",
     "estraverse": "~0.0.4",
     "jedediah": "~0.1.0",
+    "resolve": "~0.3.0",
     "http-browserify": "*",
-    "resolve": "~0.3.0"
+    "vm-browserify": "*",
+    "crypto-browserify": "*",
+    "buffer-browserify": "*",
+    "zlib-browserify": "*",
+    "querystring": "git://github.com/Gozala/querystring.git#master"
   },
   "devDependencies": {
     "mocha": "~1.8.1"
