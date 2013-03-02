@@ -103,6 +103,16 @@ bundle = (processed, entryPoint, options) ->
   iife
 
 
+badRequireError = (filename, node, msg) ->
+  if node.loc? and node.loc?.start?
+    filename = "#{filename}:#{node.loc.start.line}:#{node.loc.start.column}"
+  throw """
+    illegal require: #{msg}
+      `#{(require 'escodegen').generate node}`
+      in #{filename}
+  """
+
+
 resolvePath = (extensions, root, givenPath, cwd) ->
   if isCore givenPath
     givenPath = path.resolve path.join CORE_DIR, "#{givenPath}.js"
@@ -170,9 +180,9 @@ exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
         return unless node.type is 'CallExpression' and node.callee.type is 'Identifier' and node.callee.name is 'require'
         # illegal requires
         unless node.arguments.length is 1
-          badRequireError filename, node, '`require` must be given exactly one argument'
+          badRequireError filename, node, 'require must be given exactly one argument'
         unless node.arguments[0].type is 'Literal' and typeof node.arguments[0].value is 'string'
-          badRequireError filename, node, 'argument of `require` must be a constant string'
+          badRequireError filename, node, 'argument of require must be a constant string'
         cwd = path.dirname fs.realpathSync filename
         if options.verbose
           console.error "required \"#{node.arguments[0].value}\" from \"#{canonicalName}\""
