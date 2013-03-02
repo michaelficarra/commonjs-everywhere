@@ -4,9 +4,6 @@
 [submodule "core/crypto-browserify"]
 	path = core/crypto-browserify
 	url = git://github.com/dominictarr/crypto-browserify.git
-[submodule "core/http-browserify"]
-	path = core/http-browserify
-	url = git://github.com/substack/http-browserify.git
 [submodule "core/vm-browserify"]
 	path = core/vm-browserify
 	url = git://github.com/substack/vm-browserify.git

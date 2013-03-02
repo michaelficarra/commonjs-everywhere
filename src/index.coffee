@@ -6,6 +6,14 @@ esprima = require 'esprima'
 estraverse = require 'estraverse'
 CoffeeScript = require 'coffee-script-redux'
 
+CORE_DIR = path.join __dirname, '..', 'core'
+isCore = do ->
+  coreFiles = fs.readdirSync CORE_DIR
+  coreFiles = coreFiles.filter (f) -> not (fs.statSync path.join CORE_DIR, f).isDirectory()
+  coreFiles = coreFiles.map (f) -> f.replace /\.js$/, ''
+  (x) ->
+    (resolve.isCore x) or x in coreFiles
+
 PRELUDE = '''
 function require(file){
   if({}.hasOwnProperty.call(require.cache, file))
@@ -77,6 +85,10 @@ wrap = (name, program) ->
     ]
 
 resolvePath = (extensions, root, givenPath, cwd) ->
+  if isCore givenPath
+    givenPath = path.resolve path.join CORE_DIR, "#{givenPath}.js"
+    unless fs.existsSync givenPath
+      givenPath = path.resolve path.join CORE_DIR, 'undefined.js'
   try resolve.sync givenPath, {basedir: cwd or root, extensions}
   catch e
     try resolve.sync (path.join root, givenPath), {extensions}
@@ -114,11 +126,6 @@ exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
 
     if {}.hasOwnProperty.call options.aliases, canonicalName
       filename = resolvePath extensions, root, options.aliases[canonicalName]
-
-    if resolve.isCore filename
-      filename = path.resolve path.join __dirname, '..', 'core', "#{filename}.js"
-      unless fs.existsSync filename
-        filename = path.resolve path.join __dirname, '..', 'core', 'undefined.js'
 
     extname = path.extname filename
     fileContents = fs.readFileSync filename

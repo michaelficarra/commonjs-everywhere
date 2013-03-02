@@ -27,5 +27,5 @@ suite 'module resolution', ->
     eq '/dir/dir/index.js', @resolve 'dir/dir'
 
   test 'core module', ->
-    eq 'fs', @resolve 'fs'
-    eq 'fs', @resolve 'fs', 'dir'
+    doesNotThrow => @resolve 'fs'
+    doesNotThrow => @resolve 'fs', 'dir'

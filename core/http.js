@@ -1,1 +1,1 @@
-http-browserify/index.js
+../node_modules/http-browserify/index.js
