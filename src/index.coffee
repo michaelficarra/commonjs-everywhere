@@ -57,37 +57,16 @@ require.define = function(file, fn){ require.modules[file] = fn; };
 '''
 
 wrapFile = (name, program) ->
-  type: 'ExpressionStatement'
-  expression:
-    type: 'CallExpression'
-    callee:
-      type: 'MemberExpression'
-      computed: false
-      object: { type: 'Identifier', name: 'require' }
-      property: { type: 'Identifier', name: 'define' }
-    arguments: [
-      { type: 'Literal', value: name }
-      {
-        type: 'FunctionExpression'
-        id: null
-        params: [
-          { type: 'Identifier', name: 'module' }
-          { type: 'Identifier', name: 'exports' }
-          { type: 'Identifier', name: '__dirname' }
-          { type: 'Identifier', name: '__filename' }
-          { type: 'Identifier', name: 'process' }
-        ]
-        defaults: []
-        body:
-          type: 'BlockStatement'
-          body: program.body
-      }
-    ]
+  wrapperProgram = esprima.parse 'require.define(0, function(module, exports, __dirname, __filename, process){});'
+  wrapper = wrapperProgram.body[0]
+  wrapper.expression.arguments[0] = { type: 'Literal', value: name }
+  wrapper.expression.arguments[1].body.body = program.body
+  wrapper
 
 bundle = (processed, entryPoint, options) ->
-  outputProgram = esprima.parse PRELUDE
+  program = esprima.parse PRELUDE
   for own canonicalName, ast of processed
-    outputProgram.body.push wrapFile canonicalName, ast
+    program.body.push wrapFile canonicalName, ast
 
   requireEntryPoint =
     type: 'CallExpression'
@@ -105,7 +84,7 @@ bundle = (processed, entryPoint, options) ->
         property: { type: 'Identifier', name: exportExpression.name }
       else
         exportExpression
-    outputProgram.body.push
+    program.body.push
       type: 'ExpressionStatement'
       expression:
         type: 'AssignmentExpression'
@@ -113,25 +92,15 @@ bundle = (processed, entryPoint, options) ->
         left: lhsExpression
         right: requireEntryPoint
   else
-    outputProgram.body.push
+    program.body.push
       type: 'ExpressionStatement'
       expression: requireEntryPoint
 
   # wrap everything in IIFE for safety; define global var
-  outputProgram.body = [{
-    type: 'ExpressionStatement'
-    expression:
-      type: 'CallExpression'
-      callee:
-        type: 'FunctionExpression'
-        params: [{ type: 'Identifier', name: 'global' }]
-        body:
-          type: 'BlockStatement'
-          body: outputProgram.body
-      arguments: [{ type: 'ThisExpression' }]
-  }]
+  iife = esprima.parse 'void function(global){  }.call(this, this);'
+  iife.body[0].expression.argument.callee.object.body.body = program.body
 
-  outputProgram
+  iife
 
 
 resolvePath = (extensions, root, givenPath, cwd) ->
