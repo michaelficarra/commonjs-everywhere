@@ -9,6 +9,7 @@ optionParser = new Jedediah
 
 optionParser.addOption 'help', off, 'display this help message'
 optionParser.addOption 'minify', 'm', off, 'minify output'
+optionParser.addOption 'verbose', 'v', off, 'verbose output sent to stderr'
 optionParser.addParameter 'export', 'x', 'NAME', 'export the given entry module as NAME'
 optionParser.addParameter 'output', 'o', 'FILE', 'output to FILE instead of stdout'
 optionParser.addParameter 'root', 'r', 'DIR', 'unqualified requires are relative to DIR (default: cwd)'
@@ -20,7 +21,7 @@ if options.help
   $0 = if process.argv[0] is 'node' then process.argv[1] else process.argv[0]
   $0 = path.basename $0
   console.log "
-  Usage: #{$0} OPT* path/to/entry-file.{js,coffee}
+  Usage: #{$0} OPT* path/to/entry-file.{js,coffee} OPT*
 
 #{optionParser.help()}
 "

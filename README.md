@@ -12,11 +12,12 @@ CommonJS (node module) browser bundler with source maps from the minified JS bun
 
     $ bin/cjsify --help
 
-      Usage: cjsify OPT* path/to/entry-file.{js,coffee,json} OPT*
+      Usage: cjsify OPT* path/to/entry-file.{js,coffee} OPT*
 
       -m, --minify            minify output
       -o, --output FILE       output to FILE instead of stdout
       -r, --root DIR          unqualified requires are relative to DIR (default: cwd)
+      -v, --verbose           verbose output sent to stderr
       -x, --export NAME       export the given entry module as NAME
       --help                  display this help message
       --source-map-file FILE  output a source map to FILE
@@ -31,6 +32,7 @@ Example:
 * `entryPoint` is a file relative to `process.cwd()` that will be the initial module marked for inclusion in the bundle as well as the exported module
 * `root` is the directory to which unqualified requires are relative; defaults to `process.cwd()`
 * `options` is an optional object (defaulting to `{}`) with zero or more of the following properties
+    * `verbose`: log additional operational information to stderr
     * `export`: a variable name to add to the global scope; assigned the exported object from the `entryPoint` module. Any valid [Left-Hand-Side Expression](http://es5.github.com/#x11.2) may be given instead.
     * `aliases`: an object whose keys and values are `root`-rooted paths (`/src/file.js`), representing values that will replace requires that resolve to the associated keys
     * `handlers`: an object whose keys are file extensions (`'.roy'`) and whose values are functions from the file contents to a Spidermonkey-format JS AST like the one esprima produces. Handles for CoffeeScript and JSON are included by default. If no handler is defined for a file extension, it is assumed to be JavaScript.

@@ -145,6 +145,8 @@ exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
         unless node.arguments[0].type is 'Literal' and typeof node.arguments[0].value is 'string'
           badRequireError filename, node, 'argument of `require` must be a constant string'
         cwd = path.dirname fs.realpathSync filename
+        if options.verbose
+          console.error "required \"#{node.arguments[0].value}\" from \"#{canonicalName}\""
         worklist.push resolvePath extensions, root, node.arguments[0].value, cwd
         {
           type: 'CallExpression'
@@ -154,6 +156,9 @@ exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
             value: relativeResolve extensions, root, node.arguments[0].value, cwd
           ]
         }
+
+  if options.verbose
+    console.error "\nIncluded modules:\n  #{(Object.keys processed).sort().join "\n  "}"
 
   outputProgram = esprima.parse PRELUDE
   for own canonicalName, ast of processed
