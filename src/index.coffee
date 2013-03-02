@@ -97,8 +97,8 @@ bundle = (processed, entryPoint, options) ->
       expression: requireEntryPoint
 
   # wrap everything in IIFE for safety; define global var
-  iife = esprima.parse 'void function(global){  }.call(this, this);'
-  iife.body[0].expression.argument.callee.object.body.body = program.body
+  iife = esprima.parse '(function(global){}).call(this, this);'
+  iife.body[0].expression.callee.object.body.body = program.body
 
   iife
 
