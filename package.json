@@ -1,6 +1,6 @@
 {
   "name": "commonjs-everywhere",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "CommonJS browser bundler with aliasing, extensibility, and source maps from the minified JS bundle",
   "homepage": "https://github.com/michaelficarra/commonjs-everywhere",
   "keywords": [
