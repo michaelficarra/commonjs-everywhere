@@ -1,4 +1,8 @@
+commonjs-everywhere-*.tgz
 core/node
+core/node/*
 !core/node/lib
 src
 test
+.gitmodules
+Makefile
