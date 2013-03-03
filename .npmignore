@@ -1,0 +1,4 @@
+core/node
+!core/node/lib
+src
+test

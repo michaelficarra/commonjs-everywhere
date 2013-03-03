@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "coffee-script-redux": "git://github.com/michaelficarra/CoffeeScriptRedux.git#master",
-    "escodegen": "~0.0.17",
+    "escodegen": "~0.0.16",
     "esmangle": "~0.0.10",
     "esprima": "~1.0.2",
     "estraverse": "~0.0.4",
