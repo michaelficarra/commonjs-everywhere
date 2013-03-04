@@ -42,6 +42,8 @@ function require(file){
     children: []
   };
   var dirname = file.slice(0, file.lastIndexOf('/') + 1);
+
+  require.cache[file] = module$.exports;
   resolved.call(module$.exports, module$, module$.exports, dirname, file, process);
   module$.loaded = true;
   return require.cache[file] = module$.exports;
