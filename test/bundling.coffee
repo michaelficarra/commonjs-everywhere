@@ -42,4 +42,11 @@ suite 'Bundling', ->
     eq 5, obj.a
     eq 3, obj.b
 
-  #test 'module caching', ->
+  test 'module caching', ->
+    fixtures
+      '/a.js': '''
+        ++require('./b').b
+        module.exports = require('./b').b
+      '''
+      '/b.js': 'module.exports = {b: 1}'
+    eq 2, @bundleEval 'a.js'
