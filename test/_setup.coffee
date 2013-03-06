@@ -1,4 +1,6 @@
 util = require 'util'
+path = require 'path'
+fs = require 'scopedfs'
 inspect = (o) -> util.inspect o, no, 2, yes
 
 global[name] = func for name, func of require 'assert'
@@ -21,5 +23,17 @@ arrayEgal = (a, b) ->
 global.eq      = (a, b, msg) -> ok egal(a, b), msg ? "#{inspect a} === #{inspect b}"
 global.arrayEq = (a, b, msg) -> ok arrayEgal(a,b), msg ? "#{inspect a} === #{inspect b}"
 
+FIXTURES_DIR = path.join __dirname, 'fixtures'
+sfs = fs.scoped FIXTURES_DIR
+sfs.reset = ->
+  fs.rmrfSync FIXTURES_DIR
+  fs.mkdirpSync FIXTURES_DIR
+do sfs.reset
+
 {relativeResolve: global.relativeResolve} = require '..'
-global.path = require 'path'
+global.path = path
+global.fs = sfs
+global.fixtures = (opts) ->
+  do sfs.reset
+  sfs.applySync opts
+global.async = require 'async'
