@@ -1,9 +1,10 @@
 suite 'module resolution', ->
 
   setup ->
+    extensions = ['.js', '.coffee']
     @resolve = (givenPath, cwd) ->
-      root = path.join __dirname, 'fixtures'
-      relativeResolve ['.js', '.coffee'], root, givenPath, path.resolve path.join root, cwd
+      realCwd = path.resolve path.join FIXTURES_DIR, cwd
+      relativeResolve extensions, FIXTURES_DIR, givenPath, realCwd
 
   teardown fs.reset
 

@@ -1,5 +1,6 @@
 util = require 'util'
 path = require 'path'
+async = require 'async'
 fs = require 'scopedfs'
 inspect = (o) -> util.inspect o, no, 2, yes
 
@@ -30,10 +31,11 @@ sfs.reset = ->
   fs.mkdirpSync FIXTURES_DIR
 do sfs.reset
 
-{relativeResolve: global.relativeResolve} = require '..'
+global[k] = v for own k, v of require '..'
+global.FIXTURES_DIR = FIXTURES_DIR
 global.path = path
+global.async = async
 global.fs = sfs
 global.fixtures = (opts) ->
   do sfs.reset
   sfs.applySync opts
-global.async = require 'async'
