@@ -30,6 +30,16 @@ suite 'Bundling', ->
       '/d.js': 'module.exports = 1'
     eq 7, @bundleEval 'a.js'
 
-  #test 'circular dependencies', ->
+  test 'circular dependencies', ->
+    fixtures
+      '/a.js': '''
+        exports.a = 1;
+        exports.b = require('./b');
+        exports.a = 5;
+      '''
+      '/b.js': 'module.exports = 2 + require("./a").a'
+    obj = @bundleEval 'a.js'
+    eq 5, obj.a
+    eq 3, obj.b
 
   #test 'module caching', ->
