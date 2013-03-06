@@ -15,6 +15,16 @@ isCore = do ->
     (resolve.isCore x) or x in coreFiles
 
 PRELUDE = '''
+var process = {
+  title: 'browser',
+  browser: true,
+  env: {},
+  argv: [],
+  nextTick: function(fn){ setTimeout(fn, 0); },
+  cwd: function(){ return '/'; },
+  chdir: function(){}
+};
+
 function require(file){
   if({}.hasOwnProperty.call(require.cache, file))
     return require.cache[file];
@@ -23,15 +33,6 @@ function require(file){
   if(!resolved)
     throw new Error('Failed to resolve module ' + file);
 
-  var process = {
-    title: 'browser',
-    browser: true,
-    env: {},
-    argv: [],
-    nextTick: function(fn){ setTimeout(fn, 0); },
-    cwd: function(){ return '/'; },
-    chdir: function(){}
-  };
   var module$ = {
     id: file,
     require: require,
@@ -44,7 +45,7 @@ function require(file){
   var dirname = file.slice(0, file.lastIndexOf('/') + 1);
 
   require.cache[file] = module$.exports;
-  resolved.call(module$.exports, module$, module$.exports, dirname, file, process);
+  resolved.call(module$.exports, module$, module$.exports, dirname, file);
   module$.loaded = true;
   return require.cache[file] = module$.exports;
 }
@@ -59,7 +60,7 @@ require.define = function(file, fn){ require.modules[file] = fn; };
 '''
 
 wrapFile = (name, program) ->
-  wrapperProgram = esprima.parse 'require.define(0, function(module, exports, __dirname, __filename, process){});'
+  wrapperProgram = esprima.parse 'require.define(0, function(module, exports, __dirname, __filename){});'
   wrapper = wrapperProgram.body[0]
   wrapper.expression.arguments[0] = { type: 'Literal', value: name }
   wrapper.expression.arguments[1].body.body = program.body
