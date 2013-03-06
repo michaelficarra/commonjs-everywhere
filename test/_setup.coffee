@@ -2,6 +2,7 @@ util = require 'util'
 path = require 'path'
 async = require 'async'
 fs = require 'scopedfs'
+escodegen = require 'escodegen'
 inspect = (o) -> util.inspect o, no, 2, yes
 
 global[name] = func for name, func of require 'assert'
@@ -35,6 +36,7 @@ global[k] = v for own k, v of require '..'
 global.FIXTURES_DIR = FIXTURES_DIR
 global.path = path
 global.async = async
+global.escodegen = escodegen
 global.fs = sfs
 global.fixtures = (opts) ->
   do sfs.reset
