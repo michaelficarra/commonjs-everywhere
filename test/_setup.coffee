@@ -32,6 +32,7 @@ sfs.reset = ->
   fs.mkdirpSync FIXTURES_DIR
 do sfs.reset
 
+global.IN_TESTING_ENVIRONMENT = yes
 global[k] = v for own k, v of require '..'
 global.FIXTURES_DIR = FIXTURES_DIR
 global.path = path

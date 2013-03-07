@@ -128,7 +128,7 @@ resolvePath = (extensions, root, givenPath, cwd) ->
     try resolve.sync (path.join root, givenPath), {extensions}
     catch e then throw new Error "Cannot find module \"#{givenPath}\" in \"#{root}\""
 
-exports.relativeResolve = relativeResolve = (extensions, root, givenPath, cwd) ->
+relativeResolve = (extensions, root, givenPath, cwd) ->
   resolvedPath = resolvePath extensions, root, givenPath, cwd
   if fs.existsSync resolvedPath then "/#{path.relative root, resolvedPath}" else resolvedPath
 
@@ -205,3 +205,11 @@ exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
     console.error "\nIncluded modules:\n  #{(Object.keys processed).sort().join "\n  "}"
 
   bundle processed, (relativeResolve extensions, root, entryPoint), options
+
+if IN_TESTING_ENVIRONMENT?
+  exports.badRequireError = badRequireError
+  exports.bundle = bundle
+  exports.isCore = isCore
+  exports.relativeResolve = relativeResolve
+  exports.resolvePath = resolvePath
+  exports.wrapFile = wrapFile
