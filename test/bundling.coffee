@@ -50,3 +50,8 @@ suite 'Bundling', ->
       '''
       '/b.js': 'module.exports = {b: 1}'
     eq 2, @bundleEval 'a.js'
+
+  test 'ignoreMissing option produces null values for missing dependencies', ->
+    fixtures '/a.js': 'module.exports = require("./b")'
+    throws -> @bundleEval 'a.js'
+    eq null, @bundleEval 'a.js', ignoreMissing: yes

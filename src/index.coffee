@@ -190,7 +190,13 @@ exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
         if options.verbose
           console.error "required \"#{node.arguments[0].value}\" from \"#{canonicalName}\""
         # if we are including this file, its requires need to be processed as well
-        worklist.push resolvePath extensions, root, node.arguments[0].value, cwd
+        try
+          worklist.push resolvePath extensions, root, node.arguments[0].value, cwd
+        catch e
+          if options.ignoreMissing
+            return { type: 'Literal', value: null }
+          else
+            throw e
         # rewrite the require to use the root-relative path
         {
           type: 'CallExpression'

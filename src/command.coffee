@@ -9,6 +9,7 @@ optionParser = new Jedediah
 
 optionParser.addOption 'help', off, 'display this help message'
 optionParser.addOption 'minify', 'm', off, 'minify output'
+optionParser.addOption 'ignore-missing', off, 'continue without error when dependency resolution fails'
 optionParser.addOption 'verbose', 'v', off, 'verbose output sent to stderr'
 optionParser.addParameter 'export', 'x', 'NAME', 'export the given entry module as NAME'
 optionParser.addParameter 'output', 'o', 'FILE', 'output to FILE instead of stdout'
@@ -16,6 +17,8 @@ optionParser.addParameter 'root', 'r', 'DIR', 'unqualified requires are relative
 optionParser.addParameter 'source-map-file', 'FILE', 'output a source map to FILE'
 
 [options, positionalArgs] = optionParser.parse process.argv
+options.ignoreMissing = options['ignore-missing']
+options.sourceMapFile = options['source-map-file']
 
 if options.help
   $0 = if process.argv[0] is 'node' then process.argv[1] else process.argv[0]
@@ -65,9 +68,9 @@ if options.minify
   format: escodegenFormat
 
 
-if options['source-map-file']
-  fs.writeFileSync options['source-map-file'], "#{map}"
-  code += "\n/*\n//@ sourceMappingURL=#{options['source-map-file']}\n*/"
+if options.sourceMapFile
+  fs.writeFileSync options.sourceMapFile, "#{map}"
+  code += "\n/*\n//@ sourceMappingURL=#{options.sourceMapFile}\n*/"
 
 if options.output
   fs.writeFileSync options.output, code
