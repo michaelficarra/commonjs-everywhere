@@ -135,7 +135,7 @@ relativeResolve = (extensions, root, givenPath, cwd) ->
 
 exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
   entryPoint = path.resolve entryPoint
-  options.aliases ?= {}
+  aliases = options.aliases ? {}
 
   handlers =
     '.coffee': (coffee, canonicalName) ->
@@ -157,8 +157,8 @@ exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
     continue if {}.hasOwnProperty.call processed, canonicalName
 
     # handle aliases
-    if {}.hasOwnProperty.call options.aliases, canonicalName
-      filename = resolvePath extensions, root, options.aliases[canonicalName]
+    if {}.hasOwnProperty.call aliases, canonicalName
+      filename = resolvePath extensions, root, aliases[canonicalName]
 
     extname = path.extname filename
     fileContents = fs.readFileSync filename
