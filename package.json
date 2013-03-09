@@ -12,10 +12,18 @@
     "browserify",
     "dependency resolution"
   ],
-  "author": { "name": "Michael Ficarra", "email": "git@michael.ficarra.me" },
-  "repository": { "type": "git", "url": "git://github.com/michaelficarra/commonjs-everywhere.git" },
+  "author": {
+    "name": "Michael Ficarra",
+    "email": "git@michael.ficarra.me"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/michaelficarra/commonjs-everywhere.git"
+  },
   "bugs": "https://github.com/michaelficarra/commonjs-everywhere/issues",
-  "engines": { "node": "0.8.x || 0.9.x || 0.10.x" },
+  "engines": {
+    "node": "0.8.x || 0.9.x || 0.10.x"
+  },
   "main": "lib/index.js",
   "directories": {
     "bin": "bin",
@@ -40,12 +48,16 @@
   "devDependencies": {
     "mocha": "~1.8.1",
     "scopedfs": "~0.1.0",
-    "async": "~0.2.0"
+    "async": "~0.2.0",
+    "semver": "~1.1.4"
   },
   "scripts": {
     "test": "make test"
   },
   "licenses": [
-    { "type": "BSD", "url": "https://github.com/michaelficarra/commonjs-everywhere/blob/master/LICENSE" }
+    {
+      "type": "BSD",
+      "url": "https://github.com/michaelficarra/commonjs-everywhere/blob/master/LICENSE"
+    }
   ]
 }
