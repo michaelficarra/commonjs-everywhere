@@ -1,4 +1,4 @@
-default: all
+default: build
 
 SRC = $(shell find src -name "*.coffee" -type f | sort)
 LIB = $(SRC:src/%.coffee=lib/%.js)
@@ -13,7 +13,7 @@ lib/%.js: src/%.coffee
 	dirname "$@" | xargs mkdir -p
 	$(COFFEE) <"$<" >"$@"
 
-.PHONY:
+.PHONY: release test loc clean
 
 VERSION = $(shell node -pe 'require("./package.json").version')
 release-patch: NEXT_VERSION = $(shell node -pe 'require("semver").inc("$(VERSION)", "patch")')
