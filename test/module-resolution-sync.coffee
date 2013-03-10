@@ -4,7 +4,7 @@ suite 'module resolution', ->
     extensions = ['.js', '.coffee']
     @resolve = (givenPath, cwd) ->
       realCwd = path.resolve path.join FIXTURES_DIR, cwd
-      relativeResolve extensions, FIXTURES_DIR, givenPath, realCwd
+      relativeResolveSync extensions, FIXTURES_DIR, givenPath, realCwd
 
   teardown fs.reset
 

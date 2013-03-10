@@ -2,7 +2,7 @@ suite 'Bundling', ->
 
   setup ->
     bundle = (entryPoint, opts) ->
-      escodegen.generate cjsify (path.join FIXTURES_DIR, entryPoint), FIXTURES_DIR, opts
+      escodegen.generate cjsifySync (path.join FIXTURES_DIR, entryPoint), FIXTURES_DIR, opts
     @bundleEval = (entryPoint, opts = {}) ->
       module$ = {}
       opts.export = 'module$.exports'

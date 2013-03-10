@@ -116,7 +116,27 @@ badRequireError = (filename, node, msg) ->
   """
 
 
-resolvePath = (extensions, root, givenPath, cwd) ->
+resolvePath = (extensions, root, givenPath, cwd, cb = ->) ->
+  # try regular CommonJS requires
+  continueWith = (givenPath) ->
+    resolve givenPath, {basedir: cwd or root, extensions}, (err, resolved) ->
+      return process.nextTick (-> cb null, resolved) if resolved
+      # support root-relative requires
+      resolve (path.join root, givenPath), {extensions}, (err, resolved) ->
+        return process.nextTick (-> cb null, resolved) if resolved
+        process.nextTick -> cb new Error "Cannot find module \"#{givenPath}\" in \"#{root}\""
+  # resolve core node modules
+  if isCore givenPath
+    givenPath = path.resolve path.join CORE_DIR, "#{givenPath}.js"
+    fs.exists givenPath, (exists) ->
+      if exists
+        continueWith givenPath
+      else
+        continueWith path.resolve path.join CORE_DIR, 'undefined.js'
+  else
+    continueWith givenPath
+
+resolvePathSync = (extensions, root, givenPath, cwd) ->
   if isCore givenPath
     givenPath = path.resolve path.join CORE_DIR, "#{givenPath}.js"
     unless fs.existsSync givenPath
@@ -128,12 +148,23 @@ resolvePath = (extensions, root, givenPath, cwd) ->
     try resolve.sync (path.join root, givenPath), {extensions}
     catch e then throw new Error "Cannot find module \"#{givenPath}\" in \"#{root}\""
 
-relativeResolve = (extensions, root, givenPath, cwd) ->
-  resolvedPath = resolvePath extensions, root, givenPath, cwd
-  if fs.existsSync resolvedPath then "/#{path.relative root, resolvedPath}" else resolvedPath
+
+relativeResolve = (extensions, root, givenPath, cwd, cb = ->) ->
+  resolvePath extensions, root, givenPath, cwd, (err, resolved) ->
+    return cb err if err
+    fs.exists resolved, (exists) ->
+      cb null, if exists then "/#{path.relative root, resolved}" else resolved
+
+relativeResolveSync = (extensions, root, givenPath, cwd) ->
+  resolved = resolvePathSync extensions, root, givenPath, cwd
+  if fs.existsSync resolved then "/#{path.relative root, resolved}" else resolved
 
 
-exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
+exports.cjsify = (entryPoint, root = process.cwd(), options = {}, cb = ->) ->
+  # TODO: async this
+  process.nextTick -> cb null, exports.cjsifySync entryPoint, root, options
+
+exports.cjsifySync = (entryPoint, root = process.cwd(), options = {}) ->
   entryPoint = path.resolve entryPoint
   aliases = options.aliases ? {}
 
@@ -151,14 +182,14 @@ exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
 
   while worklist.length
     filename = worklist.pop()
-    canonicalName = relativeResolve extensions, root, filename
+    canonicalName = relativeResolveSync extensions, root, filename
 
     # filter duplicates
     continue if {}.hasOwnProperty.call processed, canonicalName
 
     # handle aliases
     if {}.hasOwnProperty.call aliases, canonicalName
-      filename = resolvePath extensions, root, aliases[canonicalName]
+      filename = resolvePathSync extensions, root, aliases[canonicalName]
 
     extname = path.extname filename
     fileContents = fs.readFileSync filename
@@ -191,7 +222,7 @@ exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
           console.error "required \"#{node.arguments[0].value}\" from \"#{canonicalName}\""
         # if we are including this file, its requires need to be processed as well
         try
-          worklist.push resolvePath extensions, root, node.arguments[0].value, cwd
+          worklist.push resolvePathSync extensions, root, node.arguments[0].value, cwd
         catch e
           if options.ignoreMissing
             return { type: 'Literal', value: null }
@@ -203,19 +234,21 @@ exports.cjsify = (entryPoint, root = process.cwd(), options = {}) ->
           callee: node.callee
           arguments: [
             type: 'Literal'
-            value: relativeResolve extensions, root, node.arguments[0].value, cwd
+            value: relativeResolveSync extensions, root, node.arguments[0].value, cwd
           ]
         }
 
   if options.verbose
     console.error "\nIncluded modules:\n  #{(Object.keys processed).sort().join "\n  "}"
 
-  bundle processed, (relativeResolve extensions, root, entryPoint), options
+  bundle processed, (relativeResolveSync extensions, root, entryPoint), options
 
 if IN_TESTING_ENVIRONMENT?
   exports.badRequireError = badRequireError
   exports.bundle = bundle
   exports.isCore = isCore
   exports.relativeResolve = relativeResolve
+  exports.relativeResolveSync = relativeResolveSync
   exports.resolvePath = resolvePath
+  exports.resolvePathSync = resolvePathSync
   exports.wrapFile = wrapFile
