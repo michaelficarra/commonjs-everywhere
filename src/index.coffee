@@ -129,12 +129,9 @@ resolvePath = (extensions, root, givenPath, cwd, cb = ->) ->
   if isCore givenPath
     givenPath = path.resolve path.join CORE_DIR, "#{givenPath}.js"
     fs.exists givenPath, (exists) ->
-      if exists
-        continueWith givenPath
-      else
-        continueWith path.resolve path.join CORE_DIR, 'undefined.js'
-  else
-    continueWith givenPath
+      if exists then continueWith givenPath
+      else continueWith path.resolve path.join CORE_DIR, 'undefined.js'
+  else continueWith givenPath
 
 resolvePathSync = (extensions, root, givenPath, cwd) ->
   if isCore givenPath
@@ -162,7 +159,9 @@ relativeResolveSync = (extensions, root, givenPath, cwd) ->
 
 exports.cjsify = (entryPoint, root = process.cwd(), options = {}, cb = ->) ->
   # TODO: async this
-  process.nextTick -> cb null, exports.cjsifySync entryPoint, root, options
+  process.nextTick ->
+    try cb null, exports.cjsifySync entryPoint, root, options
+    catch e then cb e
 
 exports.cjsifySync = (entryPoint, root = process.cwd(), options = {}) ->
   entryPoint = path.resolve entryPoint

@@ -10,7 +10,7 @@ suite 'module resolution', ->
         resolve expected, cwd, (err, resolved) ->
           return process.nextTick (-> cb err) if err
           eq expected, resolved
-          do cb
+          process.nextTick cb
 
   teardown fs.reset
 
