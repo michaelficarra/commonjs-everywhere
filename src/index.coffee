@@ -157,13 +157,9 @@ relativeResolveSync = (extensions, root, givenPath, cwd) ->
   if fs.existsSync resolved then "/#{path.relative root, resolved}" else resolved
 
 
-exports.cjsify = (entryPoint, root = process.cwd(), options = {}, cb = ->) ->
-  # TODO: async this
-  process.nextTick ->
-    try cb null, exports.cjsifySync entryPoint, root, options
-    catch e then cb e
+traverseDependencies = (entryPoint, root = process.cwd(), options = {}, cb = ->) ->
 
-exports.cjsifySync = (entryPoint, root = process.cwd(), options = {}) ->
+traverseDependenciesSync = (entryPoint, root = process.cwd(), options = {}) ->
   entryPoint = path.resolve entryPoint
   aliases = options.aliases ? {}
 
@@ -237,10 +233,28 @@ exports.cjsifySync = (entryPoint, root = process.cwd(), options = {}) ->
           ]
         }
 
+  processed
+
+
+cjsify = (entryPoint, root = process.cwd(), options = {}, cb = ->) ->
+  # TODO: async this
+  process.nextTick ->
+    try cb null, cjsifySync entryPoint, root, options
+    catch e then cb e
+
+cjsifySync = (entryPoint, root = process.cwd(), options = {}) ->
+  processed = traverseDependenciesSync entryPoint, root, options
+
   if options.verbose
     console.error "\nIncluded modules:\n  #{(Object.keys processed).sort().join "\n  "}"
 
-  bundle processed, (relativeResolveSync extensions, root, entryPoint), options
+  bundle processed, "/#{path.relative root, entryPoint}", options
+
+
+exports.cjsify = cjsify
+exports.cjsifySync = cjsifySync
+exports.traverseDependencies = traverseDependencies
+exports.traverseDependenciesSync = traverseDependenciesSync
 
 if IN_TESTING_ENVIRONMENT?
   exports.badRequireError = badRequireError
