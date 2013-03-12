@@ -25,7 +25,7 @@ var process = {
   chdir: function(){}
 };
 
-function require(file){
+function require(file, parentModule){
   if({}.hasOwnProperty.call(require.cache, file))
     return require.cache[file];
 
@@ -39,7 +39,7 @@ function require(file){
     filename: file,
     exports: {},
     loaded: false,
-    parent: null,
+    parent: parentModule,
     children: []
   };
   var dirname = file.slice(0, file.lastIndexOf('/') + 1);
@@ -227,10 +227,13 @@ traverseDependenciesSync = (entryPoint, root = process.cwd(), options = {}) ->
         {
           type: 'CallExpression'
           callee: node.callee
-          arguments: [
+          arguments: [{
             type: 'Literal'
             value: relativeResolveSync extensions, root, node.arguments[0].value, cwd
-          ]
+          }, {
+            type: 'Identifier'
+            name: 'module'
+          }]
         }
 
   processed
