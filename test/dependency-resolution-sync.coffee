@@ -28,3 +28,17 @@ suite 'Dependency Resolution', ->
       '/b.js': 'require("./c")'
       '/c.js': ''
     arrayEq ['/a.js', '/b.js', '/c.js'], @deps '/a.js'
+
+  test 'circular dependencies', ->
+    fixtures
+      '/a.js': 'require("./b");'
+      '/b.js': 'require("./a")'
+    arrayEq ['/a.js', '/b.js'], @deps '/a.js'
+
+  test 'missing dependencies', ->
+    fixtures '/a.js': 'require("./b")'
+    throws -> @deps '/a.js'
+
+  test 'ignoreMissing option ignores missing dependencies', ->
+    fixtures '/a.js': 'require("./b")'
+    arrayEq ['/a.js'], @deps '/a.js', ignoreMissing: yes
