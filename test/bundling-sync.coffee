@@ -59,6 +59,12 @@ suite 'Bundling', ->
     eq 1, obj.a
     eq 2, obj.b
 
+  test 'module.children contains required modules', ->
+    fixtures
+      '/a.js': 'require("./b"); module.exports = module.children[0].exports'
+      '/b.js': 'module.exports = module.filename'
+    eq '/b.js', @bundleEval 'a.js'
+
   test 'ignoreMissing option produces null values for missing dependencies', ->
     fixtures '/a.js': 'module.exports = require("./b")'
     throws -> @bundleEval 'a.js'

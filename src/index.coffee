@@ -42,6 +42,7 @@ function require(file, parentModule){
     parent: parentModule,
     children: []
   };
+  if(parentModule) parentModule.children.push(module$);
   var dirname = file.slice(0, file.lastIndexOf('/') + 1);
 
   require.cache[file] = module$.exports;
