@@ -30,3 +30,11 @@ suite 'Process', ->
   test 'process.chdir changes process.cwd result', ->
     fixtures '/a.js': 'process.chdir("/dir"); module.exports = process.cwd()'
     eq '/dir', @bundleEval 'a.js'
+
+  test 'process.argv is an empty array', ->
+    fixtures '/a.js': 'module.exports = process.argv'
+    arrayEq [], @bundleEval 'a.js'
+
+  test 'process.env is an empty object', ->
+    fixtures '/a.js': 'module.exports = Object.keys(process.env)'
+    arrayEq [], @bundleEval 'a.js'
