@@ -15,6 +15,10 @@ suite 'Process', ->
     fixtures '/a.js': 'module.exports = process.title'
     eq 'browser', @bundleEval 'a.js'
 
+  test 'process.version is the version of node that did the bundling', ->
+    fixtures '/a.js': 'module.exports = process.version'
+    eq process.version, @bundleEval 'a.js'
+
   test 'process.browser is truthy', ->
     fixtures '/a.js': 'module.exports = process.browser'
     ok @bundleEval 'a.js'

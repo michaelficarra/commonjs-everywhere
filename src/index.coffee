@@ -14,9 +14,10 @@ isCore = do ->
   (x) ->
     (resolve.isCore x) or x in coreFiles
 
-PRELUDE = '''
+PRELUDE = """
 var process = {
   title: 'browser',
+  version: '#{process.version}',
   browser: true,
   env: {},
   argv: [],
@@ -30,8 +31,7 @@ function require(file, parentModule){
     return require.cache[file];
 
   var resolved = require.resolve(file);
-  if(!resolved)
-    throw new Error('Failed to resolve module ' + file);
+  if(!resolved) throw new Error('Failed to resolve module ' + file);
 
   var module$ = {
     id: file,
@@ -58,7 +58,7 @@ require.resolve = function(file){
   return {}.hasOwnProperty.call(require.modules, file) ? require.modules[file] : void 0;
 };
 require.define = function(file, fn){ require.modules[file] = fn; };
-'''
+"""
 
 wrapFile = (name, program) ->
   wrapperProgram = esprima.parse 'require.define(0, function(module, exports, __dirname, __filename){});'
