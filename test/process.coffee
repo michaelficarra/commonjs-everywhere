@@ -22,3 +22,11 @@ suite 'Process', ->
   test 'process.browser is truthy', ->
     fixtures '/a.js': 'module.exports = process.browser'
     ok @bundleEval 'a.js'
+
+  test 'process.cwd defaults to "/"', ->
+    fixtures '/a.js': 'module.exports = process.cwd()'
+    eq '/', @bundleEval 'a.js'
+
+  test 'process.chdir changes process.cwd result', ->
+    fixtures '/a.js': 'process.chdir("/dir"); module.exports = process.cwd()'
+    eq '/dir', @bundleEval 'a.js'

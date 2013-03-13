@@ -15,16 +15,19 @@ isCore = do ->
     (resolve.isCore x) or x in coreFiles
 
 PRELUDE = """
-var process = {
-  title: 'browser',
-  version: '#{process.version}',
-  browser: true,
-  env: {},
-  argv: [],
-  nextTick: function(fn){ setTimeout(fn, 0); },
-  cwd: function(){ return '/'; },
-  chdir: function(){}
-};
+var process = function(){
+  var cwd = '/';
+  return {
+    title: 'browser',
+    version: '#{process.version}',
+    browser: true,
+    env: {},
+    argv: [],
+    nextTick: function(fn){ setTimeout(fn, 0); },
+    cwd: function(){ return cwd; },
+    chdir: function(dir){ cwd = dir; }
+  };
+}();
 
 function require(file, parentModule){
   if({}.hasOwnProperty.call(require.cache, file))
