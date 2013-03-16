@@ -42,3 +42,31 @@ global.fs = sfs
 global.fixtures = (opts) ->
   do sfs.reset
   sfs.applySync opts
+
+global.bundleSync = bundleSync = (entryPoint, opts) ->
+  escodegen.generate cjsifySync (path.join FIXTURES_DIR, entryPoint), FIXTURES_DIR, opts
+global.bundleEvalSync = (entryPoint, opts = {}) ->
+  module$ = {}
+  opts.export = 'module$.exports'
+  eval bundleSync entryPoint, opts
+  module$.exports
+
+global.bundle = bundle = (entryPoint, opts, cb) ->
+  cjsify (path.join FIXTURES_DIR, entryPoint), FIXTURES_DIR, opts, (err, ast) ->
+    return process.nextTick (-> cb err) if err
+    process.nextTick -> cb null, escodegen.generate ast
+global.bundleEval = (entryPoint, opts = {}, cb = ->) ->
+  module$ = {}
+  opts.export = 'module$.exports'
+  bundle entryPoint, opts, (err, js) ->
+    return process.nextTick (-> cb err) if err
+    eval js
+    process.nextTick -> cb null, module$.exports
+
+extensions = ['.js', '.coffee']
+global.resolveSync = (givenPath, cwd) ->
+  realCwd = path.resolve path.join FIXTURES_DIR, cwd
+  relativeResolveSync extensions, FIXTURES_DIR, givenPath, realCwd
+global.resolve = (givenPath, cwd, cb) ->
+  realCwd = path.resolve path.join FIXTURES_DIR, cwd
+  relativeResolve extensions, FIXTURES_DIR, givenPath, realCwd, cb

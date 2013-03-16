@@ -1,10 +1,6 @@
 suite 'module resolution', ->
 
   setup ->
-    extensions = ['.js', '.coffee']
-    @resolve = resolve = (givenPath, cwd, cb) ->
-      realCwd = path.resolve path.join FIXTURES_DIR, cwd
-      relativeResolve extensions, FIXTURES_DIR, givenPath, realCwd, cb
     @resolvesTo = (expected, givenPath, cwd) ->
       (cb) ->
         resolve expected, cwd, (err, resolved) ->
@@ -59,6 +55,6 @@ suite 'module resolution', ->
 
   test 'core module', (done) ->
     async.parallel [
-      async.apply @resolve, 'fs', null
-      async.apply @resolve, 'fs', 'dir'
+      async.apply resolve, 'fs', null
+      async.apply resolve, 'fs', 'dir'
     ], done
