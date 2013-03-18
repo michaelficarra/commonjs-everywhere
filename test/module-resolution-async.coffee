@@ -1,4 +1,4 @@
-suite 'module resolution', ->
+suite 'Module Resolution (async)', ->
 
   setup ->
     @resolvesTo = (expected, givenPath, cwd) ->

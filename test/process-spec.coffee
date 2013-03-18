@@ -1,4 +1,4 @@
-suite 'Process', ->
+suite 'Process Spec', ->
 
   teardown fs.reset
 

@@ -1,4 +1,4 @@
-suite 'Bundling', ->
+suite 'Bundling (async)', ->
 
   teardown fs.reset
 
@@ -42,37 +42,6 @@ suite 'Bundling', ->
       throw err if err
       eq 5, o.a
       eq 3, o.b
-      do done
-
-  test 'module caching', (done) ->
-    fixtures
-      '/a.js': '''
-        ++require('./b').b
-        module.exports = require('./b').b
-      '''
-      '/b.js': 'module.exports = {b: 1}'
-    bundleEval 'a.js', null, (err, o) ->
-      throw err if err
-      eq 2, o
-      do done
-
-  test 'module.parent refers to the parent module', (done) ->
-    fixtures
-      '/a.js': 'exports.a = 1; exports.b = require("./b")'
-      '/b.js': 'module.exports = module.parent.exports.a + 1;'
-    bundleEval 'a.js', null, (err, o) ->
-      throw err if err
-      eq 1, o.a
-      eq 2, o.b
-      do done
-
-  test 'module.children contains required modules', (done) ->
-    fixtures
-      '/a.js': 'require("./b"); module.exports = module.children[0].exports'
-      '/b.js': 'module.exports = module.filename'
-    bundleEval 'a.js', null, (err, o) ->
-      throw err if err
-      eq '/b.js', o
       do done
 
   test 'ignoreMissing option produces null values for missing dependencies', (done) ->

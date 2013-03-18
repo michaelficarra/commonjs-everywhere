@@ -1,4 +1,4 @@
-suite 'Dependency Resolution', ->
+suite 'Dependency Resolution (sync)', ->
 
   setup ->
     @deps = (entryFile, opts) ->
