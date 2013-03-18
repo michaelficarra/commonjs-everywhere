@@ -120,6 +120,10 @@ badRequireError = (filename, node, msg) ->
   """
 
 
+canonicalise = (root, file) ->
+  "/#{path.relative root, file}"
+
+
 resolvePath = (extensions, root, givenPath, cwd, cb = ->) ->
   # try regular CommonJS requires
   continueWith = (givenPath) ->
@@ -153,18 +157,16 @@ resolvePathSync = (extensions, root, givenPath, cwd) ->
 relativeResolve = (extensions, root, givenPath, cwd, cb = ->) ->
   resolvePath extensions, root, givenPath, cwd, (err, resolved) ->
     return cb err if err
-    fs.exists resolved, (exists) ->
-      cb null, if exists then "/#{path.relative root, resolved}" else resolved
+    cb null, if isCore givenPath then givenPath else canonicalise root, resolved
 
 relativeResolveSync = (extensions, root, givenPath, cwd) ->
   resolved = resolvePathSync extensions, root, givenPath, cwd
-  if fs.existsSync resolved then "/#{path.relative root, resolved}" else resolved
+  if isCore givenPath then givenPath else canonicalise root, resolved
 
 
 traverseDependencies = (entryPoint, root = process.cwd(), options = {}, cb = ->) ->
 
 traverseDependenciesSync = (entryPoint, root = process.cwd(), options = {}) ->
-  entryPoint = path.resolve entryPoint
   aliases = options.aliases ? {}
 
   handlers =
@@ -176,12 +178,11 @@ traverseDependenciesSync = (entryPoint, root = process.cwd(), options = {}) ->
     handlers[ext] = handler
   extensions = ['.js', (ext for own ext of handlers)...]
 
-  worklist = [entryPoint]
+  worklist = [[(path.resolve entryPoint), canonicalise root, entryPoint]]
   processed = {}
 
   while worklist.length
-    filename = worklist.pop()
-    canonicalName = relativeResolveSync extensions, root, filename
+    [filename, canonicalName] = worklist.pop()
 
     # filter duplicates
     continue if {}.hasOwnProperty.call processed, canonicalName
@@ -221,7 +222,11 @@ traverseDependenciesSync = (entryPoint, root = process.cwd(), options = {}) ->
           console.error "required \"#{node.arguments[0].value}\" from \"#{canonicalName}\""
         # if we are including this file, its requires need to be processed as well
         try
-          worklist.push resolvePathSync extensions, root, node.arguments[0].value, cwd
+          targetCanonicalName = relativeResolveSync extensions, root, node.arguments[0].value, cwd
+          worklist.push [
+            resolvePathSync extensions, root, node.arguments[0].value, cwd
+            targetCanonicalName
+          ]
         catch e
           if options.ignoreMissing
             return { type: 'Literal', value: null }
@@ -233,7 +238,7 @@ traverseDependenciesSync = (entryPoint, root = process.cwd(), options = {}) ->
           callee: node.callee
           arguments: [{
             type: 'Literal'
-            value: relativeResolveSync extensions, root, node.arguments[0].value, cwd
+            value: targetCanonicalName
           }, {
             type: 'Identifier'
             name: 'module'
@@ -255,9 +260,10 @@ cjsifySync = (entryPoint, root = process.cwd(), options = {}) ->
   if options.verbose
     console.error "\nIncluded modules:\n  #{(Object.keys processed).sort().join "\n  "}"
 
-  bundle processed, "/#{path.relative root, entryPoint}", options
+  bundle processed, (canonicalise root, entryPoint), options
 
 
+exports.bundle = bundle
 exports.cjsify = cjsify
 exports.cjsifySync = cjsifySync
 exports.traverseDependencies = traverseDependencies
@@ -265,7 +271,7 @@ exports.traverseDependenciesSync = traverseDependenciesSync
 
 if IN_TESTING_ENVIRONMENT?
   exports.badRequireError = badRequireError
-  exports.bundle = bundle
+  exports.canonicalise = canonicalise
   exports.isCore = isCore
   exports.relativeResolve = relativeResolve
   exports.relativeResolveSync = relativeResolveSync
