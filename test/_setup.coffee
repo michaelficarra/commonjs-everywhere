@@ -64,9 +64,9 @@ global.bundleEval = (entryPoint, opts = {}, cb = ->) ->
     process.nextTick -> cb null, module$.exports
 
 extensions = ['.js', '.coffee']
-global.resolveSync = (givenPath, cwd) ->
+global.resolveSync = (givenPath, cwd = '') ->
   realCwd = path.resolve path.join FIXTURES_DIR, cwd
   relativeResolveSync extensions, FIXTURES_DIR, givenPath, realCwd
-global.resolve = (givenPath, cwd, cb) ->
+global.resolve = (givenPath, cwd = '', cb) ->
   realCwd = path.resolve path.join FIXTURES_DIR, cwd
   relativeResolve extensions, FIXTURES_DIR, givenPath, realCwd, cb
