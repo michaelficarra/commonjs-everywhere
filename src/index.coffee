@@ -120,8 +120,7 @@ badRequireError = (filename, node, msg) ->
   """
 
 
-canonicalise = (root, file) ->
-  "/#{path.relative root, file}"
+canonicalise = (root, file) -> "/#{path.relative root, file}"
 
 
 resolvePath = (extensions, root, givenPath, cwd, cb = ->) ->
@@ -165,6 +164,10 @@ relativeResolveSync = (extensions, root, givenPath, cwd) ->
 
 
 traverseDependencies = (entryPoint, root = process.cwd(), options = {}, cb = ->) ->
+  # TODO: async this
+  process.nextTick ->
+    try cb null, traverseDependenciesSync entryPoint, root, options
+    catch e then cb e
 
 traverseDependenciesSync = (entryPoint, root = process.cwd(), options = {}) ->
   aliases = options.aliases ? {}
@@ -249,17 +252,16 @@ traverseDependenciesSync = (entryPoint, root = process.cwd(), options = {}) ->
 
 
 cjsify = (entryPoint, root = process.cwd(), options = {}, cb = ->) ->
-  # TODO: async this
-  process.nextTick ->
-    try cb null, cjsifySync entryPoint, root, options
-    catch e then cb e
+  traverseDependencies entryPoint, root, options, (err, processed) ->
+    return process.nextTick (-> cb err) if err
+    if options.verbose
+      console.error "\nIncluded modules:\n  #{(Object.keys processed).sort().join "\n  "}"
+    cb null, bundle processed, (canonicalise root, entryPoint), options
 
 cjsifySync = (entryPoint, root = process.cwd(), options = {}) ->
   processed = traverseDependenciesSync entryPoint, root, options
-
   if options.verbose
     console.error "\nIncluded modules:\n  #{(Object.keys processed).sort().join "\n  "}"
-
   bundle processed, (canonicalise root, entryPoint), options
 
 
