@@ -35,7 +35,7 @@ release: build test
 	npm publish
 
 test:
-	$(MOCHA) -R dot test
+	$(MOCHA) -R dot test/*
 
 loc:
 	wc -l src/*
