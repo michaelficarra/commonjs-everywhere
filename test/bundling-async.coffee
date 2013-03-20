@@ -49,7 +49,7 @@ suite 'Bundling (async)', ->
     async.parallel [
       (cb) =>
         bundleEval 'a.js', null, (err, o) ->
-          throw new Error unless err instanceof Error
+          throw new Error unless err?
           do cb
       (cb) =>
         bundleEval 'a.js', {ignoreMissing: yes}, (err, o) ->

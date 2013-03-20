@@ -38,6 +38,7 @@
     "estraverse": "~0.0.4",
     "jedediah": "~0.1.0",
     "resolve": "~0.3.0",
+    "async": "~0.2.0",
     "http-browserify": "*",
     "vm-browserify": "*",
     "crypto-browserify": "*",
@@ -48,7 +49,6 @@
   "devDependencies": {
     "mocha": "~1.8.1",
     "scopedfs": "~0.1.0",
-    "async": "~0.2.0",
     "semver": "~1.1.4"
   },
   "scripts": {

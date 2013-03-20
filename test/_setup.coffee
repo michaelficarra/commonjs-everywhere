@@ -60,7 +60,10 @@ global.bundleEval = (entryPoint, opts = {}, cb = ->) ->
   opts.export = 'module$.exports'
   bundle entryPoint, opts, (err, js) ->
     return process.nextTick (-> cb err) if err
-    eval js
+    try
+      eval js
+    catch e
+      return process.nextTick -> cb e
     process.nextTick -> cb null, module$.exports
 
 extensions = ['.js', '.coffee']

@@ -5,6 +5,14 @@ resolve = require 'resolve'
 esprima = require 'esprima'
 estraverse = require 'estraverse'
 CoffeeScript = require 'coffee-script-redux'
+async = require 'async'
+# https://github.com/caolan/async/pull/272
+async_if = (test, consequent, alternate, cb) ->
+  test (err, bool) ->
+    return cb err if err?
+    if bool then consequent cb else alternate cb
+    return
+  return
 
 CORE_DIR = path.join __dirname, '..', 'core'
 isCore = do ->
@@ -124,21 +132,23 @@ canonicalise = (root, file) -> "/#{path.relative root, file}"
 
 
 resolvePath = (extensions, root, givenPath, cwd, cb = ->) ->
-  # try regular CommonJS requires
-  continueWith = (givenPath) ->
+  test = (cb) -> cb null, isCore givenPath
+  consequent = (cb) ->
+    # resolve core node modules
+    if isCore givenPath
+      givenPath = path.resolve path.join CORE_DIR, "#{givenPath}.js"
+      fs.exists givenPath, (exists) ->
+        cb null, if exists then givenPath else path.resolve path.join CORE_DIR, 'undefined.js'
+  alternate = (cb) -> cb null, givenPath
+  async_if test, consequent, alternate, (err, givenPath) ->
+    return cb err if err?
+    # try regular CommonJS requires
     resolve givenPath, {basedir: cwd or root, extensions}, (err, resolved) ->
       return process.nextTick (-> cb null, resolved) if resolved
       # support root-relative requires
       resolve (path.join root, givenPath), {extensions}, (err, resolved) ->
         return process.nextTick (-> cb null, resolved) if resolved
         process.nextTick -> cb new Error "Cannot find module \"#{givenPath}\" in \"#{root}\""
-  # resolve core node modules
-  if isCore givenPath
-    givenPath = path.resolve path.join CORE_DIR, "#{givenPath}.js"
-    fs.exists givenPath, (exists) ->
-      if exists then continueWith givenPath
-      else continueWith path.resolve path.join CORE_DIR, 'undefined.js'
-  else continueWith givenPath
 
 resolvePathSync = (extensions, root, givenPath, cwd) ->
   if isCore givenPath
@@ -155,7 +165,7 @@ resolvePathSync = (extensions, root, givenPath, cwd) ->
 
 relativeResolve = (extensions, root, givenPath, cwd, cb = ->) ->
   resolvePath extensions, root, givenPath, cwd, (err, resolved) ->
-    return cb err if err
+    return cb err if err?
     cb null, if isCore givenPath then givenPath else canonicalise root, resolved
 
 relativeResolveSync = (extensions, root, givenPath, cwd) ->
@@ -164,10 +174,97 @@ relativeResolveSync = (extensions, root, givenPath, cwd) ->
 
 
 traverseDependencies = (entryPoint, root = process.cwd(), options = {}, cb = ->) ->
-  # TODO: async this
+  aliases = options.aliases ? {}
+
+  handlers =
+    '.coffee': (coffee, canonicalName) ->
+      CoffeeScript.compile (CoffeeScript.parse coffee, raw: yes), bare: yes
+    '.json': (json, canonicalName) ->
+      esprima.parse "module.exports = #{json}", loc: yes, source: canonicalName
+  for own ext, handler of options.handlers ? {}
+    handlers[ext] = handler
+  extensions = ['.js', (ext for own ext of handlers)...]
+
+  processed = {}
+  q = null
+
+  work = ([filename, canonicalName], next) ->
+    # filter duplicates
+    return do next if {}.hasOwnProperty.call processed, canonicalName
+
+    # handle aliases
+    test = (cb) -> cb null, {}.hasOwnProperty.call aliases, canonicalName
+    consequent = (cb) -> resolvePath extensions, root, aliases[canonicalName], cb
+    alternate = (cb) -> cb null, filename
+    async_if test, consequent, alternate, (err, filename) ->
+      return next err if err?
+
+      extname = path.extname filename
+      fs.readFile filename, (err, fileContents) ->
+        return next err if err?
+
+        # handle compile-to-JS languages and other non-JS files
+        processed[canonicalName] = ast =
+          if {}.hasOwnProperty.call handlers, extname
+            handlers[extname](fileContents, canonicalName)
+          else # assume JS
+            esprima.parse fileContents, loc: yes, source: canonicalName
+
+        source = path.relative root, filename
+        # add source file information to the AST root node
+        ast.loc ?= {}
+        ast.loc.source = source
+
+        try
+          estraverse.replace ast,
+            enter: (node, parents) ->
+              # add source file information to each node with source position information
+              if node.loc? then node.loc.source = source
+              # ignore anything that's not a `require` call
+              return unless node.type is 'CallExpression' and node.callee.type is 'Identifier' and node.callee.name is 'require'
+              # illegal requires
+              unless node.arguments.length is 1
+                badRequireError filename, node, 'require must be given exactly one argument'
+              unless node.arguments[0].type is 'Literal' and typeof node.arguments[0].value is 'string'
+                badRequireError filename, node, 'argument of require must be a constant string'
+              cwd = path.dirname fs.realpathSync filename
+              if options.verbose
+                console.error "required \"#{node.arguments[0].value}\" from \"#{canonicalName}\""
+              # if we are including this file, its requires need to be processed as well
+              try
+                targetCanonicalName = relativeResolveSync extensions, root, node.arguments[0].value, cwd
+                q.push [[
+                  resolvePathSync extensions, root, node.arguments[0].value, cwd
+                  targetCanonicalName
+                ]]
+              catch e
+                if options.ignoreMissing
+                  return { type: 'Literal', value: null }
+                else
+                  throw e
+              # rewrite the require to use the root-relative path
+              {
+                type: 'CallExpression'
+                callee: node.callee
+                arguments: [{
+                  type: 'Literal'
+                  value: targetCanonicalName
+                }, {
+                  type: 'Identifier'
+                  name: 'module'
+                }]
+              }
+        catch e
+          return next e
+
+        do next
+
   process.nextTick ->
-    try cb null, traverseDependenciesSync entryPoint, root, options
-    catch e then cb e
+    q = async.queue work, 9e9
+    q.drain = (err) -> cb err, processed
+    q.push [[(path.resolve entryPoint), canonicalise root, entryPoint]]
+  return
+
 
 traverseDependenciesSync = (entryPoint, root = process.cwd(), options = {}) ->
   aliases = options.aliases ? {}
