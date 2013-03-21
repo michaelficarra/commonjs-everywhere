@@ -95,8 +95,7 @@ if options.watch
   do startWatching = (processed) ->
     for own file of processed when file not in watching then do (file) ->
       watching.push file
-      fs.watch file, (event, filename) ->
-        return unless event is 'change'
+      fs.watchFile file, {persistent: yes, interval: 500}, (curr, prev) ->
         console.error "Rebuilding bundle starting at file #{file}"
         startWatching (processed = build file, processed)
         return
