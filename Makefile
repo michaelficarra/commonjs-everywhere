@@ -2,7 +2,6 @@ default: build
 
 SRC = $(shell find src -name "*.coffee" -type f | sort)
 LIB = $(SRC:src/%.coffee=lib/%.js)
-TEST = $(shell echo test/*.coffee | sort)
 
 COFFEE=node_modules/.bin/coffee --js
 MOCHA=node_modules/.bin/mocha --compilers coffee:coffee-script-redux -u tdd
@@ -36,7 +35,7 @@ release: build test
 	npm publish
 
 test:
-	$(MOCHA) -R dot $(TEST)
+	$(MOCHA) -R dot test/*.coffee
 
 loc:
 	wc -l src/*
