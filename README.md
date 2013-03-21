@@ -12,12 +12,13 @@ CommonJS (node module) browser bundler with source maps from the minified JS bun
 
     $ bin/cjsify --help
 
-      Usage: cjsify OPT* path/to/entry-file.{js,coffee} OPT*
+      Usage: cjsify OPT* path/to/entry-file.ext OPT*
 
       -m, --minify            minify output
       -o, --output FILE       output to FILE instead of stdout
       -r, --root DIR          unqualified requires are relative to DIR (default: cwd)
       -v, --verbose           verbose output sent to stderr
+      -w, --watch             watch input files/dependencies for changes and rebuild bundle
       -x, --export NAME       export the given entry module as NAME
       --help                  display this help message
       --ignore-missing        continue without error when dependency resolution fails

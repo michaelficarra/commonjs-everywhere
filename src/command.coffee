@@ -45,7 +45,7 @@ if options.help
   $0 = if process.argv[0] is 'node' then process.argv[1] else process.argv[0]
   $0 = path.basename $0
   console.log "
-  Usage: #{$0} OPT* path/to/entry-file.{js,coffee} OPT*
+  Usage: #{$0} OPT* path/to/entry-file.ext OPT*
 
 #{optionParser.help()}
 "
