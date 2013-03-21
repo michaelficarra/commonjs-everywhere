@@ -80,8 +80,8 @@ wrapFile = (name, program) ->
 
 bundle = (processed, entryPoint, options) ->
   program = esprima.parse PRELUDE
-  for own canonicalName, ast of processed
-    program.body.push wrapFile canonicalName, ast
+  for own filename, ast of processed
+    program.body.push wrapFile ast.loc.source, ast
 
   requireEntryPoint =
     type: 'CallExpression'
@@ -190,7 +190,7 @@ traverseDependencies = (entryPoint, root = process.cwd(), options = {}, cb = ->)
 
   work = ({filename, canonicalName}, next) ->
     # filter duplicates
-    return do next if {}.hasOwnProperty.call processed, canonicalName
+    return do next if {}.hasOwnProperty.call processed, filename
 
     # handle aliases
     test = (cb) -> cb null, {}.hasOwnProperty.call aliases, canonicalName
@@ -204,22 +204,20 @@ traverseDependencies = (entryPoint, root = process.cwd(), options = {}, cb = ->)
         return next err if err?
 
         # handle compile-to-JS languages and other non-JS files
-        processed[canonicalName] = ast =
+        processed[filename] = ast =
           if {}.hasOwnProperty.call handlers, extname
             handlers[extname](fileContents, canonicalName)
           else # assume JS
             esprima.parse fileContents, loc: yes, source: canonicalName
 
-        source = path.relative root, filename
         # add source file information to the AST root node
         ast.loc ?= {}
-        ast.loc.source = source
 
         try
           estraverse.replace ast,
             enter: (node, parents) ->
               # add source file information to each node with source position information
-              if node.loc? then node.loc.source = source
+              if node.loc? then node.loc.source = canonicalName
               # ignore anything that's not a `require` call
               return unless node.type is 'CallExpression' and node.callee.type is 'Identifier' and node.callee.name is 'require'
               # illegal requires
@@ -289,7 +287,7 @@ traverseDependenciesSync = (entryPoint, root = process.cwd(), options = {}) ->
     {filename, canonicalName} = worklist.pop()
 
     # filter duplicates
-    continue if {}.hasOwnProperty.call processed, canonicalName
+    continue if {}.hasOwnProperty.call processed, filename
 
     # handle aliases
     if {}.hasOwnProperty.call aliases, canonicalName
@@ -299,21 +297,19 @@ traverseDependenciesSync = (entryPoint, root = process.cwd(), options = {}) ->
     fileContents = fs.readFileSync filename
 
     # handle compile-to-JS languages and other non-JS files
-    processed[canonicalName] = ast =
+    processed[filename] = ast =
       if {}.hasOwnProperty.call handlers, extname
         handlers[extname](fileContents, canonicalName)
       else # assume JS
         esprima.parse fileContents, loc: yes, source: canonicalName
 
-    source = path.relative root, filename
     # add source file information to the AST root node
     ast.loc ?= {}
-    ast.loc.source = source
 
     estraverse.replace ast,
       enter: (node, parents) ->
         # add source file information to each node with source position information
-        if node.loc? then node.loc.source = source
+        if node.loc? then node.loc.source = canonicalName
         # ignore anything that's not a `require` call
         return unless node.type is 'CallExpression' and node.callee.type is 'Identifier' and node.callee.name is 'require'
         # illegal requires
