@@ -5,11 +5,32 @@ escodegen = require 'escodegen'
 Jedediah = require 'jedediah'
 CJSEverywhere = require './index'
 
+escodegenDefaultFormat =
+  indent:
+    style: '  '
+    base: 0
+  renumber: yes
+  hexadecimal: yes
+  quotes: 'auto'
+  parentheses: no
+escodegenCompactFormat =
+  indent:
+    style: ''
+    base: 0
+  renumber: yes
+  hexadecimal: yes
+  quotes: 'auto'
+  escapeless: yes
+  compact: yes
+  parentheses: no
+  semicolons: no
+
 optionParser = new Jedediah
 
 optionParser.addOption 'help', off, 'display this help message'
 optionParser.addOption 'minify', 'm', off, 'minify output'
 optionParser.addOption 'ignore-missing', off, 'continue without error when dependency resolution fails'
+optionParser.addOption 'watch', 'w', off, 'watch input files/dependencies for changes and rebuild bundle'
 optionParser.addOption 'verbose', 'v', off, 'verbose output sent to stderr'
 optionParser.addParameter 'export', 'x', 'NAME', 'export the given entry module as NAME'
 optionParser.addParameter 'output', 'o', 'FILE', 'output to FILE instead of stdout'
@@ -33,46 +54,49 @@ if options.help
 unless positionalArgs.length is 1
   throw new Error "wrong number of entry points given; expected 1"
 
+if options.watch and not options.output
+  console.error '--watch requires --ouput'
+  process.exit 1
+
 root = if options.root then path.resolve options.root else process.cwd()
-combined = CJSEverywhere.cjsify positionalArgs[0], root, options
+originalEntryPoint = positionalArgs[0]
 
-escodegenFormat =
-  indent:
-    style: '  '
-    base: 0
-  renumber: yes
-  hexadecimal: yes
-  quotes: 'auto'
-  parentheses: no
+build = (entryPoint, processed = {}) ->
+  newDeps = CJSEverywhere.traverseDependenciesSync entryPoint, root, options
+  processed[file] = newDeps[file] for own file of newDeps
+  bundled = CJSEverywhere.bundle processed, originalEntryPoint, root, options
 
-if options.minify
-  esmangle = require 'esmangle'
-  combined = esmangle.mangle (esmangle.optimize combined), destructive: yes
-  escodegenFormat =
-    indent:
-      style: ''
-      base: 0
-    renumber: yes
-    hexadecimal: yes
-    quotes: 'auto'
-    escapeless: yes
-    compact: yes
-    parentheses: no
-    semicolons: no
+  if options.minify
+    esmangle = require 'esmangle'
+    bundled = esmangle.mangle (esmangle.optimize bundled), destructive: yes
 
-{code, map} = escodegen.generate combined,
-  comment: no
-  sourceMap: yes
-  sourceMapWithCode: yes
-  sourceMapRoot: root
-  format: escodegenFormat
+  {code, map} = escodegen.generate bundled,
+    comment: no
+    sourceMap: yes
+    sourceMapWithCode: yes
+    sourceMapRoot: root
+    format: if options.minify then escodegenCompactFormat else escodegenDefaultFormat
 
+  if options.sourceMapFile
+    fs.writeFileSync options.sourceMapFile, "#{map}"
+    code += "\n/*\n//@ sourceMappingURL=#{options.sourceMapFile}\n*/"
 
-if options.sourceMapFile
-  fs.writeFileSync options.sourceMapFile, "#{map}"
-  code += "\n/*\n//@ sourceMappingURL=#{options.sourceMapFile}\n*/"
+  if options.output
+    fs.writeFileSync options.output, code
+  else
+    process.stdout.write "#{code}\n"
 
-if options.output
-  fs.writeFileSync options.output, code
-else
-  process.stdout.write "#{code}\n"
+  processed
+
+processed = build originalEntryPoint
+
+if options.watch
+  watching = []
+  do startWatching = (processed) ->
+    for own file of processed when file not in watching then do (file) ->
+      watching.push file
+      fs.watch file, (event, filename) ->
+        return unless event is 'change'
+        console.error "Rebuilding bundle starting at file #{file}"
+        startWatching (processed = build file, processed)
+        return
