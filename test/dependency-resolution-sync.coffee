@@ -2,7 +2,11 @@ suite 'Dependency Resolution (sync)', ->
 
   deps = (entryFile, opts) ->
     entryFile = path.resolve path.join FIXTURES_DIR, entryFile
-    (Object.keys traverseDependenciesSync entryFile, FIXTURES_DIR, opts).sort()
+    for filename in (Object.keys traverseDependenciesSync entryFile, FIXTURES_DIR, opts).sort()
+      if filename[...FIXTURES_DIR.length] is FIXTURES_DIR
+        "/#{path.relative FIXTURES_DIR, filename}"
+      else
+        path.relative __dirname, filename
 
   test 'no dependencies', ->
     fixtures '/a.js': ''
@@ -33,6 +37,10 @@ suite 'Dependency Resolution (sync)', ->
       '/a.js': 'require("./b");'
       '/b.js': 'require("./a")'
     arrayEq ['/a.js', '/b.js'], deps '/a.js'
+
+  test 'core dependencies', ->
+    fixtures '/a.js': 'require("punycode")'
+    arrayEq ['../core/punycode.js', '/a.js'], deps '/a.js'
 
   test 'missing dependencies', ->
     fixtures '/a.js': 'require("./b")'
