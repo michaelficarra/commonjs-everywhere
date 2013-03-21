@@ -8,6 +8,7 @@
     "CommonJS Everywhere",
     "browser",
     "build",
+    "bundle",
     "cjsify",
     "browserify",
     "dependency resolution"
