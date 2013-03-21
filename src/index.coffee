@@ -188,7 +188,7 @@ traverseDependencies = (entryPoint, root = process.cwd(), options = {}, cb = ->)
   processed = {}
   q = null
 
-  work = ([filename, canonicalName], next) ->
+  work = ({filename, canonicalName}, next) ->
     # filter duplicates
     return do next if {}.hasOwnProperty.call processed, canonicalName
 
@@ -233,10 +233,9 @@ traverseDependencies = (entryPoint, root = process.cwd(), options = {}, cb = ->)
               # if we are including this file, its requires need to be processed as well
               try
                 targetCanonicalName = relativeResolveSync extensions, root, node.arguments[0].value, cwd
-                q.push [[
-                  resolvePathSync extensions, root, node.arguments[0].value, cwd
-                  targetCanonicalName
-                ]]
+                q.push
+                  filename: resolvePathSync extensions, root, node.arguments[0].value, cwd
+                  canonicalName: targetCanonicalName
               catch e
                 if options.ignoreMissing
                   return { type: 'Literal', value: null }
@@ -262,7 +261,9 @@ traverseDependencies = (entryPoint, root = process.cwd(), options = {}, cb = ->)
   process.nextTick ->
     q = async.queue work, 9e9
     q.drain = (err) -> cb err, processed
-    q.push [[(path.resolve entryPoint), canonicalise root, entryPoint]]
+    q.push
+      filename: path.resolve entryPoint
+      canonicalName: canonicalise root, entryPoint
   return
 
 
@@ -278,11 +279,14 @@ traverseDependenciesSync = (entryPoint, root = process.cwd(), options = {}) ->
     handlers[ext] = handler
   extensions = ['.js', (ext for own ext of handlers)...]
 
-  worklist = [[(path.resolve entryPoint), canonicalise root, entryPoint]]
+  worklist = [
+    filename: path.resolve entryPoint
+    canonicalName: canonicalise root, entryPoint
+  ]
   processed = {}
 
   while worklist.length
-    [filename, canonicalName] = worklist.pop()
+    {filename, canonicalName} = worklist.pop()
 
     # filter duplicates
     continue if {}.hasOwnProperty.call processed, canonicalName
@@ -323,10 +327,9 @@ traverseDependenciesSync = (entryPoint, root = process.cwd(), options = {}) ->
         # if we are including this file, its requires need to be processed as well
         try
           targetCanonicalName = relativeResolveSync extensions, root, node.arguments[0].value, cwd
-          worklist.push [
-            resolvePathSync extensions, root, node.arguments[0].value, cwd
-            targetCanonicalName
-          ]
+          worklist.push
+            filename: resolvePathSync extensions, root, node.arguments[0].value, cwd
+            canonicalName: targetCanonicalName
         catch e
           if options.ignoreMissing
             return { type: 'Literal', value: null }
