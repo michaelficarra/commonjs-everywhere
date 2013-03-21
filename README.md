@@ -29,7 +29,9 @@ Example:
 
 ### Module Interface
 
-#### `cjsify(entryPoint, root, options)`
+#### `cjsifySync(entryPoint, root, options)` → Spidermonkey AST
+Bundles the given file and its dependencies; returns a Spidermonkey AST representation of the bundle. Run the AST through `escodegen` to generate JS code.
+
 * `entryPoint` is a file relative to `process.cwd()` that will be the initial module marked for inclusion in the bundle as well as the exported module
 * `root` is the directory to which unqualified requires are relative; defaults to `process.cwd()`
 * `options` is an optional object (defaulting to `{}`) with zero or more of the following properties
@@ -39,6 +41,8 @@ Example:
     * `verbose`: log additional operational information to stderr
     * `ignoreMissing`: continue without error when dependency resolution fails
 
+#### `cjsify(entryPoint, root, options, callback)` → void
+Same as `cjsifySync`, except takes a callback that is given `err` and `bundle` arguments.
 
 ## Examples
 
