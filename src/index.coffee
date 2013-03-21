@@ -78,7 +78,7 @@ wrapFile = (name, program) ->
   wrapper.expression.arguments[1].body.body = program.body
   wrapper
 
-bundle = (processed, entryPoint, options) ->
+bundle = (processed, entryPoint, root, options) ->
   program = esprima.parse PRELUDE
   for own filename, ast of processed
     program.body.push wrapFile ast.loc.source, ast
@@ -86,7 +86,7 @@ bundle = (processed, entryPoint, options) ->
   requireEntryPoint =
     type: 'CallExpression'
     callee: { type: 'Identifier', name: 'require' }
-    arguments: [{ type: 'Literal', value: entryPoint }]
+    arguments: [{ type: 'Literal', value: canonicalise root, entryPoint }]
 
   # require/expose the entry point
   if options.export?
@@ -353,13 +353,13 @@ cjsify = (entryPoint, root = process.cwd(), options = {}, cb = ->) ->
     return process.nextTick (-> cb err) if err
     if options.verbose
       console.error "\nIncluded modules:\n  #{(Object.keys processed).sort().join "\n  "}"
-    cb null, bundle processed, (canonicalise root, entryPoint), options
+    cb null, bundle processed, entryPoint, root, options
 
 cjsifySync = (entryPoint, root = process.cwd(), options = {}) ->
   processed = traverseDependenciesSync entryPoint, root, options
   if options.verbose
     console.error "\nIncluded modules:\n  #{(Object.keys processed).sort().join "\n  "}"
-  bundle processed, (canonicalise root, entryPoint), options
+  bundle processed, entryPoint, root, options
 
 
 exports.bundle = bundle
