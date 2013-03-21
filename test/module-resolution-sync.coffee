@@ -37,5 +37,5 @@ suite 'Module Resolution (sync)', ->
     eq '/dir/dir/index.js', resolveSync 'dir/dir'
 
   test 'core module', ->
-    doesNotThrow => resolveSync 'fs'
-    doesNotThrow => resolveSync 'fs', 'dir'
+    doesNotThrow => resolveSync 'punycode'
+    doesNotThrow => resolveSync 'punycode', 'dir'

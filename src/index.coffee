@@ -138,7 +138,8 @@ resolvePath = (extensions, root, givenPath, cwd, cb = ->) ->
     if isCore givenPath
       givenPath = path.resolve path.join CORE_DIR, "#{givenPath}.js"
       fs.exists givenPath, (exists) ->
-        cb null, if exists then givenPath else path.resolve path.join CORE_DIR, 'undefined.js'
+        if exists then cb null, givenPath
+        else throw new Error "Core module \"#{givenPath}\" has not yet been ported to the browser"
   alternate = (cb) -> cb null, givenPath
   async_if test, consequent, alternate, (err, givenPath) ->
     return cb err if err?
@@ -154,7 +155,7 @@ resolvePathSync = (extensions, root, givenPath, cwd) ->
   if isCore givenPath
     givenPath = path.resolve path.join CORE_DIR, "#{givenPath}.js"
     unless fs.existsSync givenPath
-      givenPath = path.resolve path.join CORE_DIR, 'undefined.js'
+      throw new Error "Core module \"#{givenPath}\" has not yet been ported to the browser"
   # try regular CommonJS requires
   try resolve.sync givenPath, {basedir: cwd or root, extensions}
   catch e

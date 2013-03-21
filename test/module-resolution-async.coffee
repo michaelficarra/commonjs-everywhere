@@ -54,6 +54,6 @@ suite 'Module Resolution (async)', ->
 
   test 'core module', (done) ->
     async.parallel [
-      async.apply resolve, 'fs', null
-      async.apply resolve, 'fs', 'dir'
+      async.apply resolve, 'punycode', null
+      async.apply resolve, 'punycode', 'dir'
     ], done

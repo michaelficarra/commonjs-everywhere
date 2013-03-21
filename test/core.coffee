@@ -2,7 +2,7 @@ suite 'Node Core Libraries', ->
 
   test 'path', ->
     fixtures '/a.js': 'module.exports = require("path").join("a", "b")'
-    eq 'a/b', bundleEvalSync '/a.js'
+    eq 'a/b', bundleEvalSync '/a.js', ignoreMissing: yes
 
   test 'url', ->
     fixtures '/a.js': 'module.exports = require("url").parse("https://github.com")'
