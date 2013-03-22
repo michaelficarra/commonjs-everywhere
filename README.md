@@ -24,9 +24,19 @@ CommonJS (node module) browser bundler with source maps from the minified JS bun
       --ignore-missing        continue without error when dependency resolution fails
       --source-map-file FILE  output a source map to FILE
 
-Example:
+#### Example:
 
-    cjsify src/entry-file.js --export MyLibrary --source-map-file my-library.js.map >my-library.js
+Common usage
+
+```bash
+cjsify src/entry-file.js --export MyLibrary --source-map-file my-library.js.map >my-library.js
+```
+
+Watch entry file, its dependencies, even newly added dependencies. Use `verbose` flag to show that only the files that need to be rebuilt are touched.
+
+```bash
+cjsify -wvo my-library.js -x MyLibrary src/entry-file.js
+```
 
 ### Module Interface
 
