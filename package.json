@@ -45,6 +45,7 @@
     "crypto-browserify": "*",
     "buffer-browserify": "*",
     "zlib-browserify": "*",
+    "events-browserify": "*",
     "querystring": "git://github.com/Gozala/querystring.git#master"
   },
   "devDependencies": {

@@ -1,1 +1,1 @@
-node/lib/events.js
+../node_modules/events-browserify/events.js

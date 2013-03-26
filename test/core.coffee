@@ -14,3 +14,7 @@ suite 'Node Core Libraries', ->
   test 'querystring', ->
     fixtures '/a.js': 'module.exports = require("querystring").parse("a=b").a'
     eq 'b', bundleEvalSync '/a.js'
+
+  test 'events', ->
+    fixtures '/a.js': 'module.exports = require("events")'
+    ok bundleEvalSync '/a.js'
