@@ -24,6 +24,8 @@ CommonJS (node module) browser bundler with source maps from the minified JS bun
       --ignore-missing        continue without error when dependency resolution fails
       --source-map-file FILE  output a source map to FILE
 
+*Note:* use `-` as an entry file to accept JavaScript over stdin
+
 #### Example:
 
 Common usage

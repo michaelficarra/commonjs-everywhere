@@ -88,14 +88,29 @@ build = (entryPoint, processed = {}) ->
 
   processed
 
-processed = build originalEntryPoint
+startBuild = ->
+  processed = build originalEntryPoint
 
-if options.watch
-  watching = []
-  do startWatching = (processed) ->
-    for own file of processed when file not in watching then do (file) ->
-      watching.push file
-      fs.watchFile file, {persistent: yes, interval: 500}, (curr, prev) ->
-        console.error "Rebuilding bundle starting at file #{file}"
-        startWatching (processed = build file, processed)
-        return
+  if options.watch
+    watching = []
+    do startWatching = (processed) ->
+      for own file of processed when file not in watching then do (file) ->
+        watching.push file
+        fs.watchFile file, {persistent: yes, interval: 500}, (curr, prev) ->
+          console.error "Rebuilding bundle starting at file #{file}"
+          startWatching (processed = build file, processed)
+          return
+
+if originalEntryPoint is '-'
+  # support reading input from stdin
+  stdinput = ''
+  process.stdin.on 'data', (data) -> stdinput += data
+  process.stdin.on 'end', ->
+    originalEntryPoint = (require 'mktemp').createFileSync 'temp-XXXXXXXXX.js'
+    fs.writeFileSync originalEntryPoint, stdinput
+    process.on 'exit', -> fs.unlinkSync originalEntryPoint
+    do startBuild
+  process.stdin.setEncoding 'utf8'
+  do process.stdin.resume
+else
+  do startBuild
