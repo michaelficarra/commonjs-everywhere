@@ -58,6 +58,8 @@ if options.watch and not options.output
   console.error '--watch requires --ouput'
   process.exit 1
 
+destination = if options.output then path.dirname options.output else process.cwd()
+
 root = if options.root then path.resolve options.root else process.cwd()
 originalEntryPoint = positionalArgs[0]
 
@@ -74,7 +76,7 @@ build = (entryPoint, processed = {}) ->
     comment: no
     sourceMap: yes
     sourceMapWithCode: yes
-    sourceMapRoot: path.relative('.', root) || '.'
+    sourceMapRoot: path.relative(destination, root) || '.'
     format: if options.minify then escodegenCompactFormat else escodegenDefaultFormat
 
   if options.sourceMapFile
