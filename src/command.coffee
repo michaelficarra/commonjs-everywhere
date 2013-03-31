@@ -69,12 +69,12 @@ build = (entryPoint, processed = {}) ->
   if options.minify
     esmangle = require 'esmangle'
     bundled = esmangle.mangle (esmangle.optimize bundled), destructive: yes
-
+  
   {code, map} = escodegen.generate bundled,
     comment: no
     sourceMap: yes
     sourceMapWithCode: yes
-    sourceMapRoot: root
+    sourceMapRoot: if options.sourceMapFile then path.relative(path.dirname(options.sourceMapFile), root) || '.'
     format: if options.minify then escodegenCompactFormat else escodegenDefaultFormat
 
   if options.sourceMapFile
