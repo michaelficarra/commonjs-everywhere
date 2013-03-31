@@ -3,7 +3,7 @@ default: build
 SRC = $(shell find src -name "*.coffee" -type f | sort)
 LIB = $(SRC:src/%.coffee=lib/%.js)
 
-COFFEE=node_modules/.bin/coffee --js
+COFFEE=node_modules/.bin/coffee --print
 MOCHA=node_modules/.bin/mocha --compilers coffee:coffee-script-redux -u tdd
 
 all: build test
@@ -11,7 +11,7 @@ build: $(LIB)
 
 lib/%.js: src/%.coffee
 	dirname "$@" | xargs mkdir -p
-	$(COFFEE) <"$<" >"$@"
+	$(COFFEE) "$<" >"$@"
 
 .PHONY: release test loc clean
 
