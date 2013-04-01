@@ -74,7 +74,7 @@ build = (entryPoint, processed = {}) ->
     comment: no
     sourceMap: yes
     sourceMapWithCode: yes
-    sourceMapRoot: if options.sourceMapFile? then path.relative (path.dirname options.sourceMapFile), root
+    sourceMapRoot: if options.sourceMapFile? then (path.relative (path.dirname options.sourceMapFile), root) or '.'
     format: if options.minify then escodegenCompactFormat else escodegenDefaultFormat
 
   if options.sourceMapFile
