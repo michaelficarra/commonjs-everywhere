@@ -84,7 +84,7 @@ Since the above command specifies `components` as the root directory for unquali
 ### Node Module Example
 
 ```coffee
-jsAst = (require 'commonjs-everywhere').cjsify 'src/entry-file.coffee', __dirname,
+jsAst = (require 'commonjs-everywhere').cjsifySync 'src/entry-file.coffee', __dirname,
   export: 'MyLibrary'
   aliases:
     '/src/module-that-only-works-in-node.coffee': '/src/module-that-does-the-same-thing-in-the-browser.coffee'
