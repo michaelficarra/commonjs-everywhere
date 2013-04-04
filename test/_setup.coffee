@@ -2,6 +2,7 @@ util = require 'util'
 path = require 'path'
 async = require 'async'
 fs = require 'scopedfs'
+vm = require 'vm'
 escodegen = require 'escodegen'
 inspect = (o) -> util.inspect o, no, 2, yes
 
@@ -17,7 +18,7 @@ egal = (a, b) ->
 # A recursive functional equivalence helper; uses egal for testing equivalence.
 arrayEgal = (a, b) ->
   if egal a, b then yes
-  else if a instanceof Array and b instanceof Array
+  else if (Array.isArray a) and Array.isArray b
     return no unless a.length is b.length
     return no for el, idx in a when not arrayEgal el, b[idx]
     yes
@@ -46,9 +47,10 @@ global.fixtures = (opts) ->
 global.bundleSync = bundleSync = (entryPoint, opts) ->
   escodegen.generate cjsifySync (path.join FIXTURES_DIR, entryPoint), FIXTURES_DIR, opts
 global.bundleEvalSync = (entryPoint, opts = {}) ->
-  module$ = {}
+  global$ = Object.create null
+  global$.module$ = module$ = {}
   opts.export = 'module$.exports'
-  eval bundleSync entryPoint, opts
+  vm.runInNewContext (bundleSync entryPoint, opts), global$, ''
   module$.exports
 
 global.bundle = bundle = (entryPoint, opts, cb) ->
@@ -56,12 +58,13 @@ global.bundle = bundle = (entryPoint, opts, cb) ->
     return process.nextTick (-> cb err) if err
     process.nextTick -> cb null, escodegen.generate ast
 global.bundleEval = (entryPoint, opts = {}, cb = ->) ->
-  module$ = {}
+  global$ = Object.create null
+  global$.module$ = module$ = {}
   opts.export = 'module$.exports'
   bundle entryPoint, opts, (err, js) ->
     return process.nextTick (-> cb err) if err
     try
-      eval js
+      vm.runInNewContext (bundleSync entryPoint, opts), global$, ''
     catch e
       return process.nextTick -> cb e
     process.nextTick -> cb null, module$.exports

@@ -22,9 +22,12 @@ CommonJS (node module) browser bundler with source maps from the minified JS bun
       -x, --export NAME       export the given entry module as NAME
       --help                  display this help message
       --ignore-missing        continue without error when dependency resolution fails
+      --node                  include process object; emulate node environment (default: on)
       --source-map-file FILE  output a source map to FILE
 
 *Note:* use `-` as an entry file to accept JavaScript over stdin
+
+*Note:* to disable an option, prefix it with `no-`, e.g. `--no-node`
 
 #### Example:
 
@@ -51,6 +54,7 @@ Bundles the given file and its dependencies; returns a Spidermonkey AST represen
     * `export`: a variable name to add to the global scope; assigned the exported object from the `entryPoint` module. Any valid [Left-Hand-Side Expression](http://es5.github.com/#x11.2) may be given instead.
     * `aliases`: an object whose keys and values are `root`-rooted paths (`/src/file.js`), representing values that will replace requires that resolve to the associated keys
     * `handlers`: an object whose keys are file extensions (`'.roy'`) and whose values are functions from the file contents to a Spidermonkey-format JS AST like the one esprima produces. Handles for CoffeeScript and JSON are included by default. If no handler is defined for a file extension, it is assumed to be JavaScript.
+    * `node`: a falsey value causes the bundling phase to omit the `process` stub that emulates a node environment
     * `verbose`: log additional operational information to stderr
     * `ignoreMissing`: continue without error when dependency resolution fails
 

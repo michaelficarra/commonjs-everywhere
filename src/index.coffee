@@ -22,7 +22,7 @@ isCore = do ->
   (x) ->
     (resolve.isCore x) or x in coreFiles
 
-PRELUDE = """
+PRELUDE_NODE = """
 var process = function(){
   var cwd = '/';
   return {
@@ -36,7 +36,9 @@ var process = function(){
     chdir: function(dir){ cwd = dir; }
   };
 }();
+"""
 
+PRELUDE = '''
 function require(file, parentModule){
   if({}.hasOwnProperty.call(require.cache, file))
     return require.cache[file];
@@ -69,7 +71,7 @@ require.resolve = function(file){
   return {}.hasOwnProperty.call(require.modules, file) ? require.modules[file] : void 0;
 };
 require.define = function(file, fn){ require.modules[file] = fn; };
-"""
+'''
 
 wrapFile = (name, program) ->
   wrapperProgram = esprima.parse 'require.define(0, function(module, exports, __dirname, __filename){});'
@@ -79,7 +81,8 @@ wrapFile = (name, program) ->
   wrapper
 
 bundle = (processed, entryPoint, root, options) ->
-  program = esprima.parse PRELUDE
+  prelude = if options.node ? yes then "#{PRELUDE_NODE}\n#{PRELUDE}" else PRELUDE
+  program = esprima.parse prelude
   for own filename, ast of processed
     program.body.push wrapFile ast.loc.source, ast
 

@@ -2,6 +2,11 @@ suite 'Process Spec', ->
 
   teardown fs.reset
 
+  test 'falsey `node` option disables process emulation', ->
+    fixtures '/a.js': 'module.exports = typeof process'
+    eq 'object', bundleEvalSync 'a.js'
+    eq 'undefined', bundleEvalSync 'a.js', node: no
+
   test 'process.title is "browser"', ->
     fixtures '/a.js': 'module.exports = process.title'
     eq 'browser', bundleEvalSync 'a.js'

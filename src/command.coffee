@@ -28,6 +28,7 @@ escodegenCompactFormat =
 optionParser = new Jedediah
 
 optionParser.addOption 'help', off, 'display this help message'
+optionParser.addOption 'node', on, 'include process object; emulate node environment (default: on)'
 optionParser.addOption 'minify', 'm', off, 'minify output'
 optionParser.addOption 'ignore-missing', off, 'continue without error when dependency resolution fails'
 optionParser.addOption 'watch', 'w', off, 'watch input files/dependencies for changes and rebuild bundle'
