@@ -14,13 +14,42 @@ async_if = (test, consequent, alternate, cb) ->
     return
   return
 
-CORE_DIR = path.join __dirname, '..', 'core'
-isCore = do ->
-  coreFiles = fs.readdirSync CORE_DIR
-  coreFiles = coreFiles.filter (f) -> not (fs.statSync path.join CORE_DIR, f).isDirectory()
-  coreFiles = coreFiles.map (f) -> f.replace /\.js$/, ''
-  (x) ->
-    (resolve.isCore x) or x in coreFiles
+
+CJS_DIR = path.join __dirname, '..'
+
+CORE_MODULES =
+  buffer: path.join CJS_DIR, 'node_modules/buffer-browserify/index.js'
+  crypto: path.join CJS_DIR, 'node_modules/crypto-browserify/index.js'
+  events: path.join CJS_DIR, 'node_modules/events-browserify/events.js'
+  http: path.join CJS_DIR, 'node_modules/http-browserify/index.js'
+  querystring: path.join CJS_DIR, 'node_modules/querystring/index.js'
+  vm: path.join CJS_DIR, 'node_modules/vm-browserify/index.js'
+  zlib: path.join CJS_DIR, 'node_modules/zlib-browserify/index.js'
+
+NODE_CORE_MODULES = [
+  '_stream_duplex.js'
+  '_stream_passthrough.js'
+  '_stream_readable.js'
+  '_stream_transform.js'
+  '_stream_writable.js'
+  'assert'
+  'console'
+  'domain'
+  'freelist'
+  'path'
+  'punycode'
+  'readline'
+  'stream'
+  'string_decoder'
+  'sys'
+  'url'
+  'util'
+]
+for mod in NODE_CORE_MODULES
+  CORE_MODULES[mod] = path.join CJS_DIR, "node/lib/#{mod}.js"
+
+isCore = (x) -> (resolve.isCore x) or [].hasOwnProperty.call CORE_MODULES, x
+
 
 PRELUDE_NODE = """
 var process = function(){
@@ -139,7 +168,7 @@ resolvePath = (extensions, root, givenPath, cwd, cb = ->) ->
   consequent = (cb) ->
     # resolve core node modules
     if isCore givenPath
-      givenPath = path.resolve path.join CORE_DIR, "#{givenPath}.js"
+      givenPath = CORE_MODULES[givenPath]
       fs.exists givenPath, (exists) ->
         if exists then cb null, givenPath
         else throw new Error "Core module \"#{givenPath}\" has not yet been ported to the browser"
@@ -156,7 +185,7 @@ resolvePath = (extensions, root, givenPath, cwd, cb = ->) ->
 
 resolvePathSync = (extensions, root, givenPath, cwd) ->
   if isCore givenPath
-    givenPath = path.resolve path.join CORE_DIR, "#{givenPath}.js"
+    givenPath = CORE_MODULES[givenPath]
     unless fs.existsSync givenPath
       throw new Error "Core module \"#{givenPath}\" has not yet been ported to the browser"
   # try regular CommonJS requires

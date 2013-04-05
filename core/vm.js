@@ -1,1 +1,0 @@
-../node_modules/vm-browserify/index.js

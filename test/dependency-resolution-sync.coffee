@@ -40,7 +40,7 @@ suite 'Dependency Resolution (sync)', ->
 
   test 'core dependencies', ->
     fixtures '/a.js': 'require("punycode")'
-    arrayEq ['../core/punycode.js', '/a.js'], deps '/a.js'
+    arrayEq ['../node/lib/punycode.js', '/a.js'], deps '/a.js'
 
   test 'missing dependencies', ->
     fixtures '/a.js': 'require("./b")'

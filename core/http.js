@@ -1,1 +1,0 @@
-../node_modules/http-browserify/index.js
