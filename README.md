@@ -20,6 +20,7 @@ CommonJS (node module) browser bundler with source maps from the minified JS bun
       -v, --verbose           verbose output sent to stderr
       -w, --watch             watch input files/dependencies for changes and rebuild bundle
       -x, --export NAME       export the given entry module as NAME
+      --deps                  do not bundle; just list the files that would be bundled
       --help                  display this help message
       --ignore-missing        continue without error when dependency resolution fails
       --node                  include process object; emulate node environment (default: on)

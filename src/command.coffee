@@ -28,6 +28,7 @@ escodegenCompactFormat =
 optionParser = new Jedediah
 
 optionParser.addOption 'help', off, 'display this help message'
+optionParser.addOption 'deps', off, 'do not bundle; just list the files that would be bundled'
 optionParser.addOption 'node', on, 'include process object; emulate node environment (default: on)'
 optionParser.addOption 'minify', 'm', off, 'minify output'
 optionParser.addOption 'ignore-missing', off, 'continue without error when dependency resolution fails'
@@ -55,12 +56,17 @@ if options.help
 unless positionalArgs.length is 1
   throw new Error "wrong number of entry points given; expected 1"
 
+root = if options.root then path.resolve options.root else process.cwd()
+originalEntryPoint = positionalArgs[0]
+
+if options.deps
+  deps = CJSEverywhere.traverseDependenciesSync originalEntryPoint, root, options
+  console.log (Object.keys deps).sort().map((f) -> path.relative root, f).join '\n'
+  process.exit 0
+
 if options.watch and not options.output
   console.error '--watch requires --ouput'
   process.exit 1
-
-root = if options.root then path.resolve options.root else process.cwd()
-originalEntryPoint = positionalArgs[0]
 
 build = (entryPoint, processed = {}) ->
   newDeps = CJSEverywhere.traverseDependenciesSync entryPoint, root, options
