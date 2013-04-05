@@ -168,9 +168,9 @@ resolvePath = (extensions, root, givenPath, cwd, cb = ->) ->
   consequent = (cb) ->
     # resolve core node modules
     if isCore givenPath
-      givenPath = CORE_MODULES[givenPath]
-      fs.exists givenPath, (exists) ->
-        if exists then cb null, givenPath
+      corePath = CORE_MODULES[givenPath]
+      fs.exists corePath, (exists) ->
+        if exists then cb null, corePath
         else throw new Error "Core module \"#{givenPath}\" has not yet been ported to the browser"
   alternate = (cb) -> cb null, givenPath
   async_if test, consequent, alternate, (err, givenPath) ->
@@ -185,9 +185,10 @@ resolvePath = (extensions, root, givenPath, cwd, cb = ->) ->
 
 resolvePathSync = (extensions, root, givenPath, cwd) ->
   if isCore givenPath
-    givenPath = CORE_MODULES[givenPath]
-    unless fs.existsSync givenPath
+    corePath = CORE_MODULES[givenPath]
+    unless fs.existsSync corePath
       throw new Error "Core module \"#{givenPath}\" has not yet been ported to the browser"
+    givenPath = corePath
   # try regular CommonJS requires
   try resolve.sync givenPath, {basedir: cwd or root, extensions}
   catch e
