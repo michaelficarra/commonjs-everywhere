@@ -1,7 +1,7 @@
 commonjs-everywhere-*.tgz
-core/node
-core/node/*
-!core/node/lib
+node
+node/*
+!node/lib
 src
 test
 .gitmodules
