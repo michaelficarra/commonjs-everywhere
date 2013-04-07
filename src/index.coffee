@@ -60,7 +60,7 @@ var process = function(){
     browser: true,
     env: {},
     argv: [],
-    nextTick: function(fn){ setTimeout(fn, 0); },
+    nextTick: global.setImmediate || function(fn){ setTimeout(fn, 0); },
     cwd: function(){ return cwd; },
     chdir: function(dir){ cwd = dir; }
   };
