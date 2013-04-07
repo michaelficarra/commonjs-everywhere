@@ -46,9 +46,10 @@ global.fixtures = (opts) ->
 
 global.bundleSync = bundleSync = (entryPoint, opts) ->
   escodegen.generate cjsifySync (path.join FIXTURES_DIR, entryPoint), FIXTURES_DIR, opts
-global.bundleEvalSync = (entryPoint, opts = {}) ->
+global.bundleEvalSync = (entryPoint, opts = {}, env = {}) ->
   global$ = Object.create null
   global$.module$ = module$ = {}
+  global$[key] = val for own key, val of env
   opts.export = 'module$.exports'
   vm.runInNewContext (bundleSync entryPoint, opts), global$, ''
   module$.exports
@@ -57,9 +58,10 @@ global.bundle = bundle = (entryPoint, opts, cb) ->
   cjsify (path.join FIXTURES_DIR, entryPoint), FIXTURES_DIR, opts, (err, ast) ->
     return process.nextTick (-> cb err) if err
     process.nextTick -> cb null, escodegen.generate ast
-global.bundleEval = (entryPoint, opts = {}, cb = ->) ->
+global.bundleEval = (entryPoint, opts = {}, env = {}, cb = ->) ->
   global$ = Object.create null
   global$.module$ = module$ = {}
+  global$[key] = val for own key, val of env
   opts.export = 'module$.exports'
   bundle entryPoint, opts, (err, js) ->
     return process.nextTick (-> cb err) if err
