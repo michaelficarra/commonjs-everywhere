@@ -78,7 +78,7 @@ build = (entryPoint, processed = {}) ->
     bundled = esmangle.mangle (esmangle.optimize bundled), destructive: yes
 
   {code, map} = escodegen.generate bundled,
-    comment: yes
+    comment: not options.minify
     sourceMap: yes
     sourceMapWithCode: yes
     sourceMapRoot: if options.sourceMapFile? then (path.relative (path.dirname options.sourceMapFile), root) or '.'
