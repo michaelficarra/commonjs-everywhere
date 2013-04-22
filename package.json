@@ -39,6 +39,7 @@
     "estraverse": "~0.0.4",
     "jedediah": "~0.1.0",
     "resolve": "~0.3.0",
+    "MD5": "~1.0",
     "async": "~0.2.0",
     "http-browserify": "*",
     "vm-browserify": "*",

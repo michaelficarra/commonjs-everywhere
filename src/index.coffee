@@ -5,6 +5,7 @@ resolve = require 'resolve'
 esprima = require 'esprima'
 estraverse = require 'estraverse'
 CoffeeScript = require 'coffee-script-redux'
+md5 = require 'MD5'
 async = require 'async'
 # https://github.com/caolan/async/pull/272
 async_if = (test, consequent, alternate, cb) ->
@@ -240,6 +241,13 @@ traverseDependencies = (entryPoint, root = process.cwd(), options = {}, cb = ->)
       extname = path.extname filename
       fs.readFile filename, (err, fileContents) ->
         return next err if err?
+        fileContents = fileContents.toString()
+
+        # ignore files that have not changed
+        if options.cache
+          digest = md5 fileContents
+          return do next if options.cache[filename] is digest
+          options.cache[filename] = digest
 
         # handle compile-to-JS languages and other non-JS files
         processed[filename] = ast =
@@ -332,7 +340,13 @@ traverseDependenciesSync = (entryPoint, root = process.cwd(), options = {}) ->
       filename = resolvePathSync extensions, root, aliases[canonicalName]
 
     extname = path.extname filename
-    fileContents = fs.readFileSync filename
+    fileContents = (fs.readFileSync filename).toString()
+
+    # ignore files that have not changed
+    if options.cache
+      digest = md5 fileContents.toString()
+      continue if options.cache[filename] is digest
+      options.cache[filename] = digest
 
     # handle compile-to-JS languages and other non-JS files
     processed[filename] = ast =

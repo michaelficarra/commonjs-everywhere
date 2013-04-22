@@ -70,6 +70,8 @@ if options.watch and not options.output
 
 build = (entryPoint, processed = {}) ->
   newDeps = CJSEverywhere.traverseDependenciesSync entryPoint, root, options
+  if options.watch
+    console.error "#{file} => #{options.cache[file]}" for file in Object.keys newDeps
   processed[file] = newDeps[file] for own file of newDeps
   bundled = CJSEverywhere.bundle processed, originalEntryPoint, root, options
 
@@ -96,6 +98,10 @@ build = (entryPoint, processed = {}) ->
   processed
 
 startBuild = ->
+  if options.watch
+    options.cache = {}
+    console.error "Building bundle starting at #{originalEntryPoint}"
+
   processed = build originalEntryPoint
 
   if options.watch
@@ -104,8 +110,9 @@ startBuild = ->
       for own file of processed when file not in watching then do (file) ->
         watching.push file
         fs.watchFile file, {persistent: yes, interval: 500}, (curr, prev) ->
-          console.error "Rebuilding bundle starting at file #{file}"
-          startWatching (processed = build file, processed)
+          console.error "Rebuilding bundle starting at #{file}"
+          processed = build file, processed
+          startWatching processed
           return
 
 if originalEntryPoint is '-'
