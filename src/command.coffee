@@ -69,10 +69,13 @@ if options.watch and not options.output
   process.exit 1
 
 build = (entryPoint, processed = {}) ->
-  newDeps = CJSEverywhere.traverseDependenciesSync entryPoint, root, options
-  if options.watch
-    console.error "#{file} => #{options.cache[file]}" for file in Object.keys newDeps
-  processed[file] = newDeps[file] for own file of newDeps
+  try
+    newDeps = CJSEverywhere.traverseDependenciesSync entryPoint, root, options
+    if options.watch
+      console.error "built #{file} (#{options.cache[file]})" for file in Object.keys newDeps
+    processed[file] = newDeps[file] for own file of newDeps
+  catch e
+    if options.watch then console.error "ERROR: #{e.message}" else throw e
   bundled = CJSEverywhere.bundle processed, originalEntryPoint, root, options
 
   if options.minify
@@ -110,6 +113,9 @@ startBuild = ->
       for own file of processed when file not in watching then do (file) ->
         watching.push file
         fs.watchFile file, {persistent: yes, interval: 500}, (curr, prev) ->
+          unless curr.ino
+            console.error "WARNING: watched file #{file} has disappeared"
+            return
           console.error "Rebuilding bundle starting at #{file}"
           processed = build file, processed
           startWatching processed
