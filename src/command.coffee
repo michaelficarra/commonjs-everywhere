@@ -91,7 +91,11 @@ build = (entryPoint, processed = {}) ->
 
   if options.sourceMapFile
     fs.writeFileSync options.sourceMapFile, "#{map}"
-    code += "\n/*\n//@ sourceMappingURL=#{options.sourceMapFile}\n*/"
+    sourceMappingUrl =
+      if options.output
+        path.relative (path.dirname options.output), options.sourceMapFile
+      else options.sourceMapFile
+    code = "#{code}\n/*\n//@ sourceMappingURL=#{sourceMappingUrl}\n*/"
 
   if options.output
     fs.writeFileSync options.output, code
