@@ -254,7 +254,9 @@ traverseDependencies = (entryPoint, root = process.cwd(), options = {}, cb = ->)
           if {}.hasOwnProperty.call handlers, extname
             handlers[extname](fileContents, canonicalName)
           else # assume JS
-            esprima.parse fileContents, loc: yes, source: canonicalName
+            try esprima.parse fileContents, loc: yes, source: canonicalName
+            catch e
+              next new Error "Syntax error in #{filename} at line #{e.lineNumber}, column #{e.column}#{e.message[(e.message.indexOf ':')..]}"
 
         # add source file information to the AST root node
         ast.loc ?= {}
@@ -353,7 +355,9 @@ traverseDependenciesSync = (entryPoint, root = process.cwd(), options = {}) ->
       if {}.hasOwnProperty.call handlers, extname
         handlers[extname](fileContents, canonicalName)
       else # assume JS
-        esprima.parse fileContents, loc: yes, source: canonicalName
+        try esprima.parse fileContents, loc: yes, source: canonicalName
+        catch e
+          throw new Error "Syntax error in #{filename} at line #{e.lineNumber}, column #{e.column}#{e.message[(e.message.indexOf ':')..]}"
 
     # add source file information to the AST root node
     ast.loc ?= {}
