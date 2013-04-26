@@ -14,17 +14,17 @@ CommonJS (node module) browser bundler with source maps from the minified JS bun
 
       Usage: cjsify OPT* path/to/entry-file.ext OPT*
 
-      -m, --minify            minify output
-      -o, --output FILE       output to FILE instead of stdout
-      -r, --root DIR          unqualified requires are relative to DIR (default: cwd)
-      -v, --verbose           verbose output sent to stderr
-      -w, --watch             watch input files/dependencies for changes and rebuild bundle
-      -x, --export NAME       export the given entry module as NAME
-      --deps                  do not bundle; just list the files that would be bundled
-      --help                  display this help message
-      --ignore-missing        continue without error when dependency resolution fails
-      --node                  include process object; emulate node environment (default: on)
-      --source-map-file FILE  output a source map to FILE
+      -m, --minify           minify output
+      -o, --output FILE      output to FILE instead of stdout
+      -r, --root DIR         unqualified requires are relative to DIR (default: cwd)
+      -s, --source-map FILE  output a source map to FILE
+      -v, --verbose          verbose output sent to stderr
+      -w, --watch            watch input files/dependencies for changes and rebuild bundle
+      -x, --export NAME      export the given entry module as NAME
+      --deps                 do not bundle; just list the files that would be bundled
+      --help                 display this help message
+      --ignore-missing       continue without error when dependency resolution fails
+      --node                 include process object; emulate node environment (default: on)
 
 *Note:* use `-` as an entry file to accept JavaScript over stdin
 

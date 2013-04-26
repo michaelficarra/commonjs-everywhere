@@ -37,11 +37,11 @@ optionParser.addOption 'verbose', 'v', off, 'verbose output sent to stderr'
 optionParser.addParameter 'export', 'x', 'NAME', 'export the given entry module as NAME'
 optionParser.addParameter 'output', 'o', 'FILE', 'output to FILE instead of stdout'
 optionParser.addParameter 'root', 'r', 'DIR', 'unqualified requires are relative to DIR (default: cwd)'
-optionParser.addParameter 'source-map-file', 'FILE', 'output a source map to FILE'
+optionParser.addParameter 'source-map', 's', 'FILE', 'output a source map to FILE'
 
 [options, positionalArgs] = optionParser.parse process.argv
 options.ignoreMissing = options['ignore-missing']
-options.sourceMapFile = options['source-map-file']
+options.sourceMap = options['source-map']
 
 if options.help
   $0 = if process.argv[0] is 'node' then process.argv[1] else process.argv[0]
@@ -86,15 +86,15 @@ build = (entryPoint, processed = {}) ->
     comment: not options.minify
     sourceMap: yes
     sourceMapWithCode: yes
-    sourceMapRoot: if options.sourceMapFile? then (path.relative (path.dirname options.sourceMapFile), root) or '.'
+    sourceMapRoot: if options.sourceMap? then (path.relative (path.dirname options.sourceMap), root) or '.'
     format: if options.minify then escodegenCompactFormat else escodegenDefaultFormat
 
-  if options.sourceMapFile
-    fs.writeFileSync options.sourceMapFile, "#{map}"
+  if options.sourceMap
+    fs.writeFileSync options.sourceMap, "#{map}"
     sourceMappingUrl =
       if options.output
-        path.relative (path.dirname options.output), options.sourceMapFile
-      else options.sourceMapFile
+        path.relative (path.dirname options.output), options.sourceMap
+      else options.sourceMap
     code = "#{code}\n/*\n//@ sourceMappingURL=#{sourceMappingUrl}\n*/"
 
   if options.output
