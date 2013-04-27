@@ -1,4 +1,4 @@
-suite 'Module Resolution (sync)', ->
+suite 'Module Resolution', ->
 
   teardown fs.reset
 

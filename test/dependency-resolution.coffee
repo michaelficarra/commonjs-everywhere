@@ -1,4 +1,4 @@
-suite 'Dependency Resolution (sync)', ->
+suite 'Dependency Resolution', ->
 
   deps = (entryFile, opts) ->
     entryFile = path.resolve path.join FIXTURES_DIR, entryFile

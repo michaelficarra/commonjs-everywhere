@@ -1,4 +1,4 @@
-suite 'Bundling (sync)', ->
+suite 'Bundling', ->
 
   teardown fs.reset
 
