@@ -3,7 +3,8 @@ path = require 'path'
 
 escodegen = require 'escodegen'
 Jedediah = require 'jedediah'
-CJSEverywhere = require './index'
+
+CJSEverywhere = require './module'
 
 escodegenDefaultFormat =
   indent:

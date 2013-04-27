@@ -1,9 +1,8 @@
-util = require 'util'
-path = require 'path'
-fs = require 'scopedfs'
-vm = require 'vm'
 escodegen = require 'escodegen'
-inspect = (o) -> util.inspect o, no, 2, yes
+fs = require 'scopedfs'
+path = require 'path'
+require 'coffee-script-redux'
+vm = require 'vm'
 
 global[name] = func for name, func of require 'assert'
 
@@ -22,6 +21,7 @@ arrayEgal = (a, b) ->
     return no for el, idx in a when not arrayEgal el, b[idx]
     yes
 
+inspect = (o) -> (require 'util').inspect o, no, 2, yes
 global.eq      = (a, b, msg) -> ok egal(a, b), msg ? "#{inspect a} === #{inspect b}"
 global.arrayEq = (a, b, msg) -> ok arrayEgal(a,b), msg ? "#{inspect a} === #{inspect b}"
 
@@ -32,8 +32,7 @@ sfs.reset = ->
   fs.mkdirpSync FIXTURES_DIR
 do sfs.reset
 
-global.IN_TESTING_ENVIRONMENT = yes
-global[k] = v for own k, v of require '..'
+global[k] = v for own k, v of require '../src/module'
 global.FIXTURES_DIR = FIXTURES_DIR
 global.path = path
 global.escodegen = escodegen
@@ -53,6 +52,7 @@ global.bundleEval = (entryPoint, opts = {}, env = {}) ->
   module$.exports
 
 extensions = ['.js', '.coffee']
+relativeResolve = require '../src/relative-resolve'
 global.resolve = (givenPath, cwd = '') ->
   realCwd = path.resolve path.join FIXTURES_DIR, cwd
   relativeResolve extensions, FIXTURES_DIR, givenPath, realCwd
