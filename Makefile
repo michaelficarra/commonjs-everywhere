@@ -4,7 +4,7 @@ SRC = $(shell find src -name "*.coffee" -type f | sort)
 LIB = $(SRC:src/%.coffee=lib/%.js)
 
 COFFEE=node_modules/.bin/coffee --js
-MOCHA=node_modules/.bin/mocha --compilers coffee:coffee-script-redux -u tdd
+MOCHA=node_modules/.bin/mocha --compilers coffee:coffee-script-redux -r coffee-script-redux -r test-setup.coffee -u tdd
 
 all: build test
 build: $(LIB)
