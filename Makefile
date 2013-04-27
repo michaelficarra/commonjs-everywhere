@@ -10,7 +10,7 @@ all: build test
 build: $(LIB)
 
 lib/%.js: src/%.coffee
-	dirname "$@" | xargs mkdir -p
+	@dirname "$@" | xargs mkdir -p
 	$(COFFEE) <"$<" >"$@"
 
 .PHONY: release test loc clean
@@ -40,6 +40,6 @@ test:
 	$(MOCHA) -R dot test/*.coffee
 
 loc:
-	wc -l src/*
+	@wc -l src/*
 clean:
-	rm -rf lib
+	@rm -rf lib
