@@ -27,7 +27,8 @@ escodegenCompactFormat =
 
 optionParser = new Jedediah
 
-optionParser.addOption 'help', off, 'display this help message'
+optionParser.addOption 'help', off, 'display this help message and exit'
+optionParser.addOption 'version', off, 'display the version number and exit'
 optionParser.addOption 'deps', off, 'do not bundle; just list the files that would be bundled'
 optionParser.addOption 'node', on, 'include process object; emulate node environment (default: on)'
 optionParser.addOption 'minify', 'm', off, 'minify output'
@@ -51,6 +52,10 @@ if options.help
 
 #{optionParser.help()}
 "
+  process.exit 0
+
+if options.version
+  console.log (require '../package.json').version
   process.exit 0
 
 unless positionalArgs.length is 1
