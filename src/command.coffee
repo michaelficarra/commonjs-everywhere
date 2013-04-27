@@ -65,7 +65,7 @@ root = if options.root then path.resolve options.root else process.cwd()
 originalEntryPoint = positionalArgs[0]
 
 if options.deps
-  deps = CJSEverywhere.traverseDependenciesSync originalEntryPoint, root, options
+  deps = CJSEverywhere.traverseDependencies originalEntryPoint, root, options
   console.log (Object.keys deps).sort().map((f) -> path.relative root, f).join '\n'
   process.exit 0
 
@@ -75,7 +75,7 @@ if options.watch and not options.output
 
 build = (entryPoint, processed = {}) ->
   try
-    newDeps = CJSEverywhere.traverseDependenciesSync entryPoint, root, options
+    newDeps = CJSEverywhere.traverseDependencies entryPoint, root, options
     if options.watch
       console.error "built #{file} (#{options.cache[file]})" for file in Object.keys newDeps
     processed[file] = newDeps[file] for own file of newDeps

@@ -7,13 +7,13 @@ suite 'Module Spec', ->
         module.exports = require('./b').b
       '''
       '/b.js': 'module.exports = {b: 1}'
-    eq 2, bundleEvalSync 'a.js'
+    eq 2, bundleEval 'a.js'
 
   test 'module.parent refers to the parent module', ->
     fixtures
       '/a.js': 'exports.a = 1; exports.b = require("./b")'
       '/b.js': 'module.exports = module.parent.exports.a + 1;'
-    obj = bundleEvalSync 'a.js'
+    obj = bundleEval 'a.js'
     eq 1, obj.a
     eq 2, obj.b
 
@@ -21,4 +21,4 @@ suite 'Module Spec', ->
     fixtures
       '/a.js': 'require("./b"); module.exports = module.children[0].exports'
       '/b.js': 'module.exports = module.filename'
-    eq '/b.js', bundleEvalSync 'a.js'
+    eq '/b.js', bundleEval 'a.js'

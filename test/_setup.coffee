@@ -1,6 +1,5 @@
 util = require 'util'
 path = require 'path'
-async = require 'async'
 fs = require 'scopedfs'
 vm = require 'vm'
 escodegen = require 'escodegen'
@@ -37,44 +36,23 @@ global.IN_TESTING_ENVIRONMENT = yes
 global[k] = v for own k, v of require '..'
 global.FIXTURES_DIR = FIXTURES_DIR
 global.path = path
-global.async = async
 global.escodegen = escodegen
 global.fs = sfs
 global.fixtures = (opts) ->
   do sfs.reset
   sfs.applySync opts
 
-global.bundleSync = bundleSync = (entryPoint, opts) ->
-  escodegen.generate cjsifySync (path.join FIXTURES_DIR, entryPoint), FIXTURES_DIR, opts
-global.bundleEvalSync = (entryPoint, opts = {}, env = {}) ->
+global.bundle = bundle = (entryPoint, opts) ->
+  escodegen.generate cjsify (path.join FIXTURES_DIR, entryPoint), FIXTURES_DIR, opts
+global.bundleEval = (entryPoint, opts = {}, env = {}) ->
   global$ = Object.create null
   global$.module$ = module$ = {}
   global$[key] = val for own key, val of env
   opts.export = 'module$.exports'
-  vm.runInNewContext (bundleSync entryPoint, opts), global$, ''
+  vm.runInNewContext (bundle entryPoint, opts), global$, ''
   module$.exports
 
-global.bundle = bundle = (entryPoint, opts, cb) ->
-  cjsify (path.join FIXTURES_DIR, entryPoint), FIXTURES_DIR, opts, (err, ast) ->
-    return process.nextTick (-> cb err) if err
-    process.nextTick -> cb null, escodegen.generate ast
-global.bundleEval = (entryPoint, opts = {}, env = {}, cb = ->) ->
-  global$ = Object.create null
-  global$.module$ = module$ = {}
-  global$[key] = val for own key, val of env
-  opts.export = 'module$.exports'
-  bundle entryPoint, opts, (err, js) ->
-    return process.nextTick (-> cb err) if err
-    try
-      vm.runInNewContext (bundleSync entryPoint, opts), global$, ''
-    catch e
-      return process.nextTick -> cb e
-    process.nextTick -> cb null, module$.exports
-
 extensions = ['.js', '.coffee']
-global.resolveSync = (givenPath, cwd = '') ->
+global.resolve = (givenPath, cwd = '') ->
   realCwd = path.resolve path.join FIXTURES_DIR, cwd
-  relativeResolveSync extensions, FIXTURES_DIR, givenPath, realCwd
-global.resolve = (givenPath, cwd = '', cb) ->
-  realCwd = path.resolve path.join FIXTURES_DIR, cwd
-  relativeResolve extensions, FIXTURES_DIR, givenPath, realCwd, cb
+  relativeResolve extensions, FIXTURES_DIR, givenPath, realCwd

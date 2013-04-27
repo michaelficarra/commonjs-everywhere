@@ -46,7 +46,7 @@ cjsify -wvo my-library.js -x MyLibrary src/entry-file.js
 
 ### Module Interface
 
-#### `cjsifySync(entryPoint, root, options)` → Spidermonkey AST
+#### `cjsify(entryPoint, root, options)` → Spidermonkey AST
 Bundles the given file and its dependencies; returns a Spidermonkey AST representation of the bundle. Run the AST through `escodegen` to generate JS code.
 
 * `entryPoint` is a file relative to `process.cwd()` that will be the initial module marked for inclusion in the bundle as well as the exported module
@@ -58,9 +58,6 @@ Bundles the given file and its dependencies; returns a Spidermonkey AST represen
     * `node`: a falsey value causes the bundling phase to omit the `process` stub that emulates a node environment
     * `verbose`: log additional operational information to stderr
     * `ignoreMissing`: continue without error when dependency resolution fails
-
-#### `cjsify(entryPoint, root, options, callback)` → void
-Same as `cjsifySync`, except takes a callback that is given `err` and `bundle` arguments.
 
 ## Examples
 
@@ -89,7 +86,7 @@ Since the above command specifies `components` as the root directory for unquali
 ### Node Module Example
 
 ```coffee
-jsAst = (require 'commonjs-everywhere').cjsifySync 'src/entry-file.coffee', __dirname,
+jsAst = (require 'commonjs-everywhere').cjsify 'src/entry-file.coffee', __dirname,
   export: 'MyLibrary'
   aliases:
     '/src/module-that-only-works-in-node.coffee': '/src/module-that-does-the-same-thing-in-the-browser.coffee'

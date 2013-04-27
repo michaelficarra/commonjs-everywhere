@@ -2,7 +2,7 @@ suite 'Dependency Resolution (sync)', ->
 
   deps = (entryFile, opts) ->
     entryFile = path.resolve path.join FIXTURES_DIR, entryFile
-    for filename in (Object.keys traverseDependenciesSync entryFile, FIXTURES_DIR, opts).sort()
+    for filename in (Object.keys traverseDependencies entryFile, FIXTURES_DIR, opts).sort()
       if filename[...FIXTURES_DIR.length] is FIXTURES_DIR
         "/#{path.relative FIXTURES_DIR, filename}"
       else
