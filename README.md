@@ -35,13 +35,13 @@ CommonJS (node module) browser bundler with source maps from the minified JS bun
 Common usage
 
 ```bash
-cjsify src/entry-file.js --export MyLibrary --source-map-file my-library.js.map >my-library.js
+cjsify src/entry-file.js --export MyLibrary --source-map my-library.js.map >my-library.js
 ```
 
-Watch entry file, its dependencies, even newly added dependencies. Use `verbose` flag to show that only the files that need to be rebuilt are touched.
+Watch entry file, its dependencies, and even newly added dependencies. Notice that only the files that need to be rebuilt are accessed when one of the watched dependencies are touched. This is a much more efficient approach than simply rebuilding everything.
 
 ```bash
-cjsify -wvo my-library.js -x MyLibrary src/entry-file.js
+cjsify -wo my-library.js -x MyLibrary src/entry-file.js
 ```
 
 ### Module Interface
