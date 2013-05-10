@@ -32,7 +32,7 @@
     "test": "test"
   },
   "dependencies": {
-    "coffee-script-redux": "git://github.com/michaelficarra/CoffeeScriptRedux.git#master",
+    "coffee-script-redux": "2.0.0-beta5",
     "escodegen": "~0.0.16",
     "esmangle": "~0.0.10",
     "esprima": "~1.0.2",
