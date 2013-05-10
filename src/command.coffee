@@ -123,7 +123,8 @@ startBuild = ->
       for own file of processed when file not in watching then do (file) ->
         watching.push file
         fs.watchFile file, {persistent: yes, interval: 500}, (curr, prev) ->
-          unless curr.ino?
+          ino = if process.platform is 'win32' then curr.ino? else curr.ino
+          unless ino
             console.error "WARNING: watched file #{file} has disappeared"
             return
           console.error "Rebuilding bundle starting at #{file}"
