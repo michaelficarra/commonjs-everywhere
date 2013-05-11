@@ -108,12 +108,15 @@ build = (entryPoint, processed = {}) ->
   else
     process.stdout.write "#{code}\n"
 
+  if options.watch or options.verbose
+    console.error 'BUNDLE COMPLETE'
+
   processed
 
 startBuild = ->
   if options.watch
     options.cache = {}
-    console.error "Building bundle starting at #{originalEntryPoint}"
+    console.error "BUNDLING starting at #{originalEntryPoint}"
 
   processed = build originalEntryPoint
 
@@ -127,7 +130,7 @@ startBuild = ->
           unless ino
             console.error "WARNING: watched file #{file} has disappeared"
             return
-          console.error "Rebuilding bundle starting at #{file}"
+          console.error "REBUNDLING starting at #{file}"
           processed = build file, processed
           startWatching processed
           return
