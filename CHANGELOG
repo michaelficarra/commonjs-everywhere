@@ -1,3 +1,11 @@
+v0.7.1
+  - 2013/05/14: `release-X` targets now update CHANGELOG (Michael Ficarra)
+  - 2013/05/14: release-{patch,minor,major} make targets now update changelog (Michael Ficarra)
+  - 2013/05/11: fixes #62: improve logging in watch mode (Michael Ficarra)
+  - 2013/05/10: Making curr.ino? check platform specific to win32 (krisnye)
+  - 2013/05/10: fix CoffeeScriptRedux version to 2.0.0-beta5 (Michael Ficarra)
+  - 2013/05/10: Fix -w option to work on windows (krisnye)
+  - 2013/05/02: some minor documentation updates regarding watch and source-map options (Michael Ficarra)
   - 2013/05/02: fixes #56: add a changelog (Michael Ficarra)
   - 2013/04/27: silence makefile (Nami-Doc)
 
@@ -138,9 +146,9 @@ v0.3.0
   - 2013/02/26: document handler second argument (Nami-Doc)
   - 2013/02/25: Fixing -r option (Ben Reinhart)
   - 2013/02/24: documentation cleanup (Michael Ficarra)
-  - 2013/02/24: pass around extensions in order to properly support custom handlers (Michael Ficarra)
   - 2013/02/24: Version 0.2.0 (Michael Ficarra)
   - 2013/02/24: use coffee-script-redux master to avoid a recently patched bug (Michael Ficarra)
+  - 2013/02/24: pass around extensions in order to properly support custom handlers (Michael Ficarra)
   - 2013/02/24: add some documentation to the README (Michael Ficarra)
   - 2013/02/24: add querystring shim (Michael Ficarra)
   - 2013/02/24: better errors for unfound modules (Michael Ficarra)
