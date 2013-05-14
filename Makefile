@@ -26,6 +26,7 @@ release-major: release
 release: build test
 	@printf "Current version is $(VERSION). This will publish version $(NEXT_VERSION). Press [enter] to continue." >&2
 	@read
+	changelogger changelog >CHANGELOG
 	node -e '\
 		var j = require("./package.json");\
 		j.version = "$(NEXT_VERSION)";\
