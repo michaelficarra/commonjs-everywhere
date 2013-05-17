@@ -63,7 +63,7 @@ wrapFile = (name, program) ->
 module.exports = (processed, entryPoint, root, options) ->
   prelude = if options.node ? yes then "#{PRELUDE}\n#{PRELUDE_NODE}" else PRELUDE
   program = esprima.parse prelude
-  for own filename, ast of processed
+  for own filename, {ast} of processed
     program.body.push wrapFile ast.loc.source, ast
 
   requireEntryPoint =

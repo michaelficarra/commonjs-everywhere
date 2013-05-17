@@ -22,9 +22,11 @@ CommonJS (node module) browser bundler with source maps from the minified JS bun
       -w, --watch            watch input files/dependencies for changes and rebuild bundle
       -x, --export NAME      export the given entry module as NAME
       --deps                 do not bundle; just list the files that would be bundled
-      --help                 display this help message
+      --help                 display this help message and exit
       --ignore-missing       continue without error when dependency resolution fails
+      --inline-sources       include source content in generated source maps (default: on)
       --node                 include process object; emulate node environment (default: on)
+      --version              display the version number and exit
 
 *Note:* use `-` as an entry file to accept JavaScript over stdin
 

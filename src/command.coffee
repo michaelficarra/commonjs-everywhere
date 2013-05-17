@@ -34,6 +34,7 @@ optionParser.addOption 'deps', off, 'do not bundle; just list the files that wou
 optionParser.addOption 'node', on, 'include process object; emulate node environment (default: on)'
 optionParser.addOption 'minify', 'm', off, 'minify output'
 optionParser.addOption 'ignore-missing', off, 'continue without error when dependency resolution fails'
+optionParser.addOption 'inline-sources', on, 'include source content in generated source maps (default: on)'
 optionParser.addOption 'watch', 'w', off, 'watch input files/dependencies for changes and rebuild bundle'
 optionParser.addOption 'verbose', 'v', off, 'verbose output sent to stderr'
 optionParser.addParameter 'export', 'x', 'NAME', 'export the given entry module as NAME'
@@ -67,7 +68,7 @@ originalEntryPoint = positionalArgs[0]
 
 if options.deps
   deps = CJSEverywhere.traverseDependencies originalEntryPoint, root, options
-  console.log (Object.keys deps).sort().map((f) -> path.relative root, f).join '\n'
+  console.log dep.canonicalName for own _, dep of deps
   process.exit 0
 
 if options.watch and not options.output
@@ -78,7 +79,7 @@ build = (entryPoint, processed = {}) ->
   try
     newDeps = CJSEverywhere.traverseDependencies entryPoint, root, options
     if options.watch
-      console.error "built #{file} (#{options.cache[file]})" for file in Object.keys newDeps
+      console.error "built #{dep.canonicalName} (#{options.cache[filename]})" for own filename, dep of newDeps
     processed[file] = newDeps[file] for own file of newDeps
   catch e
     if options.watch then console.error "ERROR: #{e.message}" else throw e
@@ -96,7 +97,12 @@ build = (entryPoint, processed = {}) ->
     format: if options.minify then escodegenCompactFormat else escodegenDefaultFormat
 
   if options.sourceMap
+    if options['inline-sources']
+      for own filename, {canonicalName, fileContents} of processed
+        map.setSourceContent canonicalName, fileContents
+
     fs.writeFileSync options.sourceMap, "#{map}"
+
     sourceMappingUrl =
       if options.output
         path.relative (path.dirname options.output), options.sourceMap
@@ -123,14 +129,14 @@ startBuild = ->
   if options.watch
     watching = []
     do startWatching = (processed) ->
-      for own file of processed when file not in watching then do (file) ->
+      for own file, {canonicalName} of processed when file not in watching then do (file, canonicalName) ->
         watching.push file
         fs.watchFile file, {persistent: yes, interval: 500}, (curr, prev) ->
           ino = if process.platform is 'win32' then curr.ino? else curr.ino
           unless ino
             console.error "WARNING: watched file #{file} has disappeared"
             return
-          console.error "REBUNDLING starting at #{file}"
+          console.error "REBUNDLING starting at #{canonicalName}"
           processed = build file, processed
           startWatching processed
           return
