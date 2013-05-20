@@ -24,6 +24,7 @@ CommonJS (node module) browser bundler with source maps from the minified JS bun
       --deps                 do not bundle; just list the files that would be bundled
       --help                 display this help message and exit
       --ignore-missing       continue without error when dependency resolution fails
+      --inline-source-map    include the source map as a data URI in the generated bundle
       --inline-sources       include source content in generated source maps (default: on)
       --node                 include process object; emulate node environment (default: on)
       --version              display the version number and exit

@@ -41,6 +41,7 @@
     "resolve": "~0.3.0",
     "MD5": "~1.0",
     "mktemp": "~0.3.0",
+    "Base64": "~0.1.2",
     "http-browserify": "*",
     "vm-browserify": "*",
     "crypto-browserify": "*",

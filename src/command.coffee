@@ -3,6 +3,7 @@ path = require 'path'
 
 escodegen = require 'escodegen'
 Jedediah = require 'jedediah'
+{btoa} = require 'Base64'
 
 CJSEverywhere = require './module'
 
@@ -35,6 +36,7 @@ optionParser.addOption 'node', on, 'include process object; emulate node environ
 optionParser.addOption 'minify', 'm', off, 'minify output'
 optionParser.addOption 'ignore-missing', off, 'continue without error when dependency resolution fails'
 optionParser.addOption 'inline-sources', on, 'include source content in generated source maps (default: on)'
+optionParser.addOption 'inline-source-map', off, 'include the source map as a data URI in the generated bundle'
 optionParser.addOption 'watch', 'w', off, 'watch input files/dependencies for changes and rebuild bundle'
 optionParser.addOption 'verbose', 'v', off, 'verbose output sent to stderr'
 optionParser.addParameter 'export', 'x', 'NAME', 'export the given entry module as NAME'
@@ -45,6 +47,8 @@ optionParser.addParameter 'source-map', 's', 'FILE', 'output a source map to FIL
 [options, positionalArgs] = optionParser.parse process.argv
 options.ignoreMissing = options['ignore-missing']
 options.sourceMap = options['source-map']
+options.inlineSources = options['inline-sources']
+options.inlineSourceMap = options['inline-source-map']
 
 if options.help
   $0 = if process.argv[0] is 'node' then process.argv[1] else process.argv[0]
@@ -96,18 +100,22 @@ build = (entryPoint, processed = {}) ->
     sourceMapRoot: if options.sourceMap? then (path.relative (path.dirname options.sourceMap), root) or '.'
     format: if options.minify then escodegenCompactFormat else escodegenDefaultFormat
 
+  if (options.sourceMap or options.inlineSourceMap) and options.inlineSources
+    for own filename, {canonicalName, fileContents} of processed
+      map.setSourceContent canonicalName, fileContents
+
   if options.sourceMap
-    if options['inline-sources']
-      for own filename, {canonicalName, fileContents} of processed
-        map.setSourceContent canonicalName, fileContents
-
     fs.writeFileSync options.sourceMap, "#{map}"
-
     sourceMappingUrl =
       if options.output
         path.relative (path.dirname options.output), options.sourceMap
       else options.sourceMap
-    code = "#{code}\n/*\n//@ sourceMappingURL=#{sourceMappingUrl}\n*/"
+    unless options.inlineSourceMap
+      code = "#{code}\n/*\n//@ sourceMappingURL=#{sourceMappingUrl}\n*/"
+
+  if options.inlineSourceMap
+    datauri = "data:application/json;charset=utf-8;base64,#{btoa "#{map}"}"
+    code = "#{code}\n/*\n//@ sourceMappingURL=#{datauri}\n*/"
 
   if options.output
     fs.writeFileSync options.output, code
