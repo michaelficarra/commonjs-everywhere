@@ -111,11 +111,11 @@ build = (entryPoint, processed = {}) ->
         path.relative (path.dirname options.output), options.sourceMap
       else options.sourceMap
     unless options.inlineSourceMap
-      code = "#{code}\n/*\n//@ sourceMappingURL=#{sourceMappingUrl}\n*/"
+      code = "#{code}\n//# sourceMappingURL=#{sourceMappingUrl}"
 
   if options.inlineSourceMap
     datauri = "data:application/json;charset=utf-8;base64,#{btoa "#{map}"}"
-    code = "#{code}\n/*\n//@ sourceMappingURL=#{datauri}\n*/"
+    code = "#{code}\n//# sourceMappingURL=#{datauri}"
 
   if options.output
     fs.writeFileSync options.output, code
