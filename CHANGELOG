@@ -1,4 +1,12 @@
+v0.7.2
+  - 2013/06/03: fixes #69: normalise windows/unix paths during canonicalisation (Michael Ficarra)
+  - 2013/05/19: fixes #66: add --inline-source-map option to include map as data URI (Michael Ficarra)
+  - 2013/05/17: fixes #33: add --inline-sources flag to include source content in map (Michael Ficarra)
+  - 2013/05/17: recompile with CoffeeScriptRedux 2.0.0-beta5 (Michael Ficarra)
+  - 2013/05/17: clean up lib/index.js; moved to lib/module.js (Michael Ficarra)
+
 v0.7.1
+  - 2013/05/14: Version 0.7.1 (Michael Ficarra)
   - 2013/05/14: `release-X` targets now update CHANGELOG (Michael Ficarra)
   - 2013/05/14: release-{patch,minor,major} make targets now update changelog (Michael Ficarra)
   - 2013/05/11: fixes #62: improve logging in watch mode (Michael Ficarra)
@@ -146,9 +154,9 @@ v0.3.0
   - 2013/02/26: document handler second argument (Nami-Doc)
   - 2013/02/25: Fixing -r option (Ben Reinhart)
   - 2013/02/24: documentation cleanup (Michael Ficarra)
+  - 2013/02/24: pass around extensions in order to properly support custom handlers (Michael Ficarra)
   - 2013/02/24: Version 0.2.0 (Michael Ficarra)
   - 2013/02/24: use coffee-script-redux master to avoid a recently patched bug (Michael Ficarra)
-  - 2013/02/24: pass around extensions in order to properly support custom handlers (Michael Ficarra)
   - 2013/02/24: add some documentation to the README (Michael Ficarra)
   - 2013/02/24: add querystring shim (Michael Ficarra)
   - 2013/02/24: better errors for unfound modules (Michael Ficarra)
