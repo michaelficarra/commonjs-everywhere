@@ -65,7 +65,8 @@ if options.version
   process.exit 0
 
 unless positionalArgs.length is 1
-  throw new Error "wrong number of entry points given; expected 1"
+  console.error 'wrong number of entry points given; expected 1'
+  process.exit 1
 
 root = if options.root then path.resolve options.root else process.cwd()
 originalEntryPoint = positionalArgs[0]
