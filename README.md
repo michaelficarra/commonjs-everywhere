@@ -14,6 +14,7 @@ CommonJS (node module) browser bundler with source maps from the minified JS bun
 
       Usage: cjsify OPT* path/to/entry-file.ext OPT*
 
+      -a, --alias ALIAS:TO   replace requires of file identified by ALIAS with TO
       -m, --minify           minify output
       -o, --output FILE      output to FILE instead of stdout
       -r, --root DIR         unqualified requires are relative to DIR (default: cwd)

@@ -43,12 +43,21 @@ optionParser.addParameter 'export', 'x', 'NAME', 'export the given entry module 
 optionParser.addParameter 'output', 'o', 'FILE', 'output to FILE instead of stdout'
 optionParser.addParameter 'root', 'r', 'DIR', 'unqualified requires are relative to DIR (default: cwd)'
 optionParser.addParameter 'source-map', 's', 'FILE', 'output a source map to FILE'
+optionParser.addListParameter 'alias', 'a', 'ALIAS:TO', 'replace requires of file identified by ALIAS with TO'
 
 [options, positionalArgs] = optionParser.parse process.argv
 options.ignoreMissing = options['ignore-missing']
 options.sourceMap = options['source-map']
 options.inlineSources = options['inline-sources']
 options.inlineSourceMap = options['inline-source-map']
+options.aliases = {}
+for aliasPair in options.alias
+  match = aliasPair.match /([^:]+):(.*)/ ? []
+  if match? then options.aliases[match[1]] = match[2]
+  else
+    console.error "invalid alias: #{aliasPair}"
+    process.exit 1
+
 
 if options.help
   $0 = if process.argv[0] is 'node' then process.argv[1] else process.argv[0]

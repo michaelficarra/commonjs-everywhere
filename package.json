@@ -37,7 +37,7 @@
     "esmangle": "~0.0.10",
     "esprima": "~1.0.2",
     "estraverse": "~0.0.4",
-    "jedediah": "~0.1.0",
+    "jedediah": "~0.1.1",
     "resolve": "~0.3.0",
     "MD5": "~1.0",
     "mktemp": "~0.3.0",
