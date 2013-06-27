@@ -57,14 +57,20 @@ module.exports = (entryPoint, root = process.cwd(), options = {}) ->
       continue if options.cache[filename] is digest
       options.cache[filename] = digest
 
-    ast =
+    astOrJs =
       # handle compile-to-JS languages and other non-JS files
       if {}.hasOwnProperty.call handlers, extname
         handlers[extname](fileContents, canonicalName)
       else # assume JS
-        try esprima.parse fileContents, loc: yes, source: canonicalName
+        fileContents
+
+    ast =
+      if typeof astOrJs is 'string'
+        try esprima.parse astOrJs, loc: yes, source: canonicalName
         catch e
           throw new Error "Syntax error in #{filename} at line #{e.lineNumber}, column #{e.column}#{e.message[(e.message.indexOf ':')..]}"
+      else
+        astOrJs
 
     processed[filename] = {canonicalName, ast, fileContents}
 
