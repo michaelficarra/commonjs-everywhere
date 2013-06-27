@@ -40,12 +40,13 @@ module.exports = (entryPoint, root = process.cwd(), options = {}) ->
   while worklist.length
     {filename, canonicalName} = worklist.pop()
 
-    # filter duplicates
-    continue if {}.hasOwnProperty.call processed, filename
-
     # handle aliases
     if {}.hasOwnProperty.call aliases, canonicalName
+      continue unless aliases[canonicalName]
       filename = resolvePath extensions, root, aliases[canonicalName]
+
+    # filter duplicates
+    continue if {}.hasOwnProperty.call processed, filename
 
     extname = path.extname filename
     fileContents = (fs.readFileSync filename).toString()
