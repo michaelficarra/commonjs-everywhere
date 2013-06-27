@@ -32,30 +32,41 @@ optionParser = new Jedediah
 optionParser.addOption 'help', off, 'display this help message and exit'
 optionParser.addOption 'version', off, 'display the version number and exit'
 optionParser.addOption 'deps', off, 'do not bundle; just list the files that would be bundled'
-optionParser.addOption 'node', on, 'include process object; emulate node environment (default: on)'
+optionParser.addOption 'node', on, 'include process object; emulate node environment; default: on'
 optionParser.addOption 'minify', 'm', off, 'minify output'
 optionParser.addOption 'ignore-missing', off, 'continue without error when dependency resolution fails'
-optionParser.addOption 'inline-sources', on, 'include source content in generated source maps (default: on)'
+optionParser.addOption 'inline-sources', on, 'include source content in generated source maps; default: on'
 optionParser.addOption 'inline-source-map', off, 'include the source map as a data URI in the generated bundle'
 optionParser.addOption 'watch', 'w', off, 'watch input files/dependencies for changes and rebuild bundle'
 optionParser.addOption 'verbose', 'v', off, 'verbose output sent to stderr'
 optionParser.addParameter 'export', 'x', 'NAME', 'export the given entry module as NAME'
 optionParser.addParameter 'output', 'o', 'FILE', 'output to FILE instead of stdout'
-optionParser.addParameter 'root', 'r', 'DIR', 'unqualified requires are relative to DIR (default: cwd)'
+optionParser.addParameter 'root', 'r', 'DIR', 'unqualified requires are relative to DIR; default: cwd'
 optionParser.addParameter 'source-map', 's', 'FILE', 'output a source map to FILE'
 optionParser.addListParameter 'alias', 'a', 'ALIAS:TO', 'replace requires of file identified by ALIAS with TO'
+optionParser.addListParameter 'handler', 'h', 'EXT:MODULE', 'handle files with extension EXT with module MODULE'
 
 [options, positionalArgs] = optionParser.parse process.argv
 options.ignoreMissing = options['ignore-missing']
 options.sourceMap = options['source-map']
 options.inlineSources = options['inline-sources']
 options.inlineSourceMap = options['inline-source-map']
+
 options.aliases = {}
 for aliasPair in options.alias
   match = aliasPair.match /([^:]+):(.*)/ ? []
   if match? then options.aliases[match[1]] = match[2]
   else
     console.error "invalid alias: #{aliasPair}"
+    process.exit 1
+
+options.handlers = {}
+for handlerPair in options.handler
+  match = handlerPair.match /([^:]+):(.*)/ ? []
+  if match? then do (ext = ".#{match[1]}", mod = match[2]) ->
+    options.handlers[ext] = require mod
+  else
+    console.error "invalid handler: #{handlerPair}"
     process.exit 1
 
 

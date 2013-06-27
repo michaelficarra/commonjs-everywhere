@@ -14,21 +14,22 @@ CommonJS (node module) browser bundler with source maps from the minified JS bun
 
       Usage: cjsify OPT* path/to/entry-file.ext OPT*
 
-      -a, --alias ALIAS:TO   replace requires of file identified by ALIAS with TO
-      -m, --minify           minify output
-      -o, --output FILE      output to FILE instead of stdout
-      -r, --root DIR         unqualified requires are relative to DIR (default: cwd)
-      -s, --source-map FILE  output a source map to FILE
-      -v, --verbose          verbose output sent to stderr
-      -w, --watch            watch input files/dependencies for changes and rebuild bundle
-      -x, --export NAME      export the given entry module as NAME
-      --deps                 do not bundle; just list the files that would be bundled
-      --help                 display this help message and exit
-      --ignore-missing       continue without error when dependency resolution fails
-      --inline-source-map    include the source map as a data URI in the generated bundle
-      --inline-sources       include source content in generated source maps (default: on)
-      --node                 include process object; emulate node environment (default: on)
-      --version              display the version number and exit
+      -a, --alias ALIAS:TO      replace requires of file identified by ALIAS with TO
+      -h, --handler EXT:MODULE  handle files with extension EXT with module MODULE
+      -m, --minify              minify output
+      -o, --output FILE         output to FILE instead of stdout
+      -r, --root DIR            unqualified requires are relative to DIR; default: cwd
+      -s, --source-map FILE     output a source map to FILE
+      -v, --verbose             verbose output sent to stderr
+      -w, --watch               watch input files/dependencies for changes and rebuild bundle
+      -x, --export NAME         export the given entry module as NAME
+      --deps                    do not bundle; just list the files that would be bundled
+      --help                    display this help message and exit
+      --ignore-missing          continue without error when dependency resolution fails
+      --inline-source-map       include the source map as a data URI in the generated bundle
+      --inline-sources          include source content in generated source maps; default: on
+      --node                    include process object; emulate node environment; default: on
+      --version                 display the version number and exit
 
 *Note:* use `-` as an entry file to accept JavaScript over stdin
 

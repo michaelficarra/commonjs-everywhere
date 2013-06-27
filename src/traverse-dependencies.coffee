@@ -60,7 +60,7 @@ module.exports = (entryPoint, root = process.cwd(), options = {}) ->
     astOrJs =
       # handle compile-to-JS languages and other non-JS files
       if {}.hasOwnProperty.call handlers, extname
-        handlers[extname](fileContents, canonicalName)
+        handlers[extname] fileContents, canonicalName
       else # assume JS
         fileContents
 
