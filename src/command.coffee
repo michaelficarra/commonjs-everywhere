@@ -27,25 +27,16 @@ escodegenCompactFormat =
   parentheses: no
   semicolons: no
 
-knownOpts =
-  deps: Boolean
-  help: Boolean
-  minify: Boolean
-  node: Boolean
-  verbose: Boolean
-  version: Boolean
-  watch: Boolean
-  'ignore-missing': Boolean
-  'inline-source-map': Boolean
-  'inline-sources': Boolean
-
-  export: String
-  output: String
-  root: String
-  'source-map': String
-
-  alias: [String, Array]
-  handler: [String, Array]
+knownOpts = {}
+# options
+knownOpts[opt] = Boolean for opt in [
+  'deps', 'help', 'ignore-missing', 'inline-source-map', 'inline-sources',
+  'minify', 'node', 'verbose', 'watch'
+]
+# parameters
+knownOpts[opt] = String for opt in ['export', 'output', 'root', 'source-map']
+# list parameters
+knownOpts[opt] = [String, Array] for opt in ['alias', 'handler']
 
 optAliases =
   a: '--alias'
@@ -62,6 +53,7 @@ options = nopt knownOpts, optAliases, process.argv, 2
 positionalArgs = options.argv.remain
 delete options.argv
 
+# default values
 options.node ?= on
 options['inline-sources'] ?= on
 options.alias ?= []
