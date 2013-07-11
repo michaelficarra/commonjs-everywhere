@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "coffee-script-redux": "2.0.0-beta5",
-    "escodegen": "~0.0.22",
+    "escodegen": "~0.0.24",
     "esmangle": "~0.0.10",
     "esprima": "~1.0.2",
     "estraverse": "~0.0.4",

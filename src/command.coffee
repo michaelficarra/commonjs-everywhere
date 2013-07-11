@@ -7,7 +7,7 @@ nopt = require 'nopt'
 
 CJSEverywhere = require './module'
 
-escodegenDefaultFormat =
+escodegenFormat =
   indent:
     style: '  '
     base: 0
@@ -15,17 +15,6 @@ escodegenDefaultFormat =
   hexadecimal: yes
   quotes: 'auto'
   parentheses: no
-escodegenCompactFormat =
-  indent:
-    style: ''
-    base: 0
-  renumber: yes
-  hexadecimal: yes
-  quotes: 'auto'
-  escapeless: yes
-  compact: yes
-  parentheses: no
-  semicolons: no
 
 knownOpts = {}
 # options
@@ -147,7 +136,7 @@ build = (entryPoint, processed = {}) ->
     sourceMap: yes
     sourceMapWithCode: yes
     sourceMapRoot: if options.sourceMap? then (path.relative (path.dirname options.sourceMap), root) or '.'
-    format: if options.minify then escodegenCompactFormat else escodegenDefaultFormat
+    format: if options.minify then escodegen.FORMAT_MINIFY else escodegenFormat
 
   if (options.sourceMap or options.inlineSourceMap) and options.inlineSources
     for own filename, {canonicalName, fileContents} of processed
