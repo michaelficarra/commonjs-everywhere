@@ -49,3 +49,26 @@ suite 'Dependency Resolution', ->
   test 'ignoreMissing option ignores missing dependencies', ->
     fixtures '/a.js': 'require("./b")'
     arrayEq ['/a.js'], deps '/a.js', ignoreMissing: yes
+
+  suite 'Aliasing', ->
+
+    test 'basic alias', ->
+      fixtures
+        '/a.js': 'require("./b")'
+        '/b.js': '' # /b.js still needs to exist
+        '/c.js': ''
+      arrayEq ['/a.js', '/c.js'], deps '/a.js', aliases: {'/b.js': '/c.js'}
+
+    test 'alias to falsey value to omit', ->
+      fixtures
+        '/a.js': 'require("./b")'
+        '/b.js': ''
+      arrayEq ['/a.js'], deps '/a.js', aliases: {'/b.js': ''}
+      arrayEq ['/a.js'], deps '/a.js', aliases: {'/b.js': null}
+      arrayEq ['/a.js'], deps '/a.js', aliases: {'/b.js': false}
+
+    test 'alias a core module', ->
+      fixtures '/a.js': 'require("fs")'
+      arrayEq ['/a.js', '../node/lib/punycode.js'], deps '/a.js', aliases: {fs: 'punycode'}
+      fixtures '/a.js': 'require("path")'
+      arrayEq ['/a.js', '../node/lib/path.js', '../node/lib/util.js'], deps '/a.js', aliases: {child_process: null, fs: null}
