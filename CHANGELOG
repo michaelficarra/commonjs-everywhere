@@ -1,4 +1,14 @@
+v0.8.1
+  - 2013/07/15: a bit of a restructuring of the dependency resolution functions (Michael Ficarra)
+  - 2013/07/15: add some aliasing tests (Michael Ficarra)
+  - 2013/07/15: rebuild parent commit (Michael Ficarra)
+  - 2013/07/11: use new escodegen.FORMAT_MINIFY constant (Michael Ficarra)
+  - 2013/07/07: link to isaacs/nopt#20 instead of b8101f920e7bdcf758f97ba9b17c7d0422d67992 (Michael Ficarra)
+  - 2013/07/07: more succinct option specification (Michael Ficarra)
+  - 2013/07/07: switch from michaelficarra/Jedediah to isaacs/nopt (Michael Ficarra)
+
 v0.8.0
+  - 2013/06/27: Version 0.8.0 (Michael Ficarra)
   - 2013/06/27: fixes #64: add CLI option for extension handlers (Michael Ficarra)
   - 2013/06/27: fixes #34: allow handlers to return JS strings (Michael Ficarra)
   - 2013/06/27: fixes #71: allow empty alias targets (Michael Ficarra)
@@ -104,8 +114,8 @@ v0.4.0
   - 2013/03/16: add some tests for node core libraries (Michael Ficarra)
   - 2013/03/16: DRY the tests a bit (Michael Ficarra)
   - 2013/03/12: add tests for process.argv and process.env (Michael Ficarra)
-  - 2013/03/12: implement process.chdir; test process.cwd and process.chdir (Michael Ficarra)
   - 2013/03/12: add process.version support (Michael Ficarra)
+  - 2013/03/12: implement process.chdir; test process.cwd and process.chdir (Michael Ficarra)
   - 2013/03/12: add basic process tests (Michael Ficarra)
   - 2013/03/12: add async tests for the last 2 commits (Michael Ficarra)
   - 2013/03/12: support module.children (Michael Ficarra)
@@ -130,8 +140,8 @@ v0.3.5
   - 2013/03/06: Fixed travis' node versions. (Paul Masurel)
   - 2013/03/06: fixes #24: use a single `process` instance (Michael Ficarra)
   - 2013/03/06: fixes #6: add basic bundling tests; obviously still need to expand them (Michael Ficarra)
-  - 2013/03/05: start generating fixtures for tests; starts progress on #6 (Michael Ficarra)
   - 2013/03/05: small test cleanup (Michael Ficarra)
+  - 2013/03/05: start generating fixtures for tests; starts progress on #6 (Michael Ficarra)
   - 2013/03/05: Added travis settings. (Paul Masurel)
 
 v0.3.4
@@ -167,9 +177,9 @@ v0.3.0
   - 2013/02/26: document handler second argument (Nami-Doc)
   - 2013/02/25: Fixing -r option (Ben Reinhart)
   - 2013/02/24: documentation cleanup (Michael Ficarra)
-  - 2013/02/24: pass around extensions in order to properly support custom handlers (Michael Ficarra)
-  - 2013/02/24: use coffee-script-redux master to avoid a recently patched bug (Michael Ficarra)
   - 2013/02/24: Version 0.2.0 (Michael Ficarra)
+  - 2013/02/24: use coffee-script-redux master to avoid a recently patched bug (Michael Ficarra)
+  - 2013/02/24: pass around extensions in order to properly support custom handlers (Michael Ficarra)
   - 2013/02/24: add some documentation to the README (Michael Ficarra)
   - 2013/02/24: add querystring shim (Michael Ficarra)
   - 2013/02/24: better errors for unfound modules (Michael Ficarra)
