@@ -7,7 +7,6 @@ estraverse = require 'estraverse'
 md5 = require 'MD5'
 
 canonicalise = require './canonicalise'
-resolvePath = require './resolve-path'
 relativeResolve = require './relative-resolve'
 
 badRequireError = (filename, node, msg) ->
@@ -31,19 +30,14 @@ module.exports = (entryPoint, root = process.cwd(), options = {}) ->
     handlers[ext] = handler
   extensions = ['.js', (ext for own ext of handlers)...]
 
-  worklist = [
-    filename: path.resolve entryPoint
-    canonicalName: canonicalise root, entryPoint
-  ]
+  worklist = [relativeResolve {extensions, aliases, root, path: entryPoint}]
   processed = {}
 
   while worklist.length
     {filename, canonicalName} = worklist.pop()
 
-    # handle aliases
-    if {}.hasOwnProperty.call aliases, canonicalName
-      continue unless aliases[canonicalName]
-      filename = resolvePath extensions, root, aliases[canonicalName]
+    # support aliasing to falsey values to omit files
+    continue unless filename
 
     # filter duplicates
     continue if {}.hasOwnProperty.call processed, filename
@@ -93,10 +87,8 @@ module.exports = (entryPoint, root = process.cwd(), options = {}) ->
           console.error "required \"#{node.arguments[0].value}\" from \"#{canonicalName}\""
         # if we are including this file, its requires need to be processed as well
         try
-          targetCanonicalName = relativeResolve extensions, root, node.arguments[0].value, cwd
-          worklist.push
-            filename: resolvePath extensions, root, node.arguments[0].value, cwd
-            canonicalName: targetCanonicalName
+          resolved = relativeResolve {extensions, aliases, root, cwd, path: node.arguments[0].value}
+          worklist.push resolved
         catch e
           if options.ignoreMissing
             return { type: 'Literal', value: null }
@@ -108,7 +100,7 @@ module.exports = (entryPoint, root = process.cwd(), options = {}) ->
           callee: node.callee
           arguments: [{
             type: 'Literal'
-            value: targetCanonicalName
+            value: resolved.canonicalName
           }, {
             type: 'Identifier'
             name: 'module'
