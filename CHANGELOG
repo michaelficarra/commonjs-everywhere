@@ -1,4 +1,9 @@
+v0.9.0
+  - 2013/07/15: upgrade node to v0.10.13 (Michael Ficarra)
+  - 2013/07/15: upgrade CoffeeScriptRedux to version 2.0.0-beta6 (Michael Ficarra)
+
 v0.8.1
+  - 2013/07/15: Version 0.8.1 (Michael Ficarra)
   - 2013/07/15: a bit of a restructuring of the dependency resolution functions (Michael Ficarra)
   - 2013/07/15: add some aliasing tests (Michael Ficarra)
   - 2013/07/15: rebuild parent commit (Michael Ficarra)
@@ -114,8 +119,8 @@ v0.4.0
   - 2013/03/16: add some tests for node core libraries (Michael Ficarra)
   - 2013/03/16: DRY the tests a bit (Michael Ficarra)
   - 2013/03/12: add tests for process.argv and process.env (Michael Ficarra)
-  - 2013/03/12: add process.version support (Michael Ficarra)
   - 2013/03/12: implement process.chdir; test process.cwd and process.chdir (Michael Ficarra)
+  - 2013/03/12: add process.version support (Michael Ficarra)
   - 2013/03/12: add basic process tests (Michael Ficarra)
   - 2013/03/12: add async tests for the last 2 commits (Michael Ficarra)
   - 2013/03/12: support module.children (Michael Ficarra)
@@ -177,9 +182,9 @@ v0.3.0
   - 2013/02/26: document handler second argument (Nami-Doc)
   - 2013/02/25: Fixing -r option (Ben Reinhart)
   - 2013/02/24: documentation cleanup (Michael Ficarra)
-  - 2013/02/24: Version 0.2.0 (Michael Ficarra)
   - 2013/02/24: use coffee-script-redux master to avoid a recently patched bug (Michael Ficarra)
   - 2013/02/24: pass around extensions in order to properly support custom handlers (Michael Ficarra)
+  - 2013/02/24: Version 0.2.0 (Michael Ficarra)
   - 2013/02/24: add some documentation to the README (Michael Ficarra)
   - 2013/02/24: add querystring shim (Michael Ficarra)
   - 2013/02/24: better errors for unfound modules (Michael Ficarra)
