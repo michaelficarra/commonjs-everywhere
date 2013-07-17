@@ -31,7 +31,7 @@ CommonJS (node module) browser bundler with source maps from the minified JS bun
       --node                    include process object; emulate node environment; default: on
       --version                 display the version number and exit
 
-*Note:* use `-` as an entry file to accept JavaScript over stdin (currently broken due to recent switch to [isaacs/nopt](https://github.com/isaacs/nopt); see [isaacs/nopt#20](https://github.com/isaacs/nopt/issues/20))
+*Note:* use `-` as an entry file to accept JavaScript over stdin
 
 *Note:* to disable an option, prefix it with `no-`, e.g. `--no-node`
 
