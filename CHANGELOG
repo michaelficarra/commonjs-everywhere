@@ -1,4 +1,12 @@
+v0.9.2
+  - 2013/07/20: loosen up querystring requirement (Michael Ficarra)
+  - 2013/07/20: fixes #73: support `constants` core module using constants-browserify (Michael Ficarra)
+  - 2013/07/20: remove erroneous .js from underscore-prefixed node core module listings (Michael Ficarra)
+  - 2013/07/20: protect against changes of main module in dependencies (Michael Ficarra)
+  - 2013/07/20: add more compatible punycode implementation (Michael Ficarra)
+
 v0.9.1
+  - 2013/07/17: Version 0.9.1 (Michael Ficarra)
   - 2013/07/17: update to isaacs/nopt@2.1.2 to support `-` as stdin representation again (Michael Ficarra)
 
 v0.9.0
@@ -186,9 +194,9 @@ v0.3.0
   - 2013/02/26: document handler second argument (Nami-Doc)
   - 2013/02/25: Fixing -r option (Ben Reinhart)
   - 2013/02/24: documentation cleanup (Michael Ficarra)
-  - 2013/02/24: Version 0.2.0 (Michael Ficarra)
   - 2013/02/24: use coffee-script-redux master to avoid a recently patched bug (Michael Ficarra)
   - 2013/02/24: pass around extensions in order to properly support custom handlers (Michael Ficarra)
+  - 2013/02/24: Version 0.2.0 (Michael Ficarra)
   - 2013/02/24: add some documentation to the README (Michael Ficarra)
   - 2013/02/24: add querystring shim (Michael Ficarra)
   - 2013/02/24: better errors for unfound modules (Michael Ficarra)
