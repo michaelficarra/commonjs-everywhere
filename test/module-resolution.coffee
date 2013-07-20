@@ -37,5 +37,5 @@ suite 'Module Resolution', ->
     eq '/dir/dir/index.js', resolve 'dir/dir'
 
   test 'core module', ->
-    doesNotThrow => resolve 'punycode'
-    doesNotThrow => resolve 'punycode', 'dir'
+    doesNotThrow => resolve 'freelist'
+    doesNotThrow => resolve 'freelist', 'dir'

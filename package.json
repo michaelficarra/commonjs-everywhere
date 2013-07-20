@@ -32,23 +32,24 @@
     "test": "test"
   },
   "dependencies": {
+    "Base64": "~0.1.2",
     "coffee-script-redux": "2.0.0-beta6",
     "escodegen": "~0.0.24",
     "esmangle": "~0.0.10",
     "esprima": "~1.0.2",
     "estraverse": "~0.0.4",
-    "nopt": "~2.1.2",
-    "resolve": "~0.3.0",
     "MD5": "~1.0",
     "mktemp": "~0.3.0",
-    "Base64": "~0.1.2",
-    "http-browserify": "*",
-    "vm-browserify": "*",
-    "crypto-browserify": "*",
+    "nopt": "~2.1.2",
+    "resolve": "~0.3.0",
     "buffer-browserify": "*",
-    "zlib-browserify": "*",
+    "crypto-browserify": "*",
     "events-browserify": "*",
-    "querystring": "git://github.com/Gozala/querystring.git#master"
+    "http-browserify": "*",
+    "punycode": "*",
+    "querystring": "git://github.com/Gozala/querystring.git#master",
+    "vm-browserify": "*",
+    "zlib-browserify": "*"
   },
   "devDependencies": {
     "mocha": "~1.8.1",

@@ -39,8 +39,8 @@ suite 'Dependency Resolution', ->
     arrayEq ['/a.js', '/b.js'], deps '/a.js'
 
   test 'core dependencies', ->
-    fixtures '/a.js': 'require("punycode")'
-    arrayEq ['/a.js', '../node/lib/punycode.js'], deps '/a.js'
+    fixtures '/a.js': 'require("freelist")'
+    arrayEq ['/a.js', '../node/lib/freelist.js'], deps '/a.js'
 
   test 'missing dependencies', ->
     fixtures '/a.js': 'require("./b")'
@@ -69,6 +69,6 @@ suite 'Dependency Resolution', ->
 
     test 'alias a core module', ->
       fixtures '/a.js': 'require("fs")'
-      arrayEq ['/a.js', '../node/lib/punycode.js'], deps '/a.js', aliases: {fs: 'punycode'}
+      arrayEq ['/a.js', '../node/lib/freelist.js'], deps '/a.js', aliases: {fs: 'freelist'}
       fixtures '/a.js': 'require("path")'
       arrayEq ['/a.js', '../node/lib/path.js', '../node/lib/util.js'], deps '/a.js', aliases: {child_process: null, fs: null}
