@@ -14,11 +14,11 @@ CORE_MODULES =
   zlib: resolve 'zlib-browserify'
 
 NODE_CORE_MODULES = [
-  '_stream_duplex.js'
-  '_stream_passthrough.js'
-  '_stream_readable.js'
-  '_stream_transform.js'
-  '_stream_writable.js'
+  '_stream_duplex'
+  '_stream_passthrough'
+  '_stream_readable'
+  '_stream_transform'
+  '_stream_writable'
   'assert'
   'console'
   'domain'
