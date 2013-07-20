@@ -48,7 +48,7 @@
     "events-browserify": "*",
     "http-browserify": "*",
     "punycode": "*",
-    "querystring": "git://github.com/Gozala/querystring.git#master",
+    "querystring": "*",
     "vm-browserify": "*",
     "zlib-browserify": "*"
   },
