@@ -5,6 +5,7 @@ CJS_DIR = path.join __dirname, '..'
 
 CORE_MODULES =
   buffer: resolve 'buffer-browserify'
+  constants: resolve 'constants-browserify'
   crypto: resolve 'crypto-browserify'
   events: resolve 'events-browserify'
   http: resolve 'http-browserify'

@@ -43,6 +43,7 @@
     "nopt": "~2.1.2",
     "resolve": "~0.3.0",
     "buffer-browserify": "*",
+    "constants-browserify": ">= 0.0.1",
     "crypto-browserify": "*",
     "events-browserify": "*",
     "http-browserify": "*",
