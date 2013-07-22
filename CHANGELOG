@@ -1,225 +1,246 @@
-v0.9.2
-  - 2013/07/20: loosen up querystring requirement (Michael Ficarra)
-  - 2013/07/20: fixes #73: support `constants` core module using constants-browserify (Michael Ficarra)
-  - 2013/07/20: remove erroneous .js from underscore-prefixed node core module listings (Michael Ficarra)
-  - 2013/07/20: protect against changes of main module in dependencies (Michael Ficarra)
-  - 2013/07/20: add more compatible punycode implementation (Michael Ficarra)
+v0.9.2 (2013-07-20)
+- 584005c2: Version 0.9.2
+- a788c6b1: loosen up querystring requirement
+- 68470d1a: fixes #73: support `constants` core module using constants-browserify
+- 6c3cc71f: remove erroneous .js from underscore-prefixed node core module listings
+- afae2e7c: protect against changes of main module in dependencies
+- c9164cb5: add more compatible punycode implementation
 
-v0.9.1
-  - 2013/07/17: Version 0.9.1 (Michael Ficarra)
-  - 2013/07/17: update to isaacs/nopt@2.1.2 to support `-` as stdin representation again (Michael Ficarra)
+v0.9.1 (2013-07-17)
+- 048f829c: Version 0.9.1
+- 268477ad: update to isaacs/nopt@2.1.2 to support `-` as stdin representation again
 
-v0.9.0
-  - 2013/07/15: Version 0.9.0 (Michael Ficarra)
-  - 2013/07/15: upgrade node to v0.10.13 (Michael Ficarra)
-  - 2013/07/15: upgrade CoffeeScriptRedux to version 2.0.0-beta6 (Michael Ficarra)
+v0.9.0 (2013-07-15)
+- cd51af47: Version 0.9.0
+- 30db2bc2: upgrade node to v0.10.13
+- 81156f3b: upgrade CoffeeScriptRedux to version 2.0.0-beta6
 
-v0.8.1
-  - 2013/07/15: Version 0.8.1 (Michael Ficarra)
-  - 2013/07/15: a bit of a restructuring of the dependency resolution functions (Michael Ficarra)
-  - 2013/07/15: add some aliasing tests (Michael Ficarra)
-  - 2013/07/15: rebuild parent commit (Michael Ficarra)
-  - 2013/07/11: use new escodegen.FORMAT_MINIFY constant (Michael Ficarra)
-  - 2013/07/07: link to isaacs/nopt#20 instead of b8101f920e7bdcf758f97ba9b17c7d0422d67992 (Michael Ficarra)
-  - 2013/07/07: more succinct option specification (Michael Ficarra)
-  - 2013/07/07: switch from michaelficarra/Jedediah to isaacs/nopt (Michael Ficarra)
+v0.8.1 (2013-07-15)
+- 84e370bf: Version 0.8.1
+- ab4f403e: a bit of a restructuring of the dependency resolution functions
+- 9efc3fc9: add some aliasing tests
+- 3b67b970: rebuild parent commit
+- bb05a791: use new escodegen.FORMAT_MINIFY constant
+- 0b787588: link to isaacs/nopt#20 instead of b8101f920e7bdcf758f97ba9b17c7d0422d67992
+- a5dcc310: more succinct option specification
+- 92315a5f: switch from michaelficarra/Jedediah to isaacs/nopt
 
-v0.8.0
-  - 2013/06/27: Version 0.8.0 (Michael Ficarra)
-  - 2013/06/27: fixes #64: add CLI option for extension handlers (Michael Ficarra)
-  - 2013/06/27: fixes #34: allow handlers to return JS strings (Michael Ficarra)
-  - 2013/06/27: fixes #71: allow empty alias targets (Michael Ficarra)
+v0.8.0 (2013-06-27)
+- 8f61bf5b: Version 0.8.0
+- 582fa43b: Merge branch 'new-sourceMappingURL-pragma'
+- 0e0f2546: fixes #64: add CLI option for extension handlers
+- d6dad8c7: fixes #34: allow handlers to return JS strings
+- 666b45e2: fixes #71: allow empty alias targets
+- 83765f72: change sourceMappingURL pragma to new //# format
 
-v0.7.3
-  - 2013/06/22: Version 0.7.3 (Michael Ficarra)
-  - 2013/06/21: add newline to end of package.json in release tasks (Michael Ficarra)
-  - 2013/06/21: fixes #28: add CLI option to specify aliases (Michael Ficarra)
-  - 2013/06/21: nicer handling of !=1 entry point error (Michael Ficarra)
+v0.7.3 (2013-06-22)
+- fab9d809: Version 0.7.3
+- 86629c13: add newline to end of package.json in release tasks
+- 9c798593: fixes #28: add CLI option to specify aliases
+- 95f29212: nicer handling of !=1 entry point error
 
-v0.7.2
-  - 2013/06/03: Version 0.7.2 (Michael Ficarra)
-  - 2013/06/03: fixes #69: normalise windows/unix paths during canonicalisation (Michael Ficarra)
-  - 2013/05/22: change sourceMappingURL pragma to new //# format (Michael Ficarra)
-  - 2013/05/19: fixes #66: add --inline-source-map option to include map as data URI (Michael Ficarra)
-  - 2013/05/17: fixes #33: add --inline-sources flag to include source content in map (Michael Ficarra)
-  - 2013/05/17: recompile with CoffeeScriptRedux 2.0.0-beta5 (Michael Ficarra)
-  - 2013/05/17: clean up lib/index.js; moved to lib/module.js (Michael Ficarra)
+v0.7.2 (2013-06-03)
+- 1633449a: Version 0.7.2
+- c94ec2f2: fixes #69: normalise windows/unix paths during canonicalisation
+- 84a590af: fixes #66: add --inline-source-map option to include map as data URI
+- 69f68622: fixes #33: add --inline-sources flag to include source content in map
+- fd354a6b: recompile with CoffeeScriptRedux 2.0.0-beta5
+- b1c15f4b: clean up lib/index.js; moved to lib/module.js
 
-v0.7.1
-  - 2013/05/14: Version 0.7.1 (Michael Ficarra)
-  - 2013/05/14: `release-X` targets now update CHANGELOG (Michael Ficarra)
-  - 2013/05/14: release-{patch,minor,major} make targets now update changelog (Michael Ficarra)
-  - 2013/05/11: fixes #62: improve logging in watch mode (Michael Ficarra)
-  - 2013/05/10: Making curr.ino? check platform specific to win32 (krisnye)
-  - 2013/05/10: fix CoffeeScriptRedux version to 2.0.0-beta5 (Michael Ficarra)
-  - 2013/05/10: Fix -w option to work on windows (krisnye)
-  - 2013/05/02: some minor documentation updates regarding watch and source-map options (Michael Ficarra)
-  - 2013/05/02: fixes #56: add a changelog (Michael Ficarra)
-  - 2013/04/27: silence makefile (Nami-Doc)
+v0.7.1 (2013-05-14)
+- 2291ffa7: Version 0.7.1
+- cfb65476: `release-X` targets now update CHANGELOG
+- b4d7d12d: release-{patch,minor,major} make targets now update changelog
+- a0d69620: fixes #62: improve logging in watch mode
+- a40025fb: Merge pull request #61 from krisnye/master
+- 09a1cf44: Making curr.ino? check platform specific to win32
+- ae64c225: fix CoffeeScriptRedux version to 2.0.0-beta5
+- f864c043: Fix -w option to work on windows
+- 82562ea4: some minor documentation updates regarding watch and source-map options
+- ebd855f2: fixes #56: add a changelog
+- 1ff7b178: Merge pull request #54 from Nami-Doc/master
+- a317399f: silence makefile
 
-v0.7.0
-  - 2013/04/27: Version 0.7.0 (Michael Ficarra)
-  - 2013/04/27: remove leftover ` (sync)`s in test suite descriptors (Michael Ficarra)
-  - 2013/04/27: move test/_setup.coffee to test-setup.coffee (Michael Ficarra)
-  - 2013/04/27: fixes #53: modularisation (Michael Ficarra)
-  - 2013/04/27: fixes #49: de-duplicate src/index.coffee by removing async interface (Michael Ficarra)
-  - 2013/04/27: add CLI --version flag; I can't believe I didn't already add this (Michael Ficarra)
-  - 2013/04/26: change --source-map-file option to --source-map; add -s alias (Michael Ficarra)
-  - 2013/04/26: fixes #50: sourceMappingURL should be relative to output file if given (Michael Ficarra)
+v0.7.0 (2013-04-27)
+- 13edd235: Version 0.7.0
+- 84923100: remove leftover ` (sync)`s in test suite descriptors
+- 77d40f34: move test/_setup.coffee to test-setup.coffee
+- 8874a177: fixes #53: modularisation
+- 91735b73: fixes #49: de-duplicate src/index.coffee by removing async interface
+- 406b8271: add CLI --version flag; I can't believe I didn't already add this
+- 733ff9ca: change --source-map-file option to --source-map; add -s alias
+- 4c965b56: fixes #50: sourceMappingURL should be relative to output file if given
 
-v0.6.3
-  - 2013/04/25: Version 0.6.3 (Michael Ficarra)
-  - 2013/04/25: fixes #48: clean up output from syntax errors thrown by esprima (Michael Ficarra)
+v0.6.3 (2013-04-25)
+- 5464c5e8: Version 0.6.3
+- a35ed96a: fixes #48: clean up output from syntax errors thrown by esprima
 
-v0.6.2
-  - 2013/04/21: Version 0.6.2 (Michael Ficarra)
-  - 2013/04/21: fixes #44: CLI no longer stops building when errors occur while watching (Michael Ficarra)
-  - 2013/04/21: fixes #45: implement `cache` option for `traverseDependencies` (Michael Ficarra)
-  - 2013/04/16: only include comments in generated output when not minifying (Michael Ficarra)
-  - 2013/04/15: add leading "generated by" comment; refs substack/node-browserify#380 (Michael Ficarra)
-  - 2013/04/07: slightly cleaner process.nextTick test (Michael Ficarra)
-  - 2013/04/07: add tests for process.nextTick (Michael Ficarra)
-  - 2013/04/07: process.nextTick uses setImmediate if available (Michael Ficarra)
+v0.6.2 (2013-04-21)
+- 23761b57: Version 0.6.2
+- 1425b3c3: fixes #44: CLI no longer stops building when errors occur while watching
+- bf8f3f7e: fixes #45: implement `cache` option for `traverseDependencies`
+- 9917fc61: only include comments in generated output when not minifying
+- cf602393: add leading "generated by" comment; refs substack/node-browserify#380
+- 03921196: slightly cleaner process.nextTick test
+- 12b064df: add tests for process.nextTick
+- fcf9c1a9: process.nextTick uses setImmediate if available
 
-v0.6.1
-  - 2013/04/05: Version 0.6.1 (Michael Ficarra)
-  - 2013/04/05: re-ignore node submodule (Michael Ficarra)
+v0.6.1 (2013-04-05)
+- 55e884c6: Version 0.6.1
+- 61a16a34: re-ignore node submodule
 
-v0.6.0
-  - 2013/04/05: Version 0.6.0 (Michael Ficarra)
-  - 2013/04/05: fixes #41: add --deps flag to CLI; lists dependencies without bundling (Michael Ficarra)
-  - 2013/04/05: fix error messages for unported node core modules (Michael Ficarra)
-  - 2013/04/05: fixes #39: core module symlinks are not packaged properly by npm (Michael Ficarra)
-  - 2013/04/04: fixes #36: allow process stub to be omitted (Michael Ficarra)
-  - 2013/04/02: update README demo for sync/async interface (Michael Ficarra)
-  - 2013/03/31: add safety checks around release build targets (Michael Ficarra)
+v0.6.0 (2013-04-05)
+- a4314951: Version 0.6.0
+- 0a515514: fixes #41: add --deps flag to CLI; lists dependencies without bundling
+- 210ae5f7: fix error messages for unported node core modules
+- 823c19e8: fixes #39: core module symlinks are not packaged properly by npm
+- ac3b58d8: fixes #36: allow process stub to be omitted
+- c95f10f4: update README demo for sync/async interface
+- 80f4af68: add safety checks around release build targets
 
-v0.5.1
-  - 2013/03/31: Version 0.5.1 (Michael Ficarra)
-  - 2013/03/31: use `.` as sourceMapRoot when source map is generated in root directory (Michael Ficarra)
-  - 2013/03/31: use relative paths for sourceMapRoot value in source maps; closes #37 (Michael Ficarra)
-  - 2013/03/29: fixes #32: support accepting entry point over stdin (Michael Ficarra)
-  - 2013/03/29: .travis.yml indentation (Michael Ficarra)
-  - 2013/03/26: support for 'events' core module (Gordon L. Hempton)
-  - 2013/03/22: add watch (and terse flags) example to readme (Michael Ficarra)
+v0.5.1 (2013-03-31)
+- d1a7ddb8: Version 0.5.1
+- 7913adb2: use `.` as sourceMapRoot when source map is generated in root directory
+- f6b2efd6: use relative paths for sourceMapRoot value in source maps; closes #37
+- f92ca08f: fixes #32: support accepting entry point over stdin
+- bebf9cc4: .travis.yml indentation
+- 99f72145: Merge pull request #35 from ghempton/events
+- e5d2b099: support for 'events' core module
+- 55192c9c: add watch (and terse flags) example to readme
 
-v0.5.0
-  - 2013/03/21: Version 0.5.0 (Michael Ficarra)
-  - 2013/03/21: document --watch (Michael Ficarra)
-  - 2013/03/21: update travis specification to use strings for versions (Michael Ficarra)
-  - 2013/03/21: switch --watch from fs.watch to more appropriate fs.watchFile (Michael Ficarra)
-  - 2013/03/21: fixes #31: add --watch flag to CLI for continuous builds on dep changes (Michael Ficarra)
-  - 2013/03/20: move entryPoint canonicalisation into bundling function (Michael Ficarra)
-  - 2013/03/20: undefined core modules now produce an error by default (Michael Ficarra)
-  - 2013/03/20: index processed hash by filename instead of canonical name; refs #31 (Michael Ficarra)
-  - 2013/03/20: add core dependency resolution test (Michael Ficarra)
-  - 2013/03/20: succinctly specify test files while still hopefully keeping Travis happy (Michael Ficarra)
-  - 2013/03/20: add "bundle" to package.json keywords (Michael Ficarra)
+v0.5.0 (2013-03-21)
+- 19c5af84: Version 0.5.0
+- 338dbd3e: document --watch
+- 2a0562e7: update travis specification to use strings for versions
+- 41eadc44: switch --watch from fs.watch to more appropriate fs.watchFile
+- 7ad8239e: fixes #31: add --watch flag to CLI for continuous builds on dep changes
+- 71bdfb2c: move entryPoint canonicalisation into bundling function
+- 8ef53183: undefined core modules now produce an error by default
+- ced85bc2: index processed hash by filename instead of canonical name; refs #31
+- fc51af83: add core dependency resolution test
+- 27f4d49a: succinctly specify test files while still hopefully keeping Travis happy
+- 476f0b3b: add "bundle" to package.json keywords
 
-v0.4.0
-  - 2013/03/20: Version 0.4.0 (Michael Ficarra)
-  - 2013/03/20: document async bundling interface (Michael Ficarra)
-  - 2013/03/20: switch worklist entries from ordered pairs to objects (Michael Ficarra)
-  - 2013/03/20: implement traverseDependencies (Michael Ficarra)
-  - 2013/03/18: move "TODO: async" to traverseDependencies, where it belongs for now (Michael Ficarra)
-  - 2013/03/17: start Travis testing against node 0.10.x (Michael Ficarra)
-  - 2013/03/17: one last attempt to get Travis running tests properly (Michael Ficarra)
-  - 2013/03/17: glob tests so (hopefully) Travis once again passes (Michael Ficarra)
-  - 2013/03/17: allow core libraries in bundle to appear with the core library name (Michael Ficarra)
-  - 2013/03/17: test naming/organisation (Michael Ficarra)
-  - 2013/03/16: update joyent/node submodule to v0.10.0 (Michael Ficarra)
-  - 2013/03/16: add some tests for node core libraries (Michael Ficarra)
-  - 2013/03/16: DRY the tests a bit (Michael Ficarra)
-  - 2013/03/12: add tests for process.argv and process.env (Michael Ficarra)
-  - 2013/03/12: implement process.chdir; test process.cwd and process.chdir (Michael Ficarra)
-  - 2013/03/12: add process.version support (Michael Ficarra)
-  - 2013/03/12: add basic process tests (Michael Ficarra)
-  - 2013/03/12: add async tests for the last 2 commits (Michael Ficarra)
-  - 2013/03/12: support module.children (Michael Ficarra)
-  - 2013/03/12: support module.parent; based on substack/node-browserify#323 (Michael Ficarra)
-  - 2013/03/11: round out tests for `traverseDependenciesSync` (Michael Ficarra)
-  - 2013/03/11: a few more tests for #31; more to come (Michael Ficarra)
-  - 2013/03/11: fixes #31: split out and expose dependency traversal (Michael Ficarra)
-  - 2013/03/10: add async bundling tests (Michael Ficarra)
-  - 2013/03/09: start adding async interface; ref #17 (Michael Ficarra)
-  - 2013/03/09: PHONY the appropriate make targets (Michael Ficarra)
-  - 2013/03/09: add release tasks (Michael Ficarra)
-  - 2013/03/08: remove accidental mutation of given options object (Michael Ficarra)
+v0.4.0 (2013-03-20)
+- c787513a: Version 0.4.0
+- cbc018e4: document async bundling interface
+- 4f1f97cc: switch worklist entries from ordered pairs to objects
+- b1e95f5e: implement traverseDependencies
+- 6ce6db16: move "TODO: async" to traverseDependencies, where it belongs for now
+- 2a52714e: start Travis testing against node 0.10.x
+- 3b9fe5b2: one last attempt to get Travis running tests properly
+- 67ba7757: glob tests so (hopefully) Travis once again passes
+- e5dec44c: allow core libraries in bundle to appear with the core library name
+- c3d2b4c0: test naming/organisation
+- 15e05b11: update joyent/node submodule to v0.10.0
+- cccb8c3e: add some tests for node core libraries
+- 5a797eb7: DRY the tests a bit
+- 4bc7f0ea: add tests for process.argv and process.env
+- 247b0e39: implement process.chdir; test process.cwd and process.chdir
+- f226c98f: add process.version support
+- e230ddb6: add basic process tests
+- 5e5b4b05: add async tests for the last 2 commits
+- 51796592: support module.children
+- d90a6b3d: support module.parent; based on substack/node-browserify#323
+- 70ca7a79: round out tests for `traverseDependenciesSync`
+- 2893951d: a few more tests for #31; more to come
+- 1da8d4b4: fixes #31: split out and expose dependency traversal
+- 18800f4e: add async bundling tests
+- 8f6e98aa: start adding async interface; ref #17
+- 1f9be258: PHONY the appropriate make targets
+- 5006cd63: add release tasks
+- f476442a: remove accidental mutation of given options object
 
-v0.3.5
-  - 2013/03/08: Version 0.3.5 (Michael Ficarra)
-  - 2013/03/08: JS => Node Module (Michael Ficarra)
-  - 2013/03/08: fixes #19: add `ignoreMissing` option (Michael Ficarra)
-  - 2013/03/07: fixes #29: export helpers iff we're in a testing environment (Michael Ficarra)
-  - 2013/03/06: add 0.9.x to supported engines since we're running it through travis (Michael Ficarra)
-  - 2013/03/06: add module caching test (Michael Ficarra)
-  - 2013/03/06: add circular dependency test (Michael Ficarra)
-  - 2013/03/06: Fixed travis' node versions. (Paul Masurel)
-  - 2013/03/06: fixes #24: use a single `process` instance (Michael Ficarra)
-  - 2013/03/06: fixes #6: add basic bundling tests; obviously still need to expand them (Michael Ficarra)
-  - 2013/03/05: small test cleanup (Michael Ficarra)
-  - 2013/03/05: start generating fixtures for tests; starts progress on #6 (Michael Ficarra)
-  - 2013/03/05: Added travis settings. (Paul Masurel)
+v0.3.5 (2013-03-08)
+- 25a9c72f: Version 0.3.5
+- 5b3f660d: JS => Node Module
+- 07e5c8f1: fixes #19: add `ignoreMissing` option
+- e7959ec1: fixes #29: export helpers iff we're in a testing environment
+- 3e380ff1: add 0.9.x to supported engines since we're running it through travis
+- 56fa6ff6: Merge pull request #27 from poulejapon/patch-1
+- ac2ca854: add module caching test
+- 3d45d7a9: add circular dependency test
+- 82ccb726: Fixed travis' node versions.
+- c4f893b5: fixes #24: use a single `process` instance
+- 0232a453: fixes #6: add basic bundling tests; obviously still need to expand them
+- 325f1df9: small test cleanup
+- b6784bdb: start generating fixtures for tests; starts progress on #6
+- 2353fffc: Merge pull request #26 from poulejapon/852c83d6eb026fe3be70c0e706d3ef91e7178d08
+- 852c83d6: Added travis settings.
 
-v0.3.4
-  - 2013/03/03: Version 0.3.4 (Michael Ficarra)
-  - 2013/03/03: fixes #23: support circular dependencies (Michael Ficarra)
+v0.3.4 (2013-03-03)
+- 33bc2330: Version 0.3.4
+- 70476f1d: fixes #23: support circular dependencies
 
-v0.3.3
-  - 2013/03/03: Version 0.3.3 (Michael Ficarra)
-  - 2013/03/03: fixes #21 for real: small tweaks to .npmignore (Michael Ficarra)
+v0.3.3 (2013-03-03)
+- bafdec55: Version 0.3.3
+- c601a3e0: fixes #21 for real: small tweaks to .npmignore
 
-v0.3.2
-  - 2013/03/03: Version 0.3.2 (Michael Ficarra)
-  - 2013/03/03: fixes #21: add .npmignore to reduce package size (Michael Ficarra)
-  - 2013/03/02: switch to more familiar top-level IIFE style using simple parens (Michael Ficarra)
+v0.3.2 (2013-03-03)
+- 68821870: Version 0.3.2
+- 81f6c6b8: fixes #21: add .npmignore to reduce package size
+- 0623dbb2: switch to more familiar top-level IIFE style using simple parens
 
-v0.3.1
-  - 2013/03/02: Version 0.3.1 (Michael Ficarra)
-  - 2013/03/02: fixes #20: implement `badRequireError` (Michael Ficarra)
-  - 2013/03/02: replace AST literals with esprima.parse + mutations (Michael Ficarra)
-  - 2013/03/02: fixes #16: modularise and clean up src/index.coffee (Michael Ficarra)
-  - 2013/03/02: fixes #18: add a verbose option and a --verbose flag (Michael Ficarra)
-  - 2013/03/01: switch more git submodules to npm packages and change associated links (Michael Ficarra)
-  - 2013/03/01: fixes #5: use browserify-http as a dependency instead of a submodule (Michael Ficarra)
-  - 2013/03/01: fill in package.json (Michael Ficarra)
-  - 2013/03/01: add BSD license (Michael Ficarra)
-  - 2013/03/01: delete unnecessary gitignore file; put these in your global gitignore (Michael Ficarra)
+v0.3.1 (2013-03-02)
+- 9838cf29: Version 0.3.1
+- 1f06ea30: fixes #20: implement `badRequireError`
+- 472abd07: replace AST literals with esprima.parse + mutations
+- c2e65bd5: fixes #16: modularise and clean up src/index.coffee
+- b01eb1cb: fixes #18: add a verbose option and a --verbose flag
+- 62045c9d: switch more git submodules to npm packages and change associated links
+- 466dccf8: fixes #5: use browserify-http as a dependency instead of a submodule
+- 93f3c9af: fill in package.json
+- 6a3cd299: add BSD license
+- 64caf5e2: delete unnecessary gitignore file; put these in your global gitignore
 
-v0.3.0
-  - 2013/02/28: Version 0.3.0 (Michael Ficarra)
-  - 2013/02/28: fixes #15: require the entry point module even if not exported (Michael Ficarra)
-  - 2013/02/28: Some dumbass mispelled cjsify (Ben Reinhart)
-  - 2013/02/28: Support nested objects (Ben Reinhart)
-  - 2013/02/26: document handler second argument (Nami-Doc)
-  - 2013/02/25: Fixing -r option (Ben Reinhart)
-  - 2013/02/24: documentation cleanup (Michael Ficarra)
-  - 2013/02/24: use coffee-script-redux master to avoid a recently patched bug (Michael Ficarra)
-  - 2013/02/24: pass around extensions in order to properly support custom handlers (Michael Ficarra)
-  - 2013/02/24: Version 0.2.0 (Michael Ficarra)
-  - 2013/02/24: add some documentation to the README (Michael Ficarra)
-  - 2013/02/24: add querystring shim (Michael Ficarra)
-  - 2013/02/24: better errors for unfound modules (Michael Ficarra)
-  - 2013/02/24: support requiring from required symlinks (Michael Ficarra)
-  - 2013/02/23: use resolvePath for alias resolution to allow flexible specification (Michael Ficarra)
+v0.3.0 (2013-02-28)
+- 83b91485: Version 0.3.0
+- 09624819: Merge pull request #14 from benjreinhart/master
+- f7e54478: fixes #15: require the entry point module even if not exported
+- e4006bab: Some dumbass mispelled cjsify
+- c77dbf6d: Merge pull request #10 from benjreinhart/nested-exports
+- 79e45653: Support nested objects
+- 77802dce: Merge pull request #12 from Nami-Doc/patch-1
+- 584e31c2: document handler second argument
+- 7ce2f7c9: Merge pull request #8 from benjreinhart/master
+- 080bbd35: Fixing -r option
+- c4c16cef: Merge branch 'master' of github.com:michaelficarra/commonjs-everywhere
+- 0934714c: documentation cleanup
+- fd0d62c3: Version 0.2.0
+- f13ea232: use coffee-script-redux master to avoid a recently patched bug
+- da09579c: pass around extensions in order to properly support custom handlers
+- 4a7e57db: add some documentation to the README
 
-v0.1.1
-  - 2013/02/23: version 0.1.1 (Michael Ficarra)
-  - 2013/02/23: add crypto, http, and vm node core modules (Michael Ficarra)
-  - 2013/02/23: Mutate entryPoint to be resolved path (Ben Reinhart)
-  - 2013/02/23: process.cwd() (Ben Reinhart)
-  - 2013/02/23: Compute correct path when given root option (Ben Reinhart)
-  - 2013/02/23: add symlinks to node core libraries that work as-is in the browser (Michael Ficarra)
-  - 2013/02/23: Minimal Readme (Ben Reinhart)
+v0.2.0 (2013-02-24)
+- f48bfa76: Version 0.2.0
+- b3891d66: use coffee-script-redux master to avoid a recently patched bug
+- 85fc3b2b: pass around extensions in order to properly support custom handlers
+- 0ece9d17: add querystring shim
+- 1a700c95: better errors for unfound modules
+- c05ed7c7: support requiring from required symlinks
+- 8c676d6c: use resolvePath for alias resolution to allow flexible specification
 
-v0.1.0
-  - 2013/02/23: add source map support, fix minification, change interfaces, 0.1.0 (Michael Ficarra)
-  - 2013/02/22: add --minify flag and integrate with esmangle (Michael Ficarra)
-  - 2013/02/22: rename bin/build to bin/cjsify (Michael Ficarra)
-  - 2013/02/22: add --help flag (Michael Ficarra)
-  - 2013/02/22: documentation note (Michael Ficarra)
-  - 2013/02/22: update jedediah dependency to 0.1.0 (Michael Ficarra)
-  - 2013/02/21: fix repo URL (Michael Ficarra)
-  - 2013/02/21: added .gitignore (Sean Massa)
-  - 2013/02/21: updated package.json with jedediah dependency (Sean Massa)
-  - 2013/02/21: initial commit (Michael Ficarra)
+v0.1.1 (2013-02-23)
+- 2f5205e7: version 0.1.1
+- 916c8577: add crypto, http, and vm node core modules
+- d5d8f4d1: Merge branch 'master' of github.com:michaelficarra/commonjs-everywhere
+- 7ea6be07: Merge pull request #4 from benjreinhart/master
+- 3b28ac5e: Mutate entryPoint to be resolved path
+- b9428da4: process.cwd()
+- 075cc9b7: Compute correct path when given root option
+- 671d5fab: add symlinks to node core libraries that work as-is in the browser
+- c80f12b9: Merge pull request #2 from benjreinhart/master
+- d0aef9c2: Minimal Readme
+
+v0.1.0 (2013-02-23)
+- 2644cda8: add source map support, fix minification, change interfaces, 0.1.0
+- bf6052a8: add --minify flag and integrate with esmangle
+- 9d4c2193: rename bin/build to bin/cjsify
+- 77240e10: add --help flag
+- 24f3a9cf: documentation note
+- ef3c0f2e: update jedediah dependency to 0.1.0
+- 33dc2ce5: fix repo URL
+- 89311ab3: Merge pull request #1 from EndangeredMassa/smassa/dependency-update
+- 516ab74b: added .gitignore
+- 7c9743b1: updated package.json with jedediah dependency
+- 29b13ea6: initial commit

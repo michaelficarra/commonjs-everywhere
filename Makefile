@@ -1,5 +1,7 @@
 default: build
 
+CHANGELOG=CHANGELOG
+
 SRC = $(shell find src -name "*.coffee" -type f | sort)
 LIB = $(SRC:src/%.coffee=lib/%.js)
 
@@ -26,14 +28,13 @@ release-major: release
 release: build test
 	@printf "Current version is $(VERSION). This will publish version $(NEXT_VERSION). Press [enter] to continue." >&2
 	@read
-	echo "v$(NEXT_VERSION)" >CHANGELOG
-	changelogger changelog >>CHANGELOG
+	./changelog.sh "v$(NEXT_VERSION)" >"$(CHANGELOG)"
 	node -e '\
 		var j = require("./package.json");\
 		j.version = "$(NEXT_VERSION)";\
 		var s = JSON.stringify(j, null, 2) + "\n";\
 		require("fs").writeFileSync("./package.json", s);'
-	git commit package.json CHANGELOG -m 'Version $(NEXT_VERSION)'
+	git commit package.json "$(CHANGELOG)" -m 'Version $(NEXT_VERSION)'
 	git tag -a "v$(NEXT_VERSION)" -m "Version $(NEXT_VERSION)"
 	git push --tags origin HEAD:master
 	npm publish
