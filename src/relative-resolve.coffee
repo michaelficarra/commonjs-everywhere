@@ -13,7 +13,8 @@ resolvePath = ({extensions, aliases, root, cwd, path: givenPath}) ->
     return if {}.hasOwnProperty.call aliases, givenPath
     corePath = CORE_MODULES[givenPath]
     unless fs.existsSync corePath
-      throw new Error "Core module \"#{givenPath}\" has not yet been ported to the browser"
+      console.log "Core module \"#{givenPath}\" has not yet been ported to the browser"
+      return
     givenPath = corePath
   # try regular CommonJS requires
   try resolve givenPath, {extensions, basedir: cwd or root}
