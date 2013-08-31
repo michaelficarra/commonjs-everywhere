@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "Base64": "~0.1.2",
-    "coffee-script-redux": "2.0.0-beta6",
+    "coffee-script-redux": "2.0.0-beta7",
     "escodegen": "~0.0.24",
     "esmangle": "~0.0.10",
     "esprima": "~1.0.2",
