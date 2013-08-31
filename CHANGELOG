@@ -1,3 +1,7 @@
+v0.9.3 (2013-08-30)
+- 0343e4f4: update coffee-script-redux to version 2.0.0-beta7
+- f9201f47: move CHANGELOG generation from ruby gem to shell script
+
 v0.9.2 (2013-07-20)
 - 584005c2: Version 0.9.2
 - a788c6b1: loosen up querystring requirement
