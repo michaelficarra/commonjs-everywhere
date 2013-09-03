@@ -37,3 +37,7 @@ suite 'Bundling', ->
     fixtures '/a.js': 'module.exports = require("./b")'
     throws -> bundleEval 'a.js'
     eq null, bundleEval 'a.js', ignoreMissing: yes
+
+  test '#78: fix canonicalisation of paths', ->
+    fixtures '/src/main.coffee': 'module.exports = 1'
+    doesNotThrow -> bundleEval 'main.coffee', root: 'src'

@@ -41,7 +41,8 @@ global.fixtures = (opts) ->
   sfs.applySync opts
 
 global.bundle = bundle = (entryPoint, opts) ->
-  escodegen.generate cjsify (path.join FIXTURES_DIR, entryPoint), FIXTURES_DIR, opts
+  root = path.resolve FIXTURES_DIR, (opts.root ? '')
+  escodegen.generate cjsify entryPoint, root, opts
 global.bundleEval = (entryPoint, opts = {}, env = {}) ->
   global$ = Object.create null
   global$.module$ = module$ = {}
