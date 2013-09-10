@@ -49,6 +49,12 @@ Watch entry file, its dependencies, and even newly added dependencies. Notice th
 cjsify -wo my-library.js -x MyLibrary src/entry-file.js
 ```
 
+Use a browser-specific version of `/lib/node-compatible.js` (remember to use `root`-relative paths for aliasing). An empty alias target is used to delay errors to runtime when requiring the source module (`fs` in this case).
+
+```bash
+cjsify -a /lib/node-compatible.js:/lib/browser-compatible.js -a fs: -x MyLibrary lib/entry-file.js
+```
+
 ### Module Interface
 
 #### `cjsify(entryPoint, root, options)` → Spidermonkey AST
