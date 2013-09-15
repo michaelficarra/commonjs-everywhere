@@ -1,4 +1,12 @@
+v0.9.4 (2013-09-15)
+- 7d969b72: fixes #81: improve documentation for aliasing
+- 58fc9a7c: update dependency versions
+- 65819399: remove some unnecessary parentheses
+- 0f77e4d2: fixes #78: fix path canonicalisation and some erroneous tests
+- 1e0ef697: rebuild with new CoffeeScript compiler version
+
 v0.9.3 (2013-08-30)
+- 046da017: Version 0.9.3
 - 0343e4f4: update coffee-script-redux to version 2.0.0-beta7
 - f9201f47: move CHANGELOG generation from ruby gem to shell script
 
