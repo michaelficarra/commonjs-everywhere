@@ -1,10 +1,10 @@
 fs = require 'fs'
 path = require 'path'
+util = require 'util'
 
 CoffeeScript = require 'coffee-script-redux'
 esprima = require 'esprima'
 estraverse = require 'estraverse'
-md5 = require 'MD5'
 
 canonicalise = require './canonicalise'
 relativeResolve = require './relative-resolve'
@@ -31,7 +31,8 @@ module.exports = (entryPoint, root = process.cwd(), options = {}) ->
   extensions = ['.js', (ext for own ext of handlers)...]
 
   worklist = [relativeResolve {extensions, aliases, root, path: entryPoint}]
-  processed = {}
+  processed = options.processed or {}
+  checked = {}
 
   while worklist.length
     {filename, canonicalName} = worklist.pop()
@@ -40,16 +41,18 @@ module.exports = (entryPoint, root = process.cwd(), options = {}) ->
     continue unless filename
 
     # filter duplicates
-    continue if {}.hasOwnProperty.call processed, filename
+    continue if {}.hasOwnProperty.call checked, filename
 
+    checked[filename] = true
     extname = path.extname filename
-    fileContents = (fs.readFileSync filename).toString()
+    mtime = (fs.statSync filename).mtime.getTime()
 
-    # ignore files that have not changed
-    if options.cache
-      digest = md5 fileContents.toString()
-      continue if options.cache[filename] is digest
-      options.cache[filename] = digest
+    if processed[filename]?.mtime == mtime
+      # ignore files that have not changed, but also check its dependencies
+      worklist = worklist.concat processed[filename].deps
+      continue
+
+    fileContents = (fs.readFileSync filename).toString()
 
     astOrJs =
       # handle compile-to-JS languages and other non-JS files
@@ -66,13 +69,27 @@ module.exports = (entryPoint, root = process.cwd(), options = {}) ->
       else
         astOrJs
 
-    processed[filename] = {canonicalName, ast, fileContents}
+    deps = []
+    processed[filename] = {canonicalName, ast, fileContents, mtime, deps}
 
     # add source file information to the AST root node
     ast.loc ?= {}
 
     estraverse.replace ast,
       enter: (node, parents) ->
+        if node.type is 'Literal' and util.isRegExp node.value
+          # RegExps can't be serialized to json(which is done when caching
+          # processed ASTs), but escodegen never uses any 'instanceof' checks,
+          # instead it considers all nodes of type 'Literal' with a
+          # non-primitive value to be RegExp literals. It extracts regexp
+          # data(source and flags) by calling its 'toString' method and parsing
+          # the result.
+          #
+          # Luckly wrapping a stringified regexp into an array will create an
+          # object whose toString method produces the same output as calling
+          # toString in the original RegExp object.
+          node.value = [node.value.toString()]
+
         # add source file information to each node with source position information
         if node.loc? then node.loc.source = canonicalName
         # ignore anything that's not a `require` call
@@ -89,6 +106,7 @@ module.exports = (entryPoint, root = process.cwd(), options = {}) ->
         try
           resolved = relativeResolve {extensions, aliases, root, cwd, path: node.arguments[0].value}
           worklist.push resolved
+          deps.push resolved
         catch e
           if options.ignoreMissing
             return { type: 'Literal', value: null }

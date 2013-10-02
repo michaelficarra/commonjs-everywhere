@@ -45,6 +45,7 @@ delete options.argv
 # default values
 options.node ?= on
 options['inline-sources'] ?= on
+options['cache-path'] ?= '.commonjs-everywhere-cache.json'
 options.alias ?= []
 options.handler ?= []
 
@@ -52,6 +53,7 @@ options.ignoreMissing = options['ignore-missing']
 options.sourceMap = options['source-map']
 options.inlineSources = options['inline-sources']
 options.inlineSourceMap = options['inline-source-map']
+options.cachePath = options['cache-path']
 
 if options.help
   $0 = if process.argv[0] is 'node' then process.argv[1] else process.argv[0]
@@ -74,6 +76,9 @@ if options.help
   --inline-source-map       include the source map as a data URI in the generated bundle
   --inline-sources          include source content in generated source maps; default: on
   --node                    include process object; emulate node environment; default: on
+  --cache-path              file where to read/write a json-encoded cache that will be
+                            used to speed up future rebuilds. default:
+                            '.commonjs-everywhere-cache.json' in the current directory
   --version                 display the version number and exit
 "
   process.exit 0
@@ -117,12 +122,12 @@ if options.watch and not options.output
   console.error '--watch requires --ouput'
   process.exit 1
 
-build = (entryPoint, processed = {}) ->
+build = (entryPoint) ->
+  processed = options.processed
   try
     newDeps = CJSEverywhere.traverseDependencies entryPoint, root, options
     if options.watch
-      console.error "built #{dep.canonicalName} (#{options.cache[filename]})" for own filename, dep of newDeps
-    processed[file] = newDeps[file] for own file of newDeps
+      console.error "built #{dep.canonicalName}" for own filename, dep of newDeps
   catch e
     if options.watch then console.error "ERROR: #{e.message}" else throw e
   bundled = CJSEverywhere.bundle processed, originalEntryPoint, root, options
@@ -165,14 +170,33 @@ build = (entryPoint, processed = {}) ->
 
   processed
 
+
 startBuild = ->
+  process.on 'exit', ->
+    fs.writeFileSync options.cachePath, JSON.stringify options.processed
+
+  process.on 'uncaughtException', (e) ->
+    # An exception may be thrown due to corrupt cache or incompatibilities
+    # between versions, remove it to be safe
+    try fs.unlinkSync options.cachePath
+    options.processed = {}
+    throw e
+
+  if fs.existsSync options.cachePath
+    processed = options.processed = JSON.parse fs.readFileSync options.cachePath, 'utf8'
+  else
+    processed = options.processed = {}
+
   if options.watch
-    options.cache = {}
     console.error "BUNDLING starting at #{originalEntryPoint}"
 
-  processed = build originalEntryPoint
+  build originalEntryPoint
 
   if options.watch
+    # Flush the cache when the user presses CTRL+C or the process is
+    # terminated from outside
+    process.on 'SIGINT', process.exit
+    process.on 'SIGTERM', process.exit
     watching = []
     do startWatching = (processed) ->
       for own file, {canonicalName} of processed when file not in watching then do (file, canonicalName) ->
@@ -183,7 +207,7 @@ startBuild = ->
             console.error "WARNING: watched file #{file} has disappeared"
             return
           console.error "REBUNDLING starting at #{canonicalName}"
-          processed = build file, processed
+          build file
           startWatching processed
           return
 
