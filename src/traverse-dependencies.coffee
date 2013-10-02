@@ -20,6 +20,7 @@ badRequireError = (filename, node, msg) ->
 
 module.exports = (entryPoint, root = process.cwd(), options = {}) ->
   aliases = options.aliases ? {}
+  uidFor = options.uidFor
 
   handlers =
     '.coffee': (coffee, canonicalName) ->
@@ -112,13 +113,14 @@ module.exports = (entryPoint, root = process.cwd(), options = {}) ->
             return { type: 'Literal', value: null }
           else
             throw e
-        # rewrite the require to use the root-relative path
+        # rewrite the require to use the root-relative path or the uid if
+        # enabled
         {
           type: 'CallExpression'
           callee: node.callee
           arguments: [{
             type: 'Literal'
-            value: resolved.canonicalName
+            value: if uidFor then uidFor(resolved.canonicalName) else resolved.canonicalName
           }, {
             type: 'Identifier'
             name: 'module'

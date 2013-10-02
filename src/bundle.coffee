@@ -53,23 +53,26 @@ require.resolve = function(file){
 require.define = function(file, fn){ require.modules[file] = fn; };
 """
 
-wrapFile = (name, program) ->
+wrapFile = (name, program, uidFor) ->
   wrapperProgram = esprima.parse 'require.define(0, function(module, exports, __dirname, __filename){});'
   wrapper = wrapperProgram.body[0]
-  wrapper.expression.arguments[0] = { type: 'Literal', value: name }
+  wrapper.expression.arguments[0] = { type: 'Literal', value: if uidFor then uidFor(name) else name }
   wrapper.expression.arguments[1].body.body = program.body
   wrapper
 
 module.exports = (processed, entryPoint, root, options) ->
   prelude = if options.node ? yes then "#{PRELUDE}\n#{PRELUDE_NODE}" else PRELUDE
   program = esprima.parse prelude
+  uidFor = options.uidFor
   for own filename, {ast} of processed
-    program.body.push wrapFile ast.loc.source, ast
+    program.body.push wrapFile ast.loc.source, ast, uidFor
+
+  canonicalEntryPoint = canonicalise root, entryPoint
 
   requireEntryPoint =
     type: 'CallExpression'
     callee: { type: 'Identifier', name: 'require' }
-    arguments: [{ type: 'Literal', value: canonicalise root, entryPoint }]
+    arguments: [{ type: 'Literal', value: if uidFor then uidFor(canonicalEntryPoint) else canonicalEntryPoint }]
 
   # require/expose the entry point
   if options.export?

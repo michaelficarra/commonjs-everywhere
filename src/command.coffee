@@ -54,6 +54,7 @@ options.sourceMap = options['source-map']
 options.inlineSources = options['inline-sources']
 options.inlineSourceMap = options['inline-source-map']
 options.cachePath = options['cache-path']
+options.moduleUids = options['module-uids']
 
 if options.help
   $0 = if process.argv[0] is 'node' then process.argv[1] else process.argv[0]
@@ -79,6 +80,9 @@ if options.help
   --cache-path              file where to read/write a json-encoded cache that will be
                             used to speed up future rebuilds. default:
                             '.commonjs-everywhere-cache.json' in the current directory
+  --module-uids             Instead of replacing module names by their full path,
+                            use unique ids for better minification
+                            (breaks __dirname/__filename)
   --version                 display the version number and exit
 "
   process.exit 0
@@ -173,7 +177,11 @@ build = (entryPoint) ->
 
 startBuild = ->
   process.on 'exit', ->
-    fs.writeFileSync options.cachePath, JSON.stringify options.processed
+    cache =
+      processed: options.processed
+      uids: options.uids
+      moduleUids: options.moduleUids
+    fs.writeFileSync options.cachePath, JSON.stringify cache
 
   process.on 'uncaughtException', (e) ->
     # An exception may be thrown due to corrupt cache or incompatibilities
@@ -183,9 +191,24 @@ startBuild = ->
     throw e
 
   if fs.existsSync options.cachePath
-    processed = options.processed = JSON.parse fs.readFileSync options.cachePath, 'utf8'
-  else
-    processed = options.processed = {}
+    cache = JSON.parse fs.readFileSync options.cachePath, 'utf8'
+    {processed, uids, moduleUids} = cache
+
+  if not processed or moduleUids != options.moduleUids
+    # Either the cache doesn't exist or the cache was saved with a different
+    # 'moduleUids' value. In either case we must reset it.
+    processed = {}
+    uids = {next: 1, names: {}}
+
+  options.processed = processed
+  options.uids = uids
+  options.uidFor = (name) ->
+    if not options.moduleUids
+      return name
+    if not {}.hasOwnProperty.call(uids.names, name)
+      uid = uids.next++
+      uids.names[name] = uid
+    uids.names[name]
 
   if options.watch
     console.error "BUNDLING starting at #{originalEntryPoint}"
