@@ -79,7 +79,7 @@ bundle = (entryPoint, options) ->
   map = new SourceMapGenerator
     file: path.basename(options.outFile)
     sourceRoot: path.relative(path.dirname(options.outFile), options.root)
-  lineOffset = 1
+  lineOffset = 1 # global wrapper
 
   for own filename, {name, src, srcMap, lineCount} of options.processed
     if typeof name != 'number'
@@ -89,7 +89,7 @@ bundle = (entryPoint, options) ->
       #{src}
       });
       """
-    lineOffset++ # skip the 'require.define' line
+    lineOffset += 2# skip linefeed plus the 'require.define' line
     orig = new SourceMapConsumer srcMap
     orig.eachMapping (m) ->
       map.addMapping
@@ -100,7 +100,6 @@ bundle = (entryPoint, options) ->
             line: m.originalLine or m.generatedLine
             column: m.originalColumn or m.generatedColumn
         source: filename
-    lineOffset += lineCount + 1 # skip all the source lines plus the '})' line
 
   if typeof entryPoint != 'number'
     entryPoint = "'#{entryPoint}'"

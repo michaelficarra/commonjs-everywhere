@@ -1,8 +1,8 @@
 {
-  "name": "commonjs-everywhere",
-  "version": "0.9.4",
-  "description": "CommonJS browser bundler with aliasing, extensibility, and source maps from the minified JS bundle",
-  "homepage": "https://github.com/michaelficarra/commonjs-everywhere",
+  "name": "powerbuild",
+  "version": "0.0.1",
+  "description": "CommonJS browser bundler with aliasing, extensibility, and source maps from the minified JS bundle. Forked from commonjs-everywhere, speed improvements, persistent disk cache for incremental builds and bundled grunt task",
+  "homepage": "https://github.com/tarruda/powerbuild",
   "keywords": [
     "CommonJS",
     "CommonJS Everywhere",
@@ -17,15 +17,19 @@
     "name": "Michael Ficarra",
     "email": "git@michael.ficarra.me"
   },
+  "contributors": [
+    "name": "Thiago de arruda",
+    "email": "tpadilha84@gmail.com"
+  ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/michaelficarra/commonjs-everywhere.git"
+    "url": "git://github.com/tarruda/powerbuild.git"
   },
-  "bugs": "https://github.com/michaelficarra/commonjs-everywhere/issues",
+  "bugs": "https://github.com/tarruda/powerbuild/issues",
   "engines": {
     "node": "0.8.x || 0.9.x || 0.10.x"
   },
-  "main": "lib/module",
+  "main": "lib/index",
   "directories": {
     "bin": "bin",
     "lib": "lib",
@@ -33,7 +37,6 @@
   },
   "dependencies": {
     "Base64": "~0.1.2",
-    "coffee-script-redux": "2.0.0-beta7",
     "escodegen": "~0.0.24",
     "esmangle": "~0.0.10",
     "esprima": "~1.0.2",
