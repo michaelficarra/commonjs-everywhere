@@ -20,7 +20,7 @@ badRequireError = (filename, node, msg) ->
       in #{filename}
   """
 
-module.exports = (entryPoint, options) ->
+module.exports = (options) ->
   aliases = options.aliases ? {}
   uidFor = options.uidFor
   root = options.root
@@ -35,7 +35,16 @@ module.exports = (entryPoint, options) ->
     handlers[ext] = handler
   extensions = ['.js', (ext for own ext of handlers)...]
 
-  worklist = [relativeResolve {extensions, aliases, root, path: entryPoint}]
+  worklist = []
+  resolvedEntryPoints = []
+
+  for ep in options.entryPoints
+    resolved = relativeResolve {extensions, aliases, root, path: ep}
+    worklist.push(resolved)
+    resolvedEntryPoints.push(resolved.filename)
+
+  options.entryPoints = resolvedEntryPoints
+
   processed = options.processed or {}
   checked = {}
 

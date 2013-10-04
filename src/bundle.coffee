@@ -74,7 +74,7 @@ wrapNode = (modules) -> """
   })(this, #{PRELUDE}, #{PRELUDE_NODE});
   """
 
-bundle = (entryPoint, options) ->
+bundle = (options) ->
   result = ''
   resultMap = new SourceMapGenerator
     file: path.basename(options.outFile)
@@ -101,10 +101,11 @@ bundle = (entryPoint, options) ->
             column: m.originalColumn or m.generatedColumn
         source: filename
 
-  if typeof entryPoint != 'number'
-    entryPoint = "'#{entryPoint}'"
-
-  result += "\nrequire(#{entryPoint});"
+  for entryPoint in options.entryPoints
+    name = options.processed[entryPoint].name
+    if typeof name != 'number'
+      name = "'#{name}'"
+    result += "\nrequire(#{name});"
 
   if options.node
     result = wrapNode(result)
@@ -114,8 +115,8 @@ bundle = (entryPoint, options) ->
   return {code: result, map: resultMap}
 
 
-module.exports = (entryPoint, options) ->
-  {code, map} = bundle entryPoint, options
+module.exports = (options) ->
+  {code, map} = bundle options
 
   if options.minify
     esmangle = require 'esmangle'

@@ -18,7 +18,7 @@ knownOpts = {}
 # options
 knownOpts[opt] = Boolean for opt in [
   'deps', 'help', 'ignore-missing', 'inline-source-map', 'inline-sources',
-  'minify', 'node', 'verbose', 'watch'
+  'minify', 'node', 'verbose', 'watch', 'module-uids', 'cache-path'
 ]
 # parameters
 knownOpts[opt] = String for opt in ['export', 'output', 'root', 'source-map']
@@ -35,9 +35,10 @@ optAliases =
   v: '--verbose'
   w: '--watch'
   x: '--export'
+  e: '--main'
 
 options = nopt knownOpts, optAliases, process.argv, 2
-positionalArgs = options.argv.remain
+options.entryPoints = entryPoints = options.argv.remain
 delete options.argv
 
 # default values
@@ -54,6 +55,7 @@ options.inlineSources = options['inline-sources']
 options.inlineSourceMap = options['inline-source-map']
 options.cachePath = options['cache-path']
 options.moduleUids = options['module-uids']
+options.entryPoint = options['entry-point']
 
 if options.help
   $0 = if process.argv[0] is 'node' then process.argv[1] else process.argv[0]
@@ -61,6 +63,8 @@ if options.help
   console.log "
   Usage: #{$0} OPT* path/to/entry-file.ext OPT*
 
+  -e, --main                main module to export/initialize when multiple
+                            files are specified
   -a, --alias ALIAS:TO      replace requires of file identified by ALIAS with TO
   -h, --handler EXT:MODULE  handle files with extension EXT with module MODULE
   -m, --minify              minify output
@@ -90,10 +94,6 @@ if options.version
   console.log (require '../package.json').version
   process.exit 0
 
-unless positionalArgs.length is 1
-  console.error 'wrong number of entry points given; expected 1'
-  process.exit 1
-
 options.aliases = {}
 for aliasPair in options.alias
   match = aliasPair.match /([^:]+):(.*)/ ? []
@@ -113,10 +113,9 @@ for handlerPair in options.handler
     process.exit 1
 delete options.handler
 
-originalEntryPoint = positionalArgs[0]
 
 if options.deps
-  deps = traverseDependencies originalEntryPoint, options.root, options
+  deps = traverseDependencies options
   console.log dep.canonicalName for own _, dep of deps
   process.exit 0
 
@@ -125,8 +124,8 @@ if options.watch and not options.output
   process.exit 1
 
 buildBundle = ->
-  traverseDependencies originalEntryPoint, options
-  {code, map} = bundle originalEntryPoint, options
+  traverseDependencies options
+  {code, map} = bundle options
 
   if options.sourceMap
     fs.writeFileSync options.sourceMap, "#{map}"
@@ -174,7 +173,7 @@ startBuild = ->
 
   options.processed = processed
   options.uids = uids
-  options.uidFor = (name) ->
+  uidFor = options.uidFor = (name) ->
     if not options.moduleUids
       return name
     if not {}.hasOwnProperty.call(uids.names, name)
@@ -182,10 +181,7 @@ startBuild = ->
       uids.names[name] = uid
     uids.names[name]
 
-  if options.watch
-    console.error "BUNDLING starting at #{originalEntryPoint}"
-
-  buildBundle originalEntryPoint
+  buildBundle()
 
   if options.watch
     # Flush the cache when the user presses CTRL+C or the process is
@@ -204,19 +200,19 @@ startBuild = ->
           console.error "WARNING: watched file #{file} has disappeared"
           return
         console.error "#{file} changed, rebuilding"
-        buildBundle originalEntryPoint
+        buildBundle()
         console.error "done"
         building = false
         return
 
-if originalEntryPoint is '-'
+if entryPoints.length == 1 and entryPoints[0] is '-'
   # support reading input from stdin
   stdinput = ''
   process.stdin.on 'data', (data) -> stdinput += data
   process.stdin.on 'end', ->
-    originalEntryPoint = (require 'mktemp').createFileSync 'temp-XXXXXXXXX.js'
-    fs.writeFileSync originalEntryPoint, stdinput
-    process.on 'exit', -> fs.unlinkSync originalEntryPoint
+    entryPoints[0] = (require 'mktemp').createFileSync 'temp-XXXXXXXXX.js'
+    fs.writeFileSync entryPoints[0], stdinput
+    process.on 'exit', -> fs.unlinkSync entryPoints[0]
     do startBuild
   process.stdin.setEncoding 'utf8'
   do process.stdin.resume
