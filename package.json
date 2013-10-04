@@ -18,8 +18,10 @@
     "email": "git@michael.ficarra.me"
   },
   "contributors": [
-    "name": "Thiago de arruda",
-    "email": "tpadilha84@gmail.com"
+    {
+      "name": "Thiago de arruda",
+      "email": "tpadilha84@gmail.com"
+    }
   ],
   "repository": {
     "type": "git",
@@ -54,7 +56,9 @@
     "vm-browserify": "*",
     "zlib-browserify": "*",
     "source-map": "~0.1.30",
-    "handlebars": "~1.0.12"
+    "handlebars": "~1.0.12",
+    "coffee-script": "~1.6.3",
+    "source-map-support": "~0.2.3"
   },
   "devDependencies": {
     "mocha": "~1.8.1",

@@ -2,12 +2,14 @@ fs = require 'fs'
 path = require 'path'
 util = require 'util'
 
+coffee = require 'coffee-script'
 esprima = require 'esprima'
 estraverse = require 'estraverse'
 escodegen = require 'escodegen'
 
 canonicalise = require './canonicalise'
 relativeResolve = require './relative-resolve'
+sourceMapToAst = require './sourcemap-to-ast'
 
 badRequireError = (filename, node, msg) ->
   if node.loc? and node.loc?.start?
@@ -24,8 +26,9 @@ module.exports = (entryPoint, options) ->
   root = options.root
 
   handlers =
-    '.coffee': (coffee, canonicalName) ->
-      CoffeeScript.compile (CoffeeScript.parse coffee, raw: yes), bare: yes
+    '.coffee': (src, canonicalName) ->
+      {js, v3SourceMap} = coffee.compile src, sourceMap: true, bare: true
+      return {code: js, map: v3SourceMap}
     '.json': (json, canonicalName) ->
       esprima.parse "module.exports = #{json}", loc: yes, source: canonicalName
   for own ext, handler of options.handlers ? {}
@@ -63,13 +66,21 @@ module.exports = (entryPoint, options) ->
       else # assume JS
         src
 
-    ast =
-      if typeof astOrJs is 'string'
-        try esprima.parse astOrJs, loc: yes, source: canonicalName
-        catch e
+    if typeof astOrJs == 'string'
+      astOrJs = {code: astOrJs}
+
+    if astOrJs.code
+      try
+        ast = esprima.parse astOrJs.code, loc: yes, source: canonicalName
+        if astOrJs.map
+          sourceMapToAst ast, astOrJs.map
+      catch e
+        if e.lineNumber
           throw new Error "Syntax error in #{filename} at line #{e.lineNumber}, column #{e.column}#{e.message[(e.message.indexOf ':')..]}"
-      else
-        astOrJs
+        else
+          throw e
+    else
+      ast = astOrJs
 
     # add source file information to the AST root node
     ast.loc ?= {}
@@ -113,15 +124,17 @@ module.exports = (entryPoint, options) ->
           }]
         }
 
-    {code: src, map: srcMap} = escodegen.generate ast,
+    {code, map} = escodegen.generate ast,
       sourceMap: yes
       format: escodegen.FORMAT_DEFAULTS
       sourceMapWithCode: yes
       sourceMapRoot: if options.sourceMap? then (path.relative (path.dirname options.sourceMap), options.root) or '.'
 
-    srcMap = srcMap.toString()
+    map = map.toString()
 
-    lineCount = src.split('\n').length - 1
-    processed[filename] = {name, src, srcMap, lineCount, mtime, deps}
+    # cache linecount for a little more efficiency when calculating offsets
+    # later
+    lineCount = code.split('\n').length - 1
+    processed[filename] = {name, code, map, lineCount, mtime, deps}
 
   processed

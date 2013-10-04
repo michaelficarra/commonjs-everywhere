@@ -1,5 +1,6 @@
 {SourceMapConsumer} = require 'source-map'
 {traverse} = require 'estraverse'
+assert = require 'assert'
 
 module.exports = (ast, srcMap) ->
   map = new SourceMapConsumer srcMap
@@ -16,4 +17,4 @@ module.exports = (ast, srcMap) ->
         end:
           line: origEnd.line
           column: origEnd.column
-        source: origStart.source
+        source: origStart.source || node.loc.source

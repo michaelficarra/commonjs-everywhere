@@ -75,24 +75,24 @@ wrapNode = (modules) -> """
   """
 
 bundle = (entryPoint, options) ->
-  code = ''
-  map = new SourceMapGenerator
+  result = ''
+  resultMap = new SourceMapGenerator
     file: path.basename(options.outFile)
     sourceRoot: path.relative(path.dirname(options.outFile), options.root)
   lineOffset = 1 # global wrapper
 
-  for own filename, {name, src, srcMap, lineCount} of options.processed
+  for own filename, {name, code, map, lineCount} of options.processed
     if typeof name != 'number'
       name = "'#{name}'"
-    code += """
+    result += """
       \nrequire.define(#{name}, function(module, exports, __dirname, __filename){
-      #{src}
+      #{code}
       });
       """
     lineOffset += 2# skip linefeed plus the 'require.define' line
-    orig = new SourceMapConsumer srcMap
+    orig = new SourceMapConsumer map
     orig.eachMapping (m) ->
-      map.addMapping
+      resultMap.addMapping
         generated:
             line: m.generatedLine + lineOffset
             column: m.generatedColumn
@@ -104,14 +104,14 @@ bundle = (entryPoint, options) ->
   if typeof entryPoint != 'number'
     entryPoint = "'#{entryPoint}'"
 
-  code += "\nrequire(#{entryPoint});"
+  result += "\nrequire(#{entryPoint});"
 
   if options.node
-    code = wrapNode(code)
+    result = wrapNode(result)
   else
-    code = wrap(code)
+    result = wrap(result)
 
-  return {code, map}
+  return {code: result, map: resultMap}
 
 
 module.exports = (entryPoint, options) ->
@@ -120,7 +120,7 @@ module.exports = (entryPoint, options) ->
   if options.minify
     esmangle = require 'esmangle'
     ast = esprima.parse bundled, loc: yes
-    sourceMapToAst ast, srcMap
+    sourceMapToAst ast, map
     ast = esmangle.mangle (esmangle.optimize ast), destructive: yes
     {code, map} = escodegen.generate ast,
       sourceMap: yes
@@ -129,8 +129,8 @@ module.exports = (entryPoint, options) ->
       sourceMapRoot: if options.sourceMap? then (path.relative (path.dirname options.sourceMap), options.root) or '.'
 
   if (options.sourceMap or options.inlineSourceMap) and options.inlineSources
-    for own filename, {src} of processed
-      map.setSourceContent filename, src
+    for own filename, {code} of processed
+      map.setSourceContent filename, code
 
   if options.inlineSourceMap
     datauri = "data:application/json;charset=utf-8;base64,#{btoa "#{map}"}"

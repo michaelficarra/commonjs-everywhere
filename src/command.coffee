@@ -43,7 +43,7 @@ delete options.argv
 # default values
 options.node ?= on
 options['inline-sources'] ?= on
-options['cache-path'] ?= '.commonjs-everywhere-cache.json'
+options['cache-path'] ?= '.powerbuild-cache~'
 options['root'] ?= process.cwd()
 options.alias ?= []
 options.handler ?= []
@@ -78,7 +78,7 @@ if options.help
   --node                    include process object; emulate node environment; default: on
   --cache-path              file where to read/write a json-encoded cache that will be
                             used to speed up future rebuilds. default:
-                            '.commonjs-everywhere-cache.json' in the current directory
+                            '.powerbuild-cache~' in the current directory
   --module-uids             Instead of replacing module names by their full path,
                             use unique ids for better minification
                             (breaks __dirname/__filename)

@@ -5,15 +5,15 @@ CHANGELOG=CHANGELOG
 SRC = $(shell find src -name "*.coffee" -type f | sort)
 LIB = $(SRC:src/%.coffee=lib/%.js)
 
-COFFEE=node_modules/.bin/coffee --js
-MOCHA=node_modules/.bin/mocha --compilers coffee:coffee-script-redux/register -r coffee-script-redux/register -r test-setup.coffee -u tdd
+COFFEE=node_modules/.bin/coffee
+MOCHA=node_modules/.bin/mocha --compilers coffee:coffee-script -r coffee-script -r test-setup.coffee -u tdd
 
 all: build test
 build: $(LIB)
 
 lib/%.js: src/%.coffee
 	@dirname "$@" | xargs mkdir -p
-	$(COFFEE) <"$<" >"$@"
+	$(COFFEE) -c -m -o lib "$<"
 
 .PHONY: release test loc clean
 
