@@ -1,11 +1,9 @@
 fs = require 'fs'
 path = require 'path'
-
-escodegen = require 'escodegen'
 nopt = require 'nopt'
-{btoa} = require 'Base64'
 
-CJSEverywhere = require './module'
+bundle = require './bundle'
+traverseDependencies = require './traverse-dependencies'
 
 escodegenFormat =
   indent:
@@ -46,6 +44,7 @@ delete options.argv
 options.node ?= on
 options['inline-sources'] ?= on
 options['cache-path'] ?= '.commonjs-everywhere-cache.json'
+options['root'] ?= process.cwd()
 options.alias ?= []
 options.handler ?= []
 
@@ -114,42 +113,20 @@ for handlerPair in options.handler
     process.exit 1
 delete options.handler
 
-root = if options.root then path.resolve options.root else process.cwd()
 originalEntryPoint = positionalArgs[0]
 
 if options.deps
-  deps = CJSEverywhere.traverseDependencies originalEntryPoint, root, options
+  deps = traverseDependencies originalEntryPoint, options.root, options
   console.log dep.canonicalName for own _, dep of deps
   process.exit 0
 
 if options.watch and not options.output
-  console.error '--watch requires --ouput'
+  console.error '--watch requires --output'
   process.exit 1
 
-build = (entryPoint) ->
-  processed = options.processed
-  try
-    newDeps = CJSEverywhere.traverseDependencies entryPoint, root, options
-    if options.watch
-      console.error "built #{dep.canonicalName}" for own filename, dep of newDeps
-  catch e
-    if options.watch then console.error "ERROR: #{e.message}" else throw e
-  bundled = CJSEverywhere.bundle processed, originalEntryPoint, root, options
-
-  if options.minify
-    esmangle = require 'esmangle'
-    bundled = esmangle.mangle (esmangle.optimize bundled), destructive: yes
-
-  {code, map} = escodegen.generate bundled,
-    comment: not options.minify
-    sourceMap: yes
-    sourceMapWithCode: yes
-    sourceMapRoot: if options.sourceMap? then (path.relative (path.dirname options.sourceMap), root) or '.'
-    format: if options.minify then escodegen.FORMAT_MINIFY else escodegenFormat
-
-  if (options.sourceMap or options.inlineSourceMap) and options.inlineSources
-    for own filename, {canonicalName, fileContents} of processed
-      map.setSourceContent canonicalName, fileContents
+buildBundle = ->
+  traverseDependencies originalEntryPoint, options
+  {code, map} = bundle originalEntryPoint, options
 
   if options.sourceMap
     fs.writeFileSync options.sourceMap, "#{map}"
@@ -168,11 +145,6 @@ build = (entryPoint) ->
     fs.writeFileSync options.output, code
   else
     process.stdout.write "#{code}\n"
-
-  if options.watch or options.verbose
-    console.error 'BUNDLE COMPLETE'
-
-  processed
 
 
 startBuild = ->
@@ -213,26 +185,29 @@ startBuild = ->
   if options.watch
     console.error "BUNDLING starting at #{originalEntryPoint}"
 
-  build originalEntryPoint
+  buildBundle originalEntryPoint
 
   if options.watch
     # Flush the cache when the user presses CTRL+C or the process is
     # terminated from outside
     process.on 'SIGINT', process.exit
     process.on 'SIGTERM', process.exit
-    watching = []
-    do startWatching = (processed) ->
-      for own file, {canonicalName} of processed when file not in watching then do (file, canonicalName) ->
-        watching.push file
-        fs.watchFile file, {persistent: yes, interval: 500}, (curr, prev) ->
-          ino = if process.platform is 'win32' then curr.ino? else curr.ino
-          unless ino
-            console.error "WARNING: watched file #{file} has disappeared"
-            return
-          console.error "REBUNDLING starting at #{canonicalName}"
-          build file
-          startWatching processed
+    watching = {}
+    building = false
+    for own file of processed when file not of watching then do (file) ->
+      watching[file] = true
+      fs.watchFile file, {persistent: yes, interval: 500}, (curr, prev) ->
+        if building then return
+        building = true
+        ino = if process.platform is 'win32' then curr.ino? else curr.ino
+        unless ino
+          console.error "WARNING: watched file #{file} has disappeared"
           return
+        console.error "#{file} changed, rebuilding"
+        buildBundle originalEntryPoint
+        console.error "done"
+        building = false
+        return
 
 if originalEntryPoint is '-'
   # support reading input from stdin

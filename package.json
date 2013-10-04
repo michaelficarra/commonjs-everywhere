@@ -49,7 +49,9 @@
     "punycode": "*",
     "querystring": "*",
     "vm-browserify": "*",
-    "zlib-browserify": "*"
+    "zlib-browserify": "*",
+    "source-map": "~0.1.30",
+    "handlebars": "~1.0.12"
   },
   "devDependencies": {
     "mocha": "~1.8.1",

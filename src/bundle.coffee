@@ -1,9 +1,14 @@
 esprima = require 'esprima'
+path = require 'path'
+{SourceMapConsumer, SourceMapGenerator} = require 'source-map'
+{btoa} = require 'Base64'
+escodegen = require 'escodegen'
+sourceMapToAst = require './sourcemap-to-ast'
 
 canonicalise = require './canonicalise'
 
 PRELUDE_NODE = """
-var process = function(){
+(function(){
   var cwd = '/';
   return {
     title: 'browser',
@@ -15,94 +20,121 @@ var process = function(){
     cwd: function(){ return cwd; },
     chdir: function(dir){ cwd = dir; }
   };
-}();
+})()
 """
 
 PRELUDE = """
-function require(file, parentModule){
-  if({}.hasOwnProperty.call(require.cache, file))
-    return require.cache[file];
+(function() {
+  function require(file, parentModule){
+    if({}.hasOwnProperty.call(require.cache, file))
+      return require.cache[file];
 
-  var resolved = require.resolve(file);
-  if(!resolved) throw new Error('Failed to resolve module ' + file);
+    var resolved = require.resolve(file);
+    if(!resolved) throw new Error('Failed to resolve module ' + file);
 
-  var module$ = {
-    id: file,
-    require: require,
-    filename: file,
-    exports: {},
-    loaded: false,
-    parent: parentModule,
-    children: []
+    var module$ = {
+      id: file,
+      require: require,
+      filename: file,
+      exports: {},
+      loaded: false,
+      parent: parentModule,
+      children: []
+    };
+    if(parentModule) parentModule.children.push(module$);
+    var dirname = file.slice(0, file.lastIndexOf('/') + 1);
+
+    require.cache[file] = module$.exports;
+    resolved.call(module$.exports, module$, module$.exports, dirname, file);
+    module$.loaded = true;
+    return require.cache[file] = module$.exports;
+  }
+
+  require.modules = {};
+  require.cache = {};
+
+  require.resolve = function(file){
+    return {}.hasOwnProperty.call(require.modules, file) ? require.modules[file] : void 0;
   };
-  if(parentModule) parentModule.children.push(module$);
-  var dirname = file.slice(0, file.lastIndexOf('/') + 1);
+  require.define = function(file, fn){ require.modules[file] = fn; };
 
-  require.cache[file] = module$.exports;
-  resolved.call(module$.exports, module$, module$.exports, dirname, file);
-  module$.loaded = true;
-  return require.cache[file] = module$.exports;
-}
-
-require.modules = {};
-require.cache = {};
-
-require.resolve = function(file){
-  return {}.hasOwnProperty.call(require.modules, file) ? require.modules[file] : void 0;
-};
-require.define = function(file, fn){ require.modules[file] = fn; };
+  return require;
+)()
 """
 
-wrapFile = (name, program, uidFor) ->
-  wrapperProgram = esprima.parse 'require.define(0, function(module, exports, __dirname, __filename){});'
-  wrapper = wrapperProgram.body[0]
-  wrapper.expression.arguments[0] = { type: 'Literal', value: if uidFor then uidFor(name) else name }
-  wrapper.expression.arguments[1].body.body = program.body
-  wrapper
+wrap = (modules) -> """
+  (function(global, require, undefined) {
+  #{modules}
+  })(this, #{PRELUDE});
+  """
 
-module.exports = (processed, entryPoint, root, options) ->
-  prelude = if options.node ? yes then "#{PRELUDE}\n#{PRELUDE_NODE}" else PRELUDE
-  program = esprima.parse prelude
-  uidFor = options.uidFor
-  for own filename, {ast} of processed
-    program.body.push wrapFile ast.loc.source, ast, uidFor
+wrapNode = (modules) -> """
+  (function(global, require, process, undefined) {
+  #{modules}
+  })(this, #{PRELUDE}, #{PRELUDE_NODE});
+  """
 
-  canonicalEntryPoint = canonicalise root, entryPoint
+bundle = (entryPoint, options) ->
+  code = ''
+  map = new SourceMapGenerator
+    file: path.basename(options.outFile)
+    sourceRoot: path.relative(path.dirname(options.outFile), options.root)
+  lineOffset = 1
 
-  requireEntryPoint =
-    type: 'CallExpression'
-    callee: { type: 'Identifier', name: 'require' }
-    arguments: [{ type: 'Literal', value: if uidFor then uidFor(canonicalEntryPoint) else canonicalEntryPoint }]
+  for own filename, {name, src, srcMap, lineCount} of options.processed
+    if typeof name != 'number'
+      name = "'#{name}'"
+    code += """
+      \nrequire.define(#{name}, function(module, exports, __dirname, __filename){
+      #{src}
+      });
+      """
+    lineOffset++ # skip the 'require.define' line
+    orig = new SourceMapConsumer srcMap
+    orig.eachMapping (m) ->
+      map.addMapping
+        generated:
+            line: m.generatedLine + lineOffset
+            column: m.generatedColumn
+        original:
+            line: m.originalLine or m.generatedLine
+            column: m.originalColumn or m.generatedColumn
+        source: filename
+    lineOffset += lineCount + 1 # skip all the source lines plus the '})' line
 
-  # require/expose the entry point
-  if options.export?
-    exportExpression = (esprima.parse options.export).body[0].expression
-    lhsExpression =
-      if exportExpression.type is 'Identifier'
-        type: 'MemberExpression'
-        computed: false
-        object: { type: 'Identifier', name: 'global' }
-        property: { type: 'Identifier', name: exportExpression.name }
-      else
-        exportExpression
-    program.body.push
-      type: 'ExpressionStatement'
-      expression:
-        type: 'AssignmentExpression'
-        operator: '='
-        left: lhsExpression
-        right: requireEntryPoint
+  if typeof entryPoint != 'number'
+    entryPoint = "'#{entryPoint}'"
+
+  code += "\nrequire(#{entryPoint});"
+
+  if options.node
+    code = wrapNode(code)
   else
-    program.body.push
-      type: 'ExpressionStatement'
-      expression: requireEntryPoint
+    code = wrap(code)
 
-  # wrap everything in IIFE for safety; define global var
-  iife = esprima.parse '(function(global){}).call(this, this);'
-  iife.body[0].expression.callee.object.body.body = program.body
-  iife.leadingComments = [
-    type: 'Line'
-    value: " Generated by CommonJS Everywhere #{(require '../package.json').version}"
-  ]
+  return {code, map}
 
-  iife
+
+module.exports = (entryPoint, options) ->
+  {code, map} = bundle entryPoint, options
+
+  if options.minify
+    esmangle = require 'esmangle'
+    ast = esprima.parse bundled, loc: yes
+    sourceMapToAst ast, srcMap
+    ast = esmangle.mangle (esmangle.optimize ast), destructive: yes
+    {code, map} = escodegen.generate ast,
+      sourceMap: yes
+      format: escodegen.FORMAT_MINIFY
+      sourceMapWithCode: yes
+      sourceMapRoot: if options.sourceMap? then (path.relative (path.dirname options.sourceMap), options.root) or '.'
+
+  if (options.sourceMap or options.inlineSourceMap) and options.inlineSources
+    for own filename, {src} of processed
+      map.setSourceContent filename, src
+
+  if options.inlineSourceMap
+    datauri = "data:application/json;charset=utf-8;base64,#{btoa "#{map}"}"
+    code = "#{code}\n//# sourceMappingURL=#{datauri}"
+
+  return {code, map}
