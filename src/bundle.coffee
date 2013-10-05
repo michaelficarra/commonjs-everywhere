@@ -123,8 +123,8 @@ module.exports = (options) ->
 
   if options.minify
     uglifyAst = UglifyJS.parse code
-    uglifyAst.figure_out_scope()
-    uglifyAst = uglifyAst.transform UglifyJS.Compressor()
+    # uglifyAst.figure_out_scope()
+    # uglifyAst = uglifyAst.transform UglifyJS.Compressor warnings: false
     uglifyAst.figure_out_scope()
     uglifyAst.compute_char_frequency()
     uglifyAst.mangle_names()

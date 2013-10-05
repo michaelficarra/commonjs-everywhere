@@ -18,6 +18,7 @@ module.exports = (ast, srcMap) ->
         # This is a top-level node like program or a top-level wrapper
         # function, dont care about the source file in these cases
         return
+      # console.error(origStart.name, origEnd.name)
       node.loc =
         start:
           line: origStart.line
