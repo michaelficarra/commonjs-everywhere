@@ -62,9 +62,11 @@
     "escodegen": "0.0.27"
   },
   "devDependencies": {
-    "mocha": "~1.8.1",
     "scopedfs": "~0.1.0",
-    "semver": "~1.1.4"
+    "grunt": "~0.4.1",
+    "grunt-release": "~0.6.0",
+    "grunt-mocha-debug": "0.0.6",
+    "grunt-contrib-watch": "~0.5.3"
   },
   "scripts": {
     "test": "make test"
