@@ -45,7 +45,7 @@ module.exports = (options) ->
 
   options.entryPoints = resolvedEntryPoints
 
-  processed = options.processed or {}
+  processed = options.processed
   checked = {}
 
   while worklist.length
@@ -78,7 +78,7 @@ module.exports = (options) ->
     if typeof astOrJs == 'string'
       astOrJs = {code: astOrJs}
 
-    if astOrJs.code
+    if astOrJs.code?
       try
         ast = acorn.parse astOrJs.code, locations: yes
         ast.loc ?= {}

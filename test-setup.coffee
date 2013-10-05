@@ -31,7 +31,7 @@ sfs.reset = ->
   fs.mkdirpSync FIXTURES_DIR
 do sfs.reset
 
-global[k] = v for own k, v of require './src/module'
+global[k] = v for own k, v of require './src'
 global.FIXTURES_DIR = FIXTURES_DIR
 global.path = path
 global.escodegen = escodegen
@@ -41,14 +41,17 @@ global.fixtures = (opts) ->
   sfs.applySync opts
 
 global.bundle = bundle = (entryPoint, opts) ->
-  root = path.resolve FIXTURES_DIR, (opts.root ? '')
-  escodegen.generate cjsify entryPoint, root, opts
+  opts.root = path.resolve FIXTURES_DIR, (opts.root ? '')
+  opts.entryPoints = [entryPoint]
+  {code} = cjsify opts
+  return code
 global.bundleEval = (entryPoint, opts = {}, env = {}) ->
   global$ = Object.create null
   global$.module$ = module$ = {}
   global$[key] = val for own key, val of env
   opts.export = 'module$.exports'
-  vm.runInNewContext (bundle entryPoint, opts), global$, ''
+  code = bundle entryPoint, opts
+  vm.runInNewContext code, global$, ''
   module$.exports
 
 extensions = ['.js', '.coffee']

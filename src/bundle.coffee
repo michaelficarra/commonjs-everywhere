@@ -9,7 +9,7 @@ sourceMapToAst = require './sourcemap-to-ast'
 canonicalise = require './canonicalise'
 
 PRELUDE_NODE = """
-(function() {
+(function() { var global = this;
   var cwd = '/';
   return {
     title: 'browser',
@@ -102,13 +102,20 @@ bundle = (options) ->
             line: m.originalLine or m.generatedLine
             column: m.originalColumn or m.generatedColumn
         source: canonicalName
+        name: m.name
     lineOffset += lineCount
 
-  for entryPoint in options.entryPoints
-    {id} = options.processed[entryPoint]
+  if options.export
+    {id} = options.processed[options.entryPoints[0]]
     if typeof id != 'number'
       id = "'#{id}'"
-    result += "\nrequire(#{id});"
+    result += "\n#{options.export} = require(#{id});"
+  else
+    for entryPoint in options.entryPoints
+      {id} = options.processed[entryPoint]
+      if typeof id != 'number'
+        id = "'#{id}'"
+      result += "\nrequire(#{id});"
 
   if options.node
     result = wrapNode(result)
@@ -123,6 +130,8 @@ module.exports = (options) ->
 
   if options.minify
     uglifyAst = UglifyJS.parse code
+    # Enabling the compressor seems to break the source map, leave commented
+    # until a solution is found
     # uglifyAst.figure_out_scope()
     # uglifyAst = uglifyAst.transform UglifyJS.Compressor warnings: false
     uglifyAst.figure_out_scope()
