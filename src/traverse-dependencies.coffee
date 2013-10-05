@@ -3,7 +3,7 @@ path = require 'path'
 util = require 'util'
 
 coffee = require 'coffee-script'
-esprima = require 'esprima'
+acorn = require 'acorn'
 estraverse = require 'estraverse'
 escodegen = require 'escodegen'
 
@@ -30,7 +30,7 @@ module.exports = (options) ->
       {js, v3SourceMap} = coffee.compile src, sourceMap: true, bare: true
       return {code: js, map: v3SourceMap}
     '.json': (json, canonicalName) ->
-      esprima.parse "module.exports = #{json}", loc: yes, source: canonicalName
+      acorn.parse "module.exports = #{json}", locations: yes
   for own ext, handler of options.handlers ? {}
     handlers[ext] = handler
   extensions = ['.js', (ext for own ext of handlers)...]
@@ -80,7 +80,8 @@ module.exports = (options) ->
 
     if astOrJs.code
       try
-        ast = esprima.parse astOrJs.code, loc: yes, source: canonicalName
+        ast = acorn.parse astOrJs.code, locations: yes
+        ast.loc ?= {}
         if astOrJs.map
           sourceMapToAst ast, astOrJs.map
       catch e
@@ -94,11 +95,15 @@ module.exports = (options) ->
     # add source file information to the AST root node
     ast.loc ?= {}
     deps = []
-    name = uidFor(canonicalName)
+    id = uidFor(canonicalName)
 
     estraverse.replace ast,
       enter: (node, parents) ->
         if node.loc? then node.loc.source = canonicalName
+        if node.type == 'TryStatement' and not node.guardedHandlers
+          # escodegen will break when generating from acorn's ast unless
+          # we add this
+          node.guardedHandlers = []
         # ignore anything that's not a `require` call
         return unless node.type is 'CallExpression' and node.callee.type is 'Identifier' and node.callee.name is 'require'
         # illegal requires
@@ -143,7 +148,7 @@ module.exports = (options) ->
 
     # cache linecount for a little more efficiency when calculating offsets
     # later
-    lineCount = code.split('\n').length - 1
-    processed[filename] = {name, code, map, lineCount, mtime, deps}
+    lineCount = code.split('\n').length
+    processed[filename] = {id, canonicalName, code, map, lineCount, mtime, deps}
 
   processed

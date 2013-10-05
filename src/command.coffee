@@ -1,6 +1,7 @@
 fs = require 'fs'
 path = require 'path'
 nopt = require 'nopt'
+_ = require 'lodash'
 
 bundle = require './bundle'
 traverseDependencies = require './traverse-dependencies'
@@ -38,12 +39,12 @@ optAliases =
   e: '--main'
 
 options = nopt knownOpts, optAliases, process.argv, 2
-options.entryPoints = entryPoints = options.argv.remain
+options.entryPoints = entryPoints = _.uniq options.argv.remain
 delete options.argv
 
 # default values
 options.node ?= on
-options['inline-sources'] ?= on
+options['inline-sources'] ?= false
 options['cache-path'] ?= '.powerbuild-cache~'
 options['root'] ?= process.cwd()
 options.alias ?= []
@@ -56,6 +57,8 @@ options.inlineSourceMap = options['inline-source-map']
 options.cachePath = options['cache-path']
 options.moduleUids = options['module-uids']
 options.entryPoint = options['entry-point']
+options.sourceMapRoot =
+  path.relative(path.dirname(options.output), options.root)
 
 if options.help
   $0 = if process.argv[0] is 'node' then process.argv[1] else process.argv[0]

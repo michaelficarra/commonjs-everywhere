@@ -1,20 +1,22 @@
-esprima = require 'esprima'
+acorn = require 'acorn'
 path = require 'path'
 {SourceMapConsumer, SourceMapGenerator} = require 'source-map'
 {btoa} = require 'Base64'
 escodegen = require 'escodegen'
+UglifyJS = require 'uglify-js'
 sourceMapToAst = require './sourcemap-to-ast'
 
 canonicalise = require './canonicalise'
 
 PRELUDE_NODE = """
-(function(){
+(function() {
   var cwd = '/';
   return {
     title: 'browser',
     version: '#{process.version}',
     browser: true,
     env: {},
+    on: function() {},
     argv: [],
     nextTick: global.setImmediate || function(fn){ setTimeout(fn, 0); },
     cwd: function(){ return cwd; },
@@ -25,7 +27,7 @@ PRELUDE_NODE = """
 
 PRELUDE = """
 (function() {
-  function require(file, parentModule){
+  function require(file, parentModule) {
     if({}.hasOwnProperty.call(require.cache, file))
       return require.cache[file];
 
@@ -45,7 +47,7 @@ PRELUDE = """
     var dirname = file.slice(0, file.lastIndexOf('/') + 1);
 
     require.cache[file] = module$.exports;
-    resolved.call(module$.exports, module$, module$.exports, dirname, file);
+    resolved.call(this, module$, module$.exports, dirname, file);
     module$.loaded = true;
     return require.cache[file] = module$.exports;
   }
@@ -59,37 +61,37 @@ PRELUDE = """
   require.define = function(file, fn){ require.modules[file] = fn; };
 
   return require;
-)()
+})()
 """
 
 wrap = (modules) -> """
-  (function(global, require, undefined) {
+  (function(require, undefined) { var global = this;
   #{modules}
-  })(this, #{PRELUDE});
+  })(#{PRELUDE});
   """
 
 wrapNode = (modules) -> """
-  (function(global, require, process, undefined) {
+  (function(require, process, undefined) { var global = this;
   #{modules}
-  })(this, #{PRELUDE}, #{PRELUDE_NODE});
+  })(#{PRELUDE}, #{PRELUDE_NODE});
   """
 
 bundle = (options) ->
   result = ''
   resultMap = new SourceMapGenerator
     file: path.basename(options.outFile)
-    sourceRoot: path.relative(path.dirname(options.outFile), options.root)
+    sourceRoot: options.sourceMapRoot
   lineOffset = 1 # global wrapper
 
-  for own filename, {name, code, map, lineCount} of options.processed
-    if typeof name != 'number'
-      name = "'#{name}'"
+  for own filename, {id, canonicalName, code, map, lineCount} of options.processed
+    if typeof id != 'number'
+      id = "'#{id}'"
     result += """
-      \nrequire.define(#{name}, function(module, exports, __dirname, __filename){
+      \nrequire.define(#{id}, function(module, exports, __dirname, __filename){
       #{code}
       });
       """
-    lineOffset += 2# skip linefeed plus the 'require.define' line
+    lineOffset += 2 # skip linefeed plus the 'require.define' line
     orig = new SourceMapConsumer map
     orig.eachMapping (m) ->
       resultMap.addMapping
@@ -99,39 +101,44 @@ bundle = (options) ->
         original:
             line: m.originalLine or m.generatedLine
             column: m.originalColumn or m.generatedColumn
-        source: filename
+        source: canonicalName
+    lineOffset += lineCount
 
   for entryPoint in options.entryPoints
-    name = options.processed[entryPoint].name
-    if typeof name != 'number'
-      name = "'#{name}'"
-    result += "\nrequire(#{name});"
+    {id} = options.processed[entryPoint]
+    if typeof id != 'number'
+      id = "'#{id}'"
+    result += "\nrequire(#{id});"
 
   if options.node
     result = wrapNode(result)
   else
     result = wrap(result)
 
-  return {code: result, map: resultMap}
+  return {code: result, map: resultMap.toString()}
 
 
 module.exports = (options) ->
   {code, map} = bundle options
 
   if options.minify
-    esmangle = require 'esmangle'
-    ast = esprima.parse bundled, loc: yes
-    sourceMapToAst ast, map
-    ast = esmangle.mangle (esmangle.optimize ast), destructive: yes
-    {code, map} = escodegen.generate ast,
-      sourceMap: yes
-      format: escodegen.FORMAT_MINIFY
-      sourceMapWithCode: yes
-      sourceMapRoot: if options.sourceMap? then (path.relative (path.dirname options.sourceMap), options.root) or '.'
+    uglifyAst = UglifyJS.parse code
+    uglifyAst.figure_out_scope()
+    uglifyAst = uglifyAst.transform UglifyJS.Compressor()
+    uglifyAst.figure_out_scope()
+    uglifyAst.compute_char_frequency()
+    uglifyAst.mangle_names()
+    sm = UglifyJS.SourceMap {
+      file: options.output
+      root: options.sourceMapRoot
+      orig: map
+    }
+    code = uglifyAst.print_to_string source_map: sm
+    map = sm.toString()
 
   if (options.sourceMap or options.inlineSourceMap) and options.inlineSources
-    for own filename, {code} of processed
-      map.setSourceContent filename, code
+    for own filename, {code: src, canonicalName} of options.processed
+      map.setSourceContent canonicalName, src
 
   if options.inlineSourceMap
     datauri = "data:application/json;charset=utf-8;base64,#{btoa "#{map}"}"
