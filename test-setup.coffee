@@ -31,7 +31,8 @@ sfs.reset = ->
   fs.mkdirpSync FIXTURES_DIR
 do sfs.reset
 
-global[k] = v for own k, v of require './src'
+# global[k] = v for own k, v of require './src'
+global.Powerbuild = require './src'
 global.FIXTURES_DIR = FIXTURES_DIR
 global.path = path
 global.escodegen = escodegen
@@ -43,8 +44,10 @@ global.fixtures = (opts) ->
 global.bundle = bundle = (entryPoint, opts) ->
   opts.root = path.resolve FIXTURES_DIR, (opts.root ? '')
   opts.entryPoints = [entryPoint]
-  {code} = cjsify opts
+  powerbuild = new Powerbuild opts
+  {code} = powerbuild.bundle()
   return code
+
 global.bundleEval = (entryPoint, opts = {}, env = {}) ->
   global$ = Object.create null
   global$.module$ = module$ = {}

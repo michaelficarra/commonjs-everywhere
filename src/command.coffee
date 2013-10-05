@@ -3,17 +3,9 @@ path = require 'path'
 nopt = require 'nopt'
 _ = require 'lodash'
 
-bundle = require './bundle'
+Powerbuild = require './index'
 traverseDependencies = require './traverse-dependencies'
 
-escodegenFormat =
-  indent:
-    style: '  '
-    base: 0
-  renumber: yes
-  hexadecimal: yes
-  quotes: 'auto'
-  parentheses: no
 
 knownOpts = {}
 # options
@@ -36,19 +28,13 @@ optAliases =
   v: '--verbose'
   w: '--watch'
   x: '--export'
-  e: '--main'
 
 options = nopt knownOpts, optAliases, process.argv, 2
 options.entryPoints = entryPoints = _.uniq options.argv.remain
 delete options.argv
 
 # default values
-options.node ?= on
-options['inline-sources'] ?= false
 options['cache-path'] ?= '.powerbuild-cache~'
-options['root'] ?= process.cwd()
-options.alias ?= []
-options.handler ?= []
 
 options.ignoreMissing = options['ignore-missing']
 options.sourceMap = options['source-map']
@@ -97,38 +83,38 @@ if options.version
   console.log (require '../package.json').version
   process.exit 0
 
-options.aliases = {}
-for aliasPair in options.alias
-  match = aliasPair.match /([^:]+):(.*)/ ? []
-  if match? then options.aliases[match[1]] = match[2]
-  else
-    console.error "invalid alias: #{aliasPair}"
-    process.exit 1
-delete options.alias
-
-options.handlers = {}
-for handlerPair in options.handler
-  match = handlerPair.match /([^:]+):(.*)/ ? []
-  if match? then do (ext = ".#{match[1]}", mod = match[2]) ->
-    options.handlers[ext] = require mod
-  else
-    console.error "invalid handler: #{handlerPair}"
-    process.exit 1
-delete options.handler
-
-
 if options.deps
-  deps = traverseDependencies options
-  console.log dep.canonicalName for own _, dep of deps
+  options.processed = {}
+  traverseDependencies options
+  console.log dep.canonicalName for own _, dep of options.processed
   process.exit 0
 
 if options.watch and not options.output
   console.error '--watch requires --output'
   process.exit 1
 
+options.alias ?= []
+options.aliases = {}
+
+for aliasPair in options.alias
+  if match = aliasPair.match /([^:]+):(.*)/ ? []
+    options.aliases[match[1]] = match[2]
+  else
+    throw new Error "invalid alias: #{aliasPair}"
+
+
+options.handler ?= []
+options.handlers = {}
+
+for handlerPair in options.handler
+  if match = handlerPair.match /([^:]+):(.*)/ ? []
+    options.handlers[match[1]] = require match[2]
+  else
+    throw new Error "invalid handler: #{handlerPair}"
+
+
 buildBundle = ->
-  traverseDependencies options
-  {code, map} = bundle options
+  {code, map} = powerbuild.bundle()
 
   if options.sourceMap
     fs.writeFileSync options.sourceMap, "#{map}"
@@ -148,42 +134,7 @@ buildBundle = ->
   else
     process.stdout.write "#{code}\n"
 
-
 startBuild = ->
-  process.on 'exit', ->
-    cache =
-      processed: options.processed
-      uids: options.uids
-      moduleUids: options.moduleUids
-    fs.writeFileSync options.cachePath, JSON.stringify cache
-
-  process.on 'uncaughtException', (e) ->
-    # An exception may be thrown due to corrupt cache or incompatibilities
-    # between versions, remove it to be safe
-    try fs.unlinkSync options.cachePath
-    options.processed = {}
-    throw e
-
-  if fs.existsSync options.cachePath
-    cache = JSON.parse fs.readFileSync options.cachePath, 'utf8'
-    {processed, uids, moduleUids} = cache
-
-  if not processed or moduleUids != options.moduleUids
-    # Either the cache doesn't exist or the cache was saved with a different
-    # 'moduleUids' value. In either case we must reset it.
-    processed = {}
-    uids = {next: 1, names: {}}
-
-  options.processed = processed
-  options.uids = uids
-  uidFor = options.uidFor = (name) ->
-    if not options.moduleUids
-      return name
-    if not {}.hasOwnProperty.call(uids.names, name)
-      uid = uids.next++
-      uids.names[name] = uid
-    uids.names[name]
-
   buildBundle()
 
   if options.watch
@@ -207,6 +158,8 @@ startBuild = ->
         console.error "done"
         building = false
         return
+
+powerbuild = new Powerbuild options
 
 if entryPoints.length == 1 and entryPoints[0] is '-'
   # support reading input from stdin

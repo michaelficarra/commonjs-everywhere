@@ -20,10 +20,10 @@ badRequireError = (filename, node, msg) ->
       in #{filename}
   """
 
-module.exports = (options) ->
-  aliases = options.aliases ? {}
-  uidFor = options.uidFor
-  root = options.root
+module.exports = (build) ->
+  aliases = build.aliases ? {}
+  uidFor = build.uidFor
+  root = build.root
 
   handlers =
     '.coffee': (src, canonicalName) ->
@@ -31,21 +31,21 @@ module.exports = (options) ->
       return {code: js, map: v3SourceMap}
     '.json': (json, canonicalName) ->
       acorn.parse "module.exports = #{json}", locations: yes
-  for own ext, handler of options.handlers ? {}
+  for own ext, handler of build.handlers ? {}
     handlers[ext] = handler
   extensions = ['.js', (ext for own ext of handlers)...]
 
   worklist = []
   resolvedEntryPoints = []
 
-  for ep in options.entryPoints
+  for ep in build.entryPoints
     resolved = relativeResolve {extensions, aliases, root, path: ep}
     worklist.push(resolved)
     resolvedEntryPoints.push(resolved.filename)
 
-  options.entryPoints = resolvedEntryPoints
+  build.entryPoints = resolvedEntryPoints
 
-  processed = options.processed
+  processed = build.processed
   checked = {}
 
   while worklist.length
@@ -112,15 +112,15 @@ module.exports = (options) ->
         unless node.arguments[0].type is 'Literal' and typeof node.arguments[0].value is 'string'
           badRequireError filename, node, 'argument of require must be a constant string'
         cwd = path.dirname fs.realpathSync filename
-        if options.verbose
+        if build.verbose
           console.error "required \"#{node.arguments[0].value}\" from \"#{canonicalName}\""
         # if we are including this file, its requires need to be processed as well
         try
-          resolved = relativeResolve {extensions, aliases, root: options.root, cwd, path: node.arguments[0].value}
+          resolved = relativeResolve {extensions, aliases, root: build.root, cwd, path: node.arguments[0].value}
           worklist.push resolved
           deps.push resolved
         catch e
-          if options.ignoreMissing
+          if build.ignoreMissing
             return { type: 'Literal', value: null }
           else
             throw e
@@ -142,7 +142,7 @@ module.exports = (options) ->
       sourceMap: yes
       format: escodegen.FORMAT_DEFAULTS
       sourceMapWithCode: yes
-      sourceMapRoot: if options.sourceMap? then (path.relative (path.dirname options.sourceMap), options.root) or '.'
+      sourceMapRoot: if build.sourceMap? then (path.relative (path.dirname build.sourceMap), build.root) or '.'
 
     map = map.toString()
 

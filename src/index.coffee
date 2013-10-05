@@ -1,42 +1,69 @@
+_ = require 'lodash'
+fs = require 'fs'
 bundle = require './bundle'
 traverseDependencies = require './traverse-dependencies'
 
-exports.bundle = bundle
-exports.traverseDependencies = traverseDependencies
-exports.cjsify = (options = {}) ->
-  if options.export and options.entryPoints.length != 1
-    throw new Error('Can only set the export option with one entry point')
-  options.processed or= {}
-  if options.output
-    options.sourceMapRoot =
-      path.relative(path.dirname(options.output), options.root)
-  options.alias ?= []
-  options.aliases = {}
-  for aliasPair in options.alias
-    match = aliasPair.match /([^:]+):(.*)/ ? []
-    if match? then options.aliases[match[1]] = match[2]
-    else
-      console.error "invalid alias: #{aliasPair}"
-      process.exit 1
-  delete options.alias
-  options.handler ?= []
-  options.handlers = {}
-  for handlerPair in options.handler
-    match = handlerPair.match /([^:]+):(.*)/ ? []
-    if match? then do (ext = ".#{match[1]}", mod = match[2]) ->
-      options.handlers[ext] = require mod
-    else
-      console.error "invalid handler: #{handlerPair}"
-      process.exit 1
-  delete options.handler
-  options.inlineSources ?= false
-  options.cachePath ?= '.powerbuild-cache~'
-  options.log or= ->
-  options.root or= process.cwd()
-  options.uidFor or= (name) -> name
-  options.node ?= true
-  options.processed = {}
-  traverseDependencies options
-  if options.verbose
-    options.log "\nIncluded modules:\n  #{(Object.keys options.processed).sort().join "\n  "}"
-  bundle options
+
+class Powerbuild
+  constructor: (options) ->
+    if options.export and options.entryPoints.length != 1
+      throw new Error('Can only set the export option with one entry point')
+
+    options.inlineSources ?= false
+    options.log or= ->
+    options.root or= process.cwd()
+    options.node ?= true
+    {@output, @export, @entryPoints, @root, @node, @log, @inlineSources,
+     @verbose, @ignoreMissing, @sourceMap, @inlineSourceMap, @moduleUids,
+     @mainModule, @minify, @aliases, @handlers} = options
+
+    if @output
+      @sourceMapRoot = path.relative(path.dirname(@output), @root)
+
+    if cachePath = options.cachePath
+      process.on 'exit', =>
+        cache =
+          processed: @processed
+          uids: @uids
+          moduleUids: @moduleUids
+        fs.writeFileSync cachePath, JSON.stringify cache
+
+      process.on 'uncaughtException', (e) ->
+        # An exception may be thrown due to corrupt cache or incompatibilities
+        # between versions, remove it to be safe
+        try fs.unlinkSync cachePath
+        @processed = {}
+        throw e
+
+      if fs.existsSync cachePath
+        cache = JSON.parse fs.readFileSync cachePath, 'utf8'
+        {@processed, @uids, @moduleUids} = cache
+
+    if not @processed or @moduleUids != options.moduleUids
+      # Either the cache doesn't exist or the cache was saved with a different
+      # 'moduleUids' value. In either case we must reset it.
+      @processed = {}
+      @uids = {next: 1, names: {}}
+
+
+  bundle: ->
+    @traverseDependencies()
+    bundle this
+
+
+  traverseDependencies: ->
+    traverseDependencies this
+    if @verbose
+      @log "Included modules: #{(Object.keys @processed).sort()}"
+
+
+  uidFor: (name) ->
+    if not @moduleUids
+      return name
+    if not {}.hasOwnProperty.call(@uids.names, name)
+      uid = @uids.next++
+      @uids.names[name] = uid
+    @uids.names[name]
+
+
+module.exports = Powerbuild

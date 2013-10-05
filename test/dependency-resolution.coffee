@@ -1,17 +1,17 @@
 path = require 'path'
-
+# traverseDependencies = require '../src/traverse-dependencies'
 
 suite 'Dependency Resolution', ->
 
   deps = (entryFile, opts) ->
     entryFile = path.resolve path.join FIXTURES_DIR, entryFile
     opts or= {}
-    opts.processed or= {}
-    opts.uidFor or= (name) -> name
-    opts.root = path.join process.cwd(), 'fixtures'
+    opts.root = FIXTURES_DIR
     opts.entryPoints = [entryFile]
+    powerbuild = new Powerbuild opts
+    powerbuild.traverseDependencies()
     rv = []
-    for filename in (Object.keys traverseDependencies  opts).sort()
+    for filename in (Object.keys powerbuild.processed).sort()
       if filename[...FIXTURES_DIR.length] is FIXTURES_DIR
         "#{path.relative FIXTURES_DIR, filename}"
       else

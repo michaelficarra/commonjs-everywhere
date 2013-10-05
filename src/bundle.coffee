@@ -76,14 +76,14 @@ wrapNode = (modules) -> """
   })(#{PRELUDE}, #{PRELUDE_NODE});
   """
 
-bundle = (options) ->
+bundle = (build) ->
   result = ''
   resultMap = new SourceMapGenerator
-    file: path.basename(options.outFile)
-    sourceRoot: options.sourceMapRoot
+    file: path.basename(build.output)
+    sourceRoot: build.sourceMapRoot
   lineOffset = 1 # global wrapper
 
-  for own filename, {id, canonicalName, code, map, lineCount} of options.processed
+  for own filename, {id, canonicalName, code, map, lineCount} of build.processed
     if typeof id != 'number'
       id = "'#{id}'"
     result += """
@@ -105,19 +105,19 @@ bundle = (options) ->
         name: m.name
     lineOffset += lineCount
 
-  if options.export
-    {id} = options.processed[options.entryPoints[0]]
+  if build.export
+    {id} = build.processed[build.entryPoints[0]]
     if typeof id != 'number'
       id = "'#{id}'"
-    result += "\n#{options.export} = require(#{id});"
+    result += "\n#{build.export} = require(#{id});"
   else
-    for entryPoint in options.entryPoints
-      {id} = options.processed[entryPoint]
+    for entryPoint in build.entryPoints
+      {id} = build.processed[entryPoint]
       if typeof id != 'number'
         id = "'#{id}'"
       result += "\nrequire(#{id});"
 
-  if options.node
+  if build.node
     result = wrapNode(result)
   else
     result = wrap(result)
@@ -125,10 +125,10 @@ bundle = (options) ->
   return {code: result, map: resultMap.toString()}
 
 
-module.exports = (options) ->
-  {code, map} = bundle options
+module.exports = (build) ->
+  {code, map} = bundle build
 
-  if options.minify
+  if build.minify
     uglifyAst = UglifyJS.parse code
     # Enabling the compressor seems to break the source map, leave commented
     # until a solution is found
@@ -138,18 +138,18 @@ module.exports = (options) ->
     uglifyAst.compute_char_frequency()
     uglifyAst.mangle_names()
     sm = UglifyJS.SourceMap {
-      file: options.output
-      root: options.sourceMapRoot
+      file: build.output
+      root: build.sourceMapRoot
       orig: map
     }
     code = uglifyAst.print_to_string source_map: sm
     map = sm.toString()
 
-  if (options.sourceMap or options.inlineSourceMap) and options.inlineSources
-    for own filename, {code: src, canonicalName} of options.processed
+  if (build.sourceMap or build.inlineSourceMap) and build.inlineSources
+    for own filename, {code: src, canonicalName} of build.processed
       map.setSourceContent canonicalName, src
 
-  if options.inlineSourceMap
+  if build.inlineSourceMap
     datauri = "data:application/json;charset=utf-8;base64,#{btoa "#{map}"}"
     code = "#{code}\n//# sourceMappingURL=#{datauri}"
 

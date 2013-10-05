@@ -12,7 +12,7 @@ module.exports = (grunt) ->
       options:
         ui: 'tdd'
         reporter: 'dot'
-        check: ['src/*.coffee', 'test/*.coffee']
+        check: ['test-setup.coffee', 'src/*.coffee', 'test/*.coffee']
       nodejs:
         options:
           src: ['test-setup.coffee', 'test/*.coffee']
@@ -22,6 +22,7 @@ module.exports = (grunt) ->
         nospawn: true
       all:
         files: [
+          'test-setup.coffee'
           'Gruntfile.coffee'
           'src/*.coffee'
           'test/*.coffee'
