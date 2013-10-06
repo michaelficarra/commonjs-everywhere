@@ -4,6 +4,7 @@ nopt = require 'nopt'
 _ = require 'lodash'
 
 Powerbuild = require './index'
+buildCache = require '../src/build-cache'
 traverseDependencies = require './traverse-dependencies'
 
 knownOpts = {}
@@ -145,6 +146,9 @@ startBuild = ->
         building = false
         return
 
+cache = buildCache()
+options.processed = cache.processed
+options.uids = cache.uids
 build = new Powerbuild options
 
 if entryPoints.length == 1 and entryPoints[0] is '-'
