@@ -14,13 +14,15 @@ class Powerbuild
     options.inlineSources ?= false
     options.log or= ->
     options.processed or= {}
+    options.checkNpmModules ?= false
+    options.npmSourceMaps ?= false
     options.moduleUids ?= false
     options.root or= process.cwd()
     options.node ?= true
     {@output, @export, @entryPoints, @root, @node, @log, @inlineSources,
      @verbose, @ignoreMissing, @sourceMap, @inlineSourceMap, @moduleUids,
      @mainModule, @minify, @aliases, @handlers, @processed, @uids,
-     @moduleUids} = options
+     @moduleUids, @checkNpmModules, @npmSourceMaps} = options
 
     if @output
       @sourceMapRoot = path.relative(path.dirname(@output), @root)

@@ -121,17 +121,20 @@ buildBundle = ->
   else
     process.stdout.write "#{code}\n"
 
+cache = buildCache()
+options.processed = cache.processed
+options.uids = cache.uids
+build = new Powerbuild options
+
 startBuild = ->
   buildBundle()
 
   if options.watch
     # Flush the cache when the user presses CTRL+C or the process is
     # terminated from outside
-    process.on 'SIGINT', process.exit
-    process.on 'SIGTERM', process.exit
     watching = {}
     building = false
-    for own file of processed when file not of watching then do (file) ->
+    for own file of build.processed when file not of watching then do (file) ->
       watching[file] = true
       fs.watchFile file, {persistent: yes, interval: 500}, (curr, prev) ->
         if building then return
@@ -145,11 +148,6 @@ startBuild = ->
         console.error "done"
         building = false
         return
-
-cache = buildCache()
-options.processed = cache.processed
-options.uids = cache.uids
-build = new Powerbuild options
 
 if entryPoints.length == 1 and entryPoints[0] is '-'
   # support reading input from stdin

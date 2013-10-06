@@ -29,6 +29,7 @@ module.exports = (grunt) ->
         files: [
           'test-setup.coffee'
           'Gruntfile.coffee'
+          'tasks/*.coffee'
           'src/*.coffee'
           'test/*.coffee'
         ]

@@ -2,6 +2,7 @@ fs = require 'fs'
 path = require 'path'
 util = require 'util'
 
+_ = require 'lodash'
 esprima = require 'esprima'
 estraverse = require 'estraverse'
 escodegen = require 'escodegen'
@@ -29,7 +30,7 @@ module.exports = (build) ->
 
   for ep in build.entryPoints
     resolved = relativeResolve {extensions: build.extensions, aliases, root, path: ep}
-    worklist.push(resolved)
+    worklist.push(_.assign(resolved, {isNpmModule: false}))
     resolvedEntryPoints.push(resolved.filename)
 
   build.entryPoints = resolvedEntryPoints
@@ -38,7 +39,7 @@ module.exports = (build) ->
   checked = {}
 
   while worklist.length
-    {filename, canonicalName} = worklist.pop()
+    {filename, canonicalName, isNpmModule} = worklist.pop()
 
     # support aliasing to falsey values to omit files
     continue unless filename
@@ -52,7 +53,9 @@ module.exports = (build) ->
 
     if processed[filename]?.mtime == mtime
       # ignore files that have not changed, but also check its dependencies
-      worklist = worklist.concat processed[filename].deps
+      for dep in processed[filename].deps
+        if dep.isNpmModule and build.checkNpmModules
+          worklist.push dep
       continue
 
     src = (fs.readFileSync filename).toString()
@@ -132,9 +135,14 @@ module.exports = (build) ->
           console.error "required \"#{node.arguments[0].value}\" from \"#{canonicalName}\""
         # if we are including this file, its requires need to be processed as well
         try
-          resolved = relativeResolve {extensions: build.extensions, aliases, root: build.root, cwd, path: node.arguments[0].value}
-          worklist.push resolved
-          deps.push resolved
+          moduleName = node.arguments[0].value
+          isNpmDep = /^[^/.]/.test(moduleName)
+          resolved = relativeResolve {extensions: build.extensions, aliases, root: build.root, cwd, path: moduleName}
+          dep = _.assign(resolved, {isNpmModule: isNpmDep})
+          if dep.filename not of build.processed or
+              isNpmDep and bundle.checkNpmModules
+            worklist.push dep
+          deps.push dep
         catch e
           if build.ignoreMissing
             return { type: 'Literal', value: null }
@@ -154,13 +162,18 @@ module.exports = (build) ->
           }]
         }
 
-    {code, map} = escodegen.generate ast,
-      sourceMap: yes
-      format: escodegen.FORMAT_DEFAULTS
-      sourceMapWithCode: yes
-      sourceMapRoot: if build.sourceMap? then (path.relative (path.dirname build.sourceMap), build.root) or '.'
-
-    map = map.toString()
+    map = null
+    if isNpmModule or build.npmSourceMaps
+      {code, map} = escodegen.generate ast,
+        sourceMap: true
+        format: escodegen.FORMAT_DEFAULTS
+        sourceMapWithCode: true
+        sourceMapRoot: if build.sourceMap? then (path.relative (path.dirname build.sourceMap), build.root) or '.'
+      map = map.toString()
+    else
+      code = escodegen.generate ast,
+        sourceMap: false
+        format: escodegen.FORMAT_DEFAULTS
 
     # cache linecount for a little more efficiency when calculating offsets
     # later

@@ -91,17 +91,18 @@ bundle = (build) ->
       });
       """
     lineOffset += 2 # skip linefeed plus the 'require.define' line
-    orig = new SourceMapConsumer map
-    orig.eachMapping (m) ->
-      resultMap.addMapping
-        generated:
-          line: m.generatedLine + lineOffset
-          column: m.generatedColumn
-        original:
-          line: m.originalLine or m.generatedLine
-          column: m.originalColumn or m.generatedColumn
-        source: canonicalName
-        name: m.name
+    if map
+      orig = new SourceMapConsumer map
+      orig.eachMapping (m) ->
+        resultMap.addMapping
+          generated:
+            line: m.generatedLine + lineOffset
+            column: m.generatedColumn
+          original:
+            line: m.originalLine or m.generatedLine
+            column: m.originalColumn or m.generatedColumn
+          source: canonicalName
+          name: m.name
     lineOffset += lineCount
 
   if build.export
