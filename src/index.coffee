@@ -16,6 +16,7 @@ class Powerbuild
     options.processed or= {}
     options.checkNpmModules ?= false
     options.npmSourceMaps ?= false
+    options.bundleNpmModules ?= true
     options.moduleUids ?= false
     options.root or= process.cwd()
     options.node ?= true

@@ -111,13 +111,16 @@ for handlerPair in options.handler
 
 
 buildBundle = ->
+  start = new Date().getTime()
   {code, map} = build.bundle()
-
-  if build.sourceMap
-    fs.writeFileSync build.sourceMap, "#{map}"
 
   if build.output
     fs.writeFileSync build.output, code
+    console.error("Created #{build.output}")
+    if build.sourceMap
+      console.error("Created #{build.sourceMap}")
+      fs.writeFileSync build.sourceMap, "#{map}"
+    console.error("Completed in #{new Date().getTime() - start} ms")
   else
     process.stdout.write "#{code}\n"
 
@@ -130,6 +133,7 @@ startBuild = ->
   buildBundle()
 
   if options.watch
+    console.error("Watching for changes...")
     # Flush the cache when the user presses CTRL+C or the process is
     # terminated from outside
     watching = {}
@@ -138,14 +142,13 @@ startBuild = ->
       watching[file] = true
       fs.watchFile file, {persistent: yes, interval: 500}, (curr, prev) ->
         if building then return
+        console.error("File '#{file}' as changed, starting rebuild")
         building = true
         ino = if process.platform is 'win32' then curr.ino? else curr.ino
         unless ino
           console.error "WARNING: watched file #{file} has disappeared"
           return
-        console.error "#{file} changed, rebuilding"
         buildBundle()
-        console.error "done"
         building = false
         return
 

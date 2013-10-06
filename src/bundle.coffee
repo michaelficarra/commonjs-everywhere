@@ -66,21 +66,38 @@ PRELUDE = """
 wrap = (modules) -> """
   (function(require, undefined) { var global = this;
   #{modules}
-  })(#{PRELUDE});
+  })(#{PRELUDE})
   """
 
 wrapNode = (modules) -> """
   (function(require, process, undefined) { var global = this;
   #{modules}
-  })(#{PRELUDE}, #{PRELUDE_NODE});
+  })(#{PRELUDE}, #{PRELUDE_NODE})
   """
+
+wrapUmd = (exports, commonjs) -> """
+  (function(exported) {
+    if (typeof exports === 'object') {
+      module.exports = exported;
+    } else if (typeof define === 'function' && define.amd) {
+      define(function() {
+        return exported;
+      });
+    } else {
+      #{exports}
+    }
+  })(#{commonjs});
+  """
+
+umdOffset = wrapUmd('', '').split('\n').length
+
 
 bundle = (build) ->
   result = ''
   resultMap = new SourceMapGenerator
     file: path.basename(build.output)
     sourceRoot: build.sourceMapRoot
-  lineOffset = 1 # global wrapper
+  lineOffset = umdOffset
 
   for own filename, {id, canonicalName, code, map, lineCount} of build.processed
     if typeof id != 'number'
@@ -105,22 +122,28 @@ bundle = (build) ->
           name: m.name
     lineOffset += lineCount
 
-  if build.export
-    {id} = build.processed[build.entryPoints[0]]
+  for i in [0...build.entryPoints.length]
+    entryPoint = build.entryPoints[i]
+    {id} = build.processed[entryPoint]
     if typeof id != 'number'
       id = "'#{id}'"
-    result += "\n#{build.export} = require(#{id});"
-  else
-    for entryPoint in build.entryPoints
-      {id} = build.processed[entryPoint]
-      if typeof id != 'number'
-        id = "'#{id}'"
+    if i == build.entryPoints.length - 1
+      # export the last entry point
+      result += "\nreturn require(#{id});"
+    else
       result += "\nrequire(#{id});"
 
-  if build.node
-    result = wrapNode(result)
+  if build.export
+    exports = "#{build.export} = exported;"
   else
-    result = wrap(result)
+    exports = ''
+
+  if build.node
+    commonjs = wrapNode(result)
+  else
+    commonjs = wrap(result)
+
+  result = wrapUmd(exports, commonjs)
 
   return {code: result, map: resultMap.toString()}
 

@@ -10,6 +10,7 @@ escodegen = require 'escodegen'
 canonicalise = require './canonicalise'
 relativeResolve = require './relative-resolve'
 sourceMapToAst = require './sourcemap-to-ast'
+isCore = require './is-core'
 
 badRequireError = (filename, node, msg) ->
   if node.loc? and node.loc?.start?
@@ -22,7 +23,6 @@ badRequireError = (filename, node, msg) ->
 
 module.exports = (build) ->
   aliases = build.aliases ? {}
-  uidFor = build.uidFor
   root = build.root
 
   worklist = []
@@ -109,7 +109,7 @@ module.exports = (build) ->
     # add source file information to the AST root node
     ast.loc ?= {}
     deps = []
-    id = uidFor(canonicalName)
+    id = build.uidFor(canonicalName)
 
     estraverse.replace ast,
       enter: (node, parents) ->
@@ -133,16 +133,22 @@ module.exports = (build) ->
         cwd = path.dirname fs.realpathSync filename
         if build.verbose
           console.error "required \"#{node.arguments[0].value}\" from \"#{canonicalName}\""
-        # if we are including this file, its requires need to be processed as well
+        # if we are including this file, its requires need to be processed as
+        # well
         try
           moduleName = node.arguments[0].value
-          isNpmDep = /^[^/.]/.test(moduleName)
-          resolved = relativeResolve {extensions: build.extensions, aliases, root: build.root, cwd, path: moduleName}
-          dep = _.assign(resolved, {isNpmModule: isNpmDep})
-          if dep.filename not of build.processed or
-              isNpmDep and bundle.checkNpmModules
-            worklist.push dep
-          deps.push dep
+          rewriteRequire = false
+          if not (isCore(moduleName)) or build.node
+            rewriteRequire = true
+            resolved = relativeResolve {extensions: build.extensions, aliases, root: build.root, cwd, path: moduleName}
+            # Only include an external dep if its not a core module or
+            # we are emulating a node.js environment
+            isNpmDep = isNpmModule or /^[^/.]/.test(moduleName)
+            dep = _.assign(resolved, {isNpmModule: isNpmDep})
+            if dep.filename not of build.processed or
+                isNpmDep and build.checkNpmModules
+              worklist.push dep
+            deps.push dep
         catch e
           if build.ignoreMissing
             return { type: 'Literal', value: null }
@@ -150,20 +156,22 @@ module.exports = (build) ->
             throw e
         # rewrite the require to use the root-relative path or the uid if
         # enabled
-        {
-          type: 'CallExpression'
-          callee: node.callee
-          arguments: [{
-            type: 'Literal'
-            value: uidFor(resolved.canonicalName)
-          }, {
-            type: 'Identifier'
-            name: 'module'
-          }]
-        }
+        if rewriteRequire
+          return {
+            type: 'CallExpression'
+            callee: node.callee
+            arguments: [{
+              type: 'Literal'
+              value: build.uidFor(dep.canonicalName)
+            }, {
+              type: 'Identifier'
+              name: 'module'
+            }]
+          }
+        return
 
     map = null
-    if isNpmModule or build.npmSourceMaps
+    if not isNpmModule or build.npmSourceMaps
       {code, map} = escodegen.generate ast,
         sourceMap: true
         format: escodegen.FORMAT_DEFAULTS
@@ -174,6 +182,7 @@ module.exports = (build) ->
       code = escodegen.generate ast,
         sourceMap: false
         format: escodegen.FORMAT_DEFAULTS
+        comment: true
 
     # cache linecount for a little more efficiency when calculating offsets
     # later

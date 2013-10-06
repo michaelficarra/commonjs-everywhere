@@ -23,8 +23,9 @@ module.exports = (grunt) ->
       opts.output = f.dest
       build = new Powerbuild(opts)
       start = new Date().getTime()
+      grunt.log.ok("Build started...")
       {code, map} = build.bundle()
-      console.error("took #{new Date().valueOf() - start} ms")
+      console.error("Completed in #{new Date().getTime() - start} ms")
       grunt.file.write build.output, code
       grunt.log.ok("Created #{build.output}")
       if build.sourceMap
