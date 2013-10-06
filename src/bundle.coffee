@@ -1,11 +1,9 @@
 path = require 'path'
 {SourceMapConsumer, SourceMapGenerator} = require 'source-map'
 {btoa} = require 'Base64'
-escodegen = require 'escodegen'
 UglifyJS = require 'uglify-js'
 sourceMapToAst = require './sourcemap-to-ast'
 
-canonicalise = require './canonicalise'
 
 PRELUDE_NODE = """
 (function() { var global = this;
@@ -26,16 +24,23 @@ PRELUDE_NODE = """
 
 PRELUDE = """
 (function() {
-  function require(file, parentModule) {
-    if({}.hasOwnProperty.call(require.cache, file))
-      return require.cache[file];
+  var outer;
+  if (typeof require === 'function') {
+    outer = require;
+  }
+  function inner(file, parentModule) {
+    if({}.hasOwnProperty.call(inner.cache, file))
+      return inner.cache[file];
 
-    var resolved = require.resolve(file);
-    if(!resolved) throw new Error('Failed to resolve module ' + file);
+    var resolved = inner.resolve(file);
+    if(!resolved && outer) {
+      return inner.cache[file] = outer(file);
+    }
+    if(!resolved) throw new Error("Failed to resolve module '" + file + "'");
 
     var module$ = {
       id: file,
-      require: require,
+      require: inner,
       filename: file,
       exports: {},
       loaded: false,
@@ -45,21 +50,21 @@ PRELUDE = """
     if(parentModule) parentModule.children.push(module$);
     var dirname = file.slice(0, file.lastIndexOf('/') + 1);
 
-    require.cache[file] = module$.exports;
+    inner.cache[file] = module$.exports;
     resolved.call(this, module$, module$.exports, dirname, file);
     module$.loaded = true;
-    return require.cache[file] = module$.exports;
+    return inner.cache[file] = module$.exports;
   }
 
-  require.modules = {};
-  require.cache = {};
+  inner.modules = {};
+  inner.cache = {};
 
-  require.resolve = function(file){
-    return {}.hasOwnProperty.call(require.modules, file) ? require.modules[file] : void 0;
+  inner.resolve = function(file){
+    return {}.hasOwnProperty.call(inner.modules, file) ? inner.modules[file] : void 0;
   };
-  require.define = function(file, fn){ require.modules[file] = fn; };
+  inner.define = function(file, fn){ inner.modules[file] = fn; };
 
-  return require;
+  return inner;
 })()
 """
 

@@ -173,6 +173,7 @@ module.exports = (build) ->
     map = null
     if not isNpmModule or build.npmSourceMaps
       {code, map} = escodegen.generate ast,
+        comment: true
         sourceMap: true
         format: escodegen.FORMAT_DEFAULTS
         sourceMapWithCode: true
@@ -180,9 +181,9 @@ module.exports = (build) ->
       map = map.toString()
     else
       code = escodegen.generate ast,
+        comment: true
         sourceMap: false
         format: escodegen.FORMAT_DEFAULTS
-        comment: true
 
     # cache linecount for a little more efficiency when calculating offsets
     # later
