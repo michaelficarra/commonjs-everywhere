@@ -5,8 +5,13 @@ module.exports = (grunt) ->
       all: ['build']
 
     powerbuild:
+      options:
+        sourceMap: true
+        ignoreMissing: true
       all:
-        'lib': 'src/*.coffee'
+        files: [
+          {src: ['test-setup.coffee', 'test/*.coffee'], dest: 'bundle.js'}
+        ]
 
     mocha_debug:
       options:
@@ -32,11 +37,11 @@ module.exports = (grunt) ->
         ]
     
 
-  # grunt.loadTasks('tasks')
+  grunt.loadTasks('tasks')
 
   grunt.loadNpmTasks('grunt-release')
   grunt.loadNpmTasks('grunt-mocha-debug')
   grunt.loadNpmTasks('grunt-contrib-watch')
 
-  grunt.registerTask('test', ['mocha_debug'])
+  grunt.registerTask('test', ['powerbuild', 'mocha_debug'])
   grunt.registerTask('default', ['test', 'watch'])

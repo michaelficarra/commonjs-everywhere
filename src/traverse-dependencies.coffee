@@ -2,8 +2,7 @@ fs = require 'fs'
 path = require 'path'
 util = require 'util'
 
-coffee = require 'coffee-script'
-acorn = require 'acorn'
+esprima = require 'esprima'
 estraverse = require 'estraverse'
 escodegen = require 'escodegen'
 
@@ -25,21 +24,11 @@ module.exports = (build) ->
   uidFor = build.uidFor
   root = build.root
 
-  handlers =
-    '.coffee': (src, canonicalName) ->
-      {js, v3SourceMap} = coffee.compile src, sourceMap: true, bare: true
-      return {code: js, map: v3SourceMap}
-    '.json': (json, canonicalName) ->
-      acorn.parse "module.exports = #{json}", locations: yes
-  for own ext, handler of build.handlers ? {}
-    handlers[ext] = handler
-  extensions = ['.js', (ext for own ext of handlers)...]
-
   worklist = []
   resolvedEntryPoints = []
 
   for ep in build.entryPoints
-    resolved = relativeResolve {extensions, aliases, root, path: ep}
+    resolved = relativeResolve {extensions: build.extensions, aliases, root, path: ep}
     worklist.push(resolved)
     resolvedEntryPoints.push(resolved.filename)
 
@@ -70,18 +59,40 @@ module.exports = (build) ->
 
     astOrJs =
       # handle compile-to-JS languages and other non-JS files
-      if {}.hasOwnProperty.call handlers, extname
-        handlers[extname] src, canonicalName
+      if {}.hasOwnProperty.call build.handlers, extname
+        build.handlers[extname] src, canonicalName
       else # assume JS
         src
 
     if typeof astOrJs == 'string'
       astOrJs = {code: astOrJs}
 
+    adjustWrapperLocation = false
+
     if astOrJs.code?
       try
-        ast = acorn.parse astOrJs.code, locations: yes
-        ast.loc ?= {}
+        # wrap into a function so top-level 'return' statements wont break
+        # when parsing
+        astOrJs.code = "(function(){#{astOrJs.code}})()"
+        ast = esprima.parse astOrJs.code,
+          loc: yes, comment: true, range: true, tokens: true
+        # unwrap the function
+        ast.body = ast.body[0].expression.callee.body.body
+        # adjust the range/column offsets to ignore the wrapped function
+        adjustWrapperLocation = true
+        # Remove the extra tokens
+        ast.tokens = ast.tokens.slice(5, ast.tokens.length - 4)
+        # Fix comments/token position info
+        for t in ast.comments.concat(ast.tokens)
+          t.range[0] -= 12
+          t.range[1] -= 12
+          if t.loc.start.line == 1
+            t.loc.start.column -= 12
+          if t.loc.end.line == 1
+            t.loc.end.column -= 12
+        # Also adjust top node end range/column
+        ast.range[1] -= 4
+        ast.loc.end.column -= 4
         if astOrJs.map
           sourceMapToAst ast, astOrJs.map
       catch e
@@ -99,11 +110,16 @@ module.exports = (build) ->
 
     estraverse.replace ast,
       enter: (node, parents) ->
-        if node.loc? then node.loc.source = canonicalName
-        if node.type == 'TryStatement' and not node.guardedHandlers
-          # escodegen will break when generating from acorn's ast unless
-          # we add this
-          node.guardedHandlers = []
+        if node.loc?
+          node.loc.source = canonicalName
+          if node.type != 'Program' and adjustWrapperLocation
+            # Adjust the location info to reflect the removed function wrapper 
+            if node.loc.start.line == 1 and node.loc.start.column >= 12
+              node.loc.start.column -= 12
+            if node.loc.end.line == 1 and node.loc.end.column >= 12
+              node.loc.end.column -= 12
+            node.range[0] -= 12
+            node.range[1] -= 12
         # ignore anything that's not a `require` call
         return unless node.type is 'CallExpression' and node.callee.type is 'Identifier' and node.callee.name is 'require'
         # illegal requires
@@ -116,7 +132,7 @@ module.exports = (build) ->
           console.error "required \"#{node.arguments[0].value}\" from \"#{canonicalName}\""
         # if we are including this file, its requires need to be processed as well
         try
-          resolved = relativeResolve {extensions, aliases, root: build.root, cwd, path: node.arguments[0].value}
+          resolved = relativeResolve {extensions: build.extensions, aliases, root: build.root, cwd, path: node.arguments[0].value}
           worklist.push resolved
           deps.push resolved
         catch e

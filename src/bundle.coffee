@@ -1,4 +1,3 @@
-acorn = require 'acorn'
 path = require 'path'
 {SourceMapConsumer, SourceMapGenerator} = require 'source-map'
 {btoa} = require 'Base64'
@@ -96,11 +95,11 @@ bundle = (build) ->
     orig.eachMapping (m) ->
       resultMap.addMapping
         generated:
-            line: m.generatedLine + lineOffset
-            column: m.generatedColumn
+          line: m.generatedLine + lineOffset
+          column: m.generatedColumn
         original:
-            line: m.originalLine or m.generatedLine
-            column: m.originalColumn or m.generatedColumn
+          line: m.originalLine or m.generatedLine
+          column: m.originalColumn or m.generatedColumn
         source: canonicalName
         name: m.name
     lineOffset += lineCount
@@ -149,8 +148,15 @@ module.exports = (build) ->
     for own filename, {code: src, canonicalName} of build.processed
       map.setSourceContent canonicalName, src
 
+  sourceMappingUrl =
+    if build.output
+      path.relative (path.dirname build.output), build.sourceMap
+    else build.sourceMap
+
   if build.inlineSourceMap
     datauri = "data:application/json;charset=utf-8;base64,#{btoa "#{map}"}"
     code = "#{code}\n//# sourceMappingURL=#{datauri}"
+  else
+    code = "#{code}\n//# sourceMappingURL=#{sourceMappingUrl}"
 
   return {code, map}

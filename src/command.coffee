@@ -6,7 +6,6 @@ _ = require 'lodash'
 Powerbuild = require './index'
 traverseDependencies = require './traverse-dependencies'
 
-
 knownOpts = {}
 # options
 knownOpts[opt] = Boolean for opt in [
@@ -43,8 +42,6 @@ options.inlineSourceMap = options['inline-source-map']
 options.cachePath = options['cache-path']
 options.moduleUids = options['module-uids']
 options.entryPoint = options['entry-point']
-options.sourceMapRoot =
-  path.relative(path.dirname(options.output), options.root)
 
 if options.help
   $0 = if process.argv[0] is 'node' then process.argv[1] else process.argv[0]
@@ -102,7 +99,6 @@ for aliasPair in options.alias
   else
     throw new Error "invalid alias: #{aliasPair}"
 
-
 options.handler ?= []
 options.handlers = {}
 
@@ -114,23 +110,13 @@ for handlerPair in options.handler
 
 
 buildBundle = ->
-  {code, map} = powerbuild.bundle()
+  {code, map} = build.bundle()
 
-  if options.sourceMap
-    fs.writeFileSync options.sourceMap, "#{map}"
-    sourceMappingUrl =
-      if options.output
-        path.relative (path.dirname options.output), options.sourceMap
-      else options.sourceMap
-    unless options.inlineSourceMap
-      code = "#{code}\n//# sourceMappingURL=#{sourceMappingUrl}"
+  if build.sourceMap
+    fs.writeFileSync build.sourceMap, "#{map}"
 
-  if options.inlineSourceMap
-    datauri = "data:application/json;charset=utf-8;base64,#{btoa "#{map}"}"
-    code = "#{code}\n//# sourceMappingURL=#{datauri}"
-
-  if options.output
-    fs.writeFileSync options.output, code
+  if build.output
+    fs.writeFileSync build.output, code
   else
     process.stdout.write "#{code}\n"
 
@@ -159,7 +145,7 @@ startBuild = ->
         building = false
         return
 
-powerbuild = new Powerbuild options
+build = new Powerbuild options
 
 if entryPoints.length == 1 and entryPoints[0] is '-'
   # support reading input from stdin

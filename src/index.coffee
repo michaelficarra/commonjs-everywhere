@@ -1,5 +1,7 @@
 _ = require 'lodash'
-fs = require 'fs'
+acorn = require 'acorn'
+coffee = require 'coffee-script'
+path = require 'path'
 bundle = require './bundle'
 traverseDependencies = require './traverse-dependencies'
 
@@ -11,44 +13,36 @@ class Powerbuild
 
     options.inlineSources ?= false
     options.log or= ->
+    options.processed or= {}
+    options.moduleUids ?= false
     options.root or= process.cwd()
     options.node ?= true
     {@output, @export, @entryPoints, @root, @node, @log, @inlineSources,
      @verbose, @ignoreMissing, @sourceMap, @inlineSourceMap, @moduleUids,
-     @mainModule, @minify, @aliases, @handlers} = options
+     @mainModule, @minify, @aliases, @handlers, @processed, @uids,
+     @moduleUids} = options
 
     if @output
       @sourceMapRoot = path.relative(path.dirname(@output), @root)
+      if @sourceMap == true
+        @sourceMap = "#{@output}.map"
 
-    if cachePath = options.cachePath
-      process.on 'exit', =>
-        cache =
-          processed: @processed
-          uids: @uids
-          moduleUids: @moduleUids
-        fs.writeFileSync cachePath, JSON.stringify cache
+    @handlers =
+      '.coffee': (src, canonicalName) ->
+        {js, v3SourceMap} = coffee.compile src, sourceMap: true, bare: true
+        return {code: js, map: v3SourceMap}
+      '.json': (json, canonicalName) ->
+        acorn.parse "module.exports = #{json}", locations: yes
 
-      process.on 'uncaughtException', (e) ->
-        # An exception may be thrown due to corrupt cache or incompatibilities
-        # between versions, remove it to be safe
-        try fs.unlinkSync cachePath
-        @processed = {}
-        throw e
+    for own ext, handler of options.handlers ? {}
+      @handlers[ext] = handler
 
-      if fs.existsSync cachePath
-        cache = JSON.parse fs.readFileSync cachePath, 'utf8'
-        {@processed, @uids, @moduleUids} = cache
-
-    if not @processed or @moduleUids != options.moduleUids
-      # Either the cache doesn't exist or the cache was saved with a different
-      # 'moduleUids' value. In either case we must reset it.
-      @processed = {}
-      @uids = {next: 1, names: {}}
+    @extensions = ['.js', (ext for own ext of @handlers)...]
 
 
   bundle: ->
     @traverseDependencies()
-    bundle this
+    return bundle this
 
 
   traverseDependencies: ->
