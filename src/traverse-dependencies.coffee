@@ -6,11 +6,19 @@ _ = require 'lodash'
 esprima = require 'esprima'
 estraverse = require 'estraverse'
 escodegen = require 'escodegen'
+escope = require 'escope'
 
 canonicalise = require './canonicalise'
 relativeResolve = require './relative-resolve'
 sourceMapToAst = require './sourcemap-to-ast'
 isCore = require './is-core'
+
+
+isImplicit = (name, scope) ->
+  _.any scope.scopes, (scope) ->
+    _.any scope.references, (reference) ->
+      reference.identifier.name == name && not reference.resolved
+
 
 badRequireError = (filename, node, msg) ->
   if node.loc? and node.loc?.start?
@@ -24,6 +32,11 @@ badRequireError = (filename, node, msg) ->
 module.exports = (build) ->
   aliases = build.aliases ? {}
   root = build.root
+  globalFeatures = {
+    setImmediate: false
+    process: false
+    Buffer: false
+  }
 
   worklist = []
   resolvedEntryPoints = []
@@ -108,6 +121,7 @@ module.exports = (build) ->
 
     # add source file information to the AST root node
     ast.loc ?= {}
+    scope = escope.analyze ast
     deps = []
     id = build.uidFor(canonicalName)
 
@@ -170,6 +184,31 @@ module.exports = (build) ->
           }
         return
 
+    nodeFeatures = {
+      setImmediate: isImplicit 'setImmediate', scope
+      process: isImplicit 'process', scope
+      Buffer: isImplicit 'Buffer', scope
+      __filename: isImplicit '__filename', scope
+      __dirname: isImplicit '__dirname', scope
+    }
+
+    baseDir = path.dirname path.resolve __dirname
+    if nodeFeatures.process
+      globalFeatures.process = true
+
+    if not globalFeatures.setImmediate and nodeFeatures.setImmediate or
+        nodeFeatures.process
+      globalFeatures.setImmediate = true
+      resolved = relativeResolve {extensions: build.extensions, aliases, root: build.root, cwd: baseDir, path: 'setimmediate'}
+      nodeFeatures.setImmediate = resolved.filename
+      worklist.unshift(resolved)
+
+    if not globalFeatures.Buffer and nodeFeatures.Buffer
+      globalFeatures.Buffer = true
+      resolved = relativeResolve {extensions: build.extensions, aliases, root: build.root, cwd: baseDir, path: 'buffer-browserify'}
+      nodeFeatures.Buffer = resolved.filename
+      worklist.unshift(resolved)
+
     map = null
     if not isNpmModule or build.npmSourceMaps
       {code, map} = escodegen.generate ast,
@@ -188,6 +227,7 @@ module.exports = (build) ->
     # cache linecount for a little more efficiency when calculating offsets
     # later
     lineCount = code.split('\n').length
-    processed[filename] = {id, canonicalName, code, map, lineCount, mtime, deps}
+    processed[filename] = {id, canonicalName, code, map, lineCount, mtime,
+      deps, nodeFeatures}
 
   processed

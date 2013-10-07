@@ -5,7 +5,7 @@ UglifyJS = require 'uglify-js'
 sourceMapToAst = require './sourcemap-to-ast'
 
 
-PRELUDE_NODE = """
+PROCESS = """
 (function() { var global = this;
   var cwd = '/';
   return {
@@ -15,14 +15,14 @@ PRELUDE_NODE = """
     env: {},
     on: function() {},
     argv: [],
-    nextTick: global.setImmediate || function(fn){ setTimeout(fn, 0); },
+    nextTick: setImmediate,
     cwd: function(){ return cwd; },
     chdir: function(dir){ cwd = dir; }
   };
 })()
 """
 
-PRELUDE = """
+REQUIRE = """
 (function() {
   var outer;
   if (typeof require === 'function') {
@@ -71,13 +71,7 @@ PRELUDE = """
 wrap = (modules) -> """
   (function(require, undefined) { var global = this;
   #{modules}
-  })(#{PRELUDE})
-  """
-
-wrapNode = (modules) -> """
-  (function(require, process, undefined) { var global = this;
-  #{modules}
-  })(#{PRELUDE}, #{PRELUDE_NODE})
+  })(#{REQUIRE})
   """
 
 wrapUmd = (exports, commonjs) -> """
@@ -103,12 +97,18 @@ bundle = (build) ->
     file: path.basename(build.output)
     sourceRoot: build.sourceMapRoot
   lineOffset = umdOffset
+  useProcess = false
+  bufferPath = false
+  setImmediatePath = false
 
-  for own filename, {id, canonicalName, code, map, lineCount} of build.processed
+  for own filename, {id, canonicalName, code, map, lineCount, nodeFeatures} of build.processed
+    useProcess = useProcess or nodeFeatures.process
+    setImmediatePath = setImmediatePath or nodeFeatures.setImmediate
+    bufferPath = bufferPath or nodeFeatures.Buffer
     if typeof id != 'number'
       id = "'#{id}'"
     result += """
-      \nrequire.define(#{id}, function(module, exports, __dirname, __filename){
+      \nrequire.define(#{id}, function(module, exports, __dirname, __filename, undefined){
       #{code}
       });
       """
@@ -127,6 +127,21 @@ bundle = (build) ->
           name: m.name
     lineOffset += lineCount
 
+  if bufferPath
+    {id} = build.processed[bufferPath]
+    if typeof id != 'number'
+      id = "'#{id}'"
+    result += "\nvar Buffer = require(#{id});"
+
+  if setImmediatePath
+    {id} = build.processed[setImmediatePath]
+    if typeof id != 'number'
+      id = "'#{id}'"
+    result += "\nrequire(#{id});"
+
+  if useProcess and build.node
+    result += "\nvar process = #{PROCESS};"
+
   for i in [0...build.entryPoints.length]
     entryPoint = build.entryPoints[i]
     {id} = build.processed[entryPoint]
@@ -143,10 +158,7 @@ bundle = (build) ->
   else
     exports = ''
 
-  if build.node
-    commonjs = wrapNode(result)
-  else
-    commonjs = wrap(result)
+  commonjs = wrap(result)
 
   result = wrapUmd(exports, commonjs)
 

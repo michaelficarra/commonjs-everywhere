@@ -80,4 +80,5 @@ suite 'Dependency Resolution', ->
       fixtures 'a.js': 'require("fs")'
       arrayEq ['a.js', '../node/lib/freelist.js'], deps 'a.js', aliases: {fs: 'freelist'}
       fixtures 'a.js': 'require("path")'
-      arrayEq ['a.js', '../node/lib/path.js', '../node/lib/util.js'], deps 'a.js', aliases: {child_process: null, fs: null}
+      arrayEq ['a.js', '../node/lib/path.js', '../node/lib/util.js'
+        '../node_modules/setimmediate/setImmediate.js'], deps 'a.js', aliases: {child_process: null, fs: null}
