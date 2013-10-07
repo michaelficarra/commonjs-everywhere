@@ -161,10 +161,12 @@ module.exports = (build) ->
             worklist.push dep
             deps.push dep
         catch e
+          rv = undefined
           if build.ignoreMissing
-            return { type: 'Literal', value: null }
-          else
-            throw e
+            rv = { type: 'Literal', value: null }
+            rv.loc = node.loc
+            rv.range = node.range
+          return rv
         # rewrite the require to use the root-relative path or the uid if
         # enabled
         if rewriteRequire
@@ -227,7 +229,6 @@ module.exports = (build) ->
   # remove old dependencies
   for own k, {isCoreModule} of processed
     if not (isCoreModule or k of checked)
-      console.error("deleting #{k}")
       delete processed[k]
 
   processed

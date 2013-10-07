@@ -1,3 +1,5 @@
 commonjs-everywhere-*.tgz
 test/fixtures/*
 /lib/
+tests.js
+tests.js.map

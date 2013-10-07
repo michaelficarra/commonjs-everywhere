@@ -51,14 +51,6 @@ suite 'Dependency Resolution', ->
     fixtures 'a.js': 'require("freelist")'
     arrayEq ['a.js', '../node/lib/freelist.js'], deps 'a.js'
 
-  test 'missing dependencies', ->
-    fixtures 'a.js': 'require("./b")'
-    throws -> deps 'a.js'
-
-  test 'ignoreMissing option ignores missing dependencies', ->
-    fixtures 'a.js': 'require("./b")'
-    arrayEq ['a.js'], deps 'a.js', ignoreMissing: yes
-
   suite 'Aliasing', ->
 
     test 'basic alias', ->

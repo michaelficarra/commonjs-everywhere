@@ -7,10 +7,11 @@ module.exports = (grunt) ->
     powerbuild:
       options:
         sourceMap: true
-        ignoreMissing: true
+        node: false
       all:
         files: [
-          {src: ['test-setup.coffee', 'test/*.coffee'], dest: 'bundle.js'}
+          {src: ['test-setup.coffee', 'test/*.coffee'], dest: 'tests.js'}
+          # {src: 'src/index', dest: 'lib/main.js'}
         ]
 
     mocha_debug:
@@ -20,7 +21,7 @@ module.exports = (grunt) ->
         check: ['test-setup.coffee', 'src/*.coffee', 'test/*.coffee']
       nodejs:
         options:
-          src: ['test-setup.coffee', 'test/*.coffee']
+          src: ['tests.js']
 
     watch:
       options:

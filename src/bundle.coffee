@@ -41,6 +41,8 @@ commonjs = (filenameMap) -> """
 
       var dirname;
       var filename = files[id] || '';
+      if (filename && typeof __dirname === 'string')
+        filename = __dirname + '/' + filename;
       if (filename)
         dirname = filename.slice(0, filename.lastIndexOf('/') + 1);
       else
