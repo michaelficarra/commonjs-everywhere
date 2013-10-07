@@ -5,18 +5,27 @@ buildCache = require '../src/build-cache'
 
 
 NAME = 'powerbuild'
-DESC = 'Builds commonjs projects to run anywhere, transpiling to javascript if
-necessary, besides generating concatenated source maps.'
+DESC = 'Wraps commonjs projects into single umd function that will run
+ anywhere, generating concatenated source maps to debug files individually.'
 
 
-cache = buildCache()
+initialized = false
+
+initSignalHandlers = ->
+  if initialized then return
+  initialized = true
+  process.on 'SIGINT', process.exit
+  process.on 'SIGTERM', process.exit
 
 
 module.exports = (grunt) ->
   grunt.registerMultiTask NAME, DESC, ->
     options = @options()
-    options.processed = cache.processed
-    options.uids = cache.uids
+    if not options.disableDiskCache
+      initSignalHandlers()
+      cache = buildCache(options.cachePath)
+      options.processed = cache.processed
+      options.uids = cache.uids
     for f in @files
       opts = _.clone(options)
       opts.entryPoints = grunt.file.expand(f.orig.src)

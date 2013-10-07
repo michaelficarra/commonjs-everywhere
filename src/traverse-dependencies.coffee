@@ -52,7 +52,7 @@ module.exports = (build) ->
   checked = {}
 
   while worklist.length
-    {filename, canonicalName, isNpmModule} = worklist.pop()
+    {filename, canonicalName, isNpmModule, isCoreModule} = worklist.pop()
 
     # support aliasing to falsey values to omit files
     continue unless filename
@@ -67,8 +67,7 @@ module.exports = (build) ->
     if processed[filename]?.mtime == mtime
       # ignore files that have not changed, but also check its dependencies
       for dep in processed[filename].deps
-        if dep.isNpmModule and build.checkNpmModules
-          worklist.push dep
+        worklist.push dep
       continue
 
     src = (fs.readFileSync filename).toString()
@@ -152,16 +151,14 @@ module.exports = (build) ->
         try
           moduleName = node.arguments[0].value
           rewriteRequire = false
-          if not (isCore(moduleName)) or build.node
+          if not (isCoreDep = isCoreModule or isCore(moduleName)) or build.node
             rewriteRequire = true
             resolved = relativeResolve {extensions: build.extensions, aliases, root: build.root, cwd, path: moduleName}
             # Only include an external dep if its not a core module or
             # we are emulating a node.js environment
             isNpmDep = isNpmModule or /^[^/.]/.test(moduleName)
-            dep = _.assign(resolved, {isNpmModule: isNpmDep})
-            if dep.filename not of build.processed or
-                isNpmDep and build.checkNpmModules
-              worklist.push dep
+            dep = _.assign(resolved, {isNpmModule: isNpmDep, isCoreModule: isCoreDep})
+            worklist.push dep
             deps.push dep
         catch e
           if build.ignoreMissing
@@ -202,34 +199,35 @@ module.exports = (build) ->
         nodeFeatures.process
       globalFeatures.setImmediate = true
       resolved = relativeResolve {extensions: build.extensions, aliases, root: build.root, cwd: baseDir, path: 'setimmediate'}
+      resolved = _.extend resolved, isCoreModule: true, isNpmModule: true
       nodeFeatures.setImmediate = resolved.filename
       worklist.unshift(resolved)
 
     if not globalFeatures.Buffer and nodeFeatures.Buffer
       globalFeatures.Buffer = true
       resolved = relativeResolve {extensions: build.extensions, aliases, root: build.root, cwd: baseDir, path: 'buffer-browserify'}
+      resolved = _.extend resolved, isCoreModule: true, isNpmModule: true
       nodeFeatures.Buffer = resolved.filename
       worklist.unshift(resolved)
 
-    map = null
-    if not isNpmModule or build.npmSourceMaps
-      {code, map} = escodegen.generate ast,
-        comment: true
-        sourceMap: true
-        format: escodegen.FORMAT_DEFAULTS
-        sourceMapWithCode: true
-        sourceMapRoot: if build.sourceMap? then (path.relative (path.dirname build.sourceMap), build.root) or '.'
-      map = map.toString()
-    else
-      code = escodegen.generate ast,
-        comment: true
-        sourceMap: false
-        format: escodegen.FORMAT_DEFAULTS
+    {code, map} = escodegen.generate ast,
+      comment: true
+      sourceMap: true
+      format: escodegen.FORMAT_DEFAULTS
+      sourceMapWithCode: true
+      sourceMapRoot: if build.sourceMap? then (path.relative (path.dirname build.sourceMap), build.root) or '.'
+    map = map.toString()
 
     # cache linecount for a little more efficiency when calculating offsets
     # later
     lineCount = code.split('\n').length
     processed[filename] = {id, canonicalName, code, map, lineCount, mtime,
-      deps, nodeFeatures}
+      deps, nodeFeatures, isNpmModule, isCoreModule}
+
+  # remove old dependencies
+  for own k, {isCoreModule} of processed
+    if not (isCoreModule or k of checked)
+      console.error("deleting #{k}")
+      delete processed[k]
 
   processed

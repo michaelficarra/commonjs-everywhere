@@ -2,26 +2,28 @@ fs = require 'fs'
 path = require 'path'
 
 
-module.exports = (cachePath = path.join(process.cwd(), '.powerbuild~')) ->
-  process.on 'exit', ->
-    fs.writeFileSync cachePath, JSON.stringify cache
+caches = {}
 
-  process.on 'SIGINT', process.exit
-  process.on 'SIGTERM', process.exit
+module.exports = (cachePath = path.join(process.cwd(), '.powerbuild~')) ->
+  if {}.hasOwnProperty.call caches, cachePath
+    return caches[cachePath]
+
+  process.on 'exit', ->
+    fs.writeFileSync cachePath, JSON.stringify caches[cachePath]
 
   process.on 'uncaughtException', (e) ->
     # An exception may be thrown due to corrupt cache or incompatibilities
     # between versions, remove it to be safe
     try fs.unlinkSync cachePath
-    cache.processed = {}
+    caches[cachePath].processed = {}
     throw e
 
   if fs.existsSync cachePath
-    cache = JSON.parse fs.readFileSync cachePath, 'utf8'
+    caches[cachePath] = JSON.parse fs.readFileSync cachePath, 'utf8'
 
-  if not cache
-    cache =
+  if not caches[cachePath]
+    caches[cachePath] =
       processed: {}
       uids: {next: 1, names: []}
 
-  return cache
+  return caches[cachePath]

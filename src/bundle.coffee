@@ -108,7 +108,7 @@ bundle = (build) ->
 
   files = {}
 
-  for own filename, {id, canonicalName, code, map, lineCount, nodeFeatures} of build.processed
+  for own filename, {id, canonicalName, code, map, lineCount, isNpmModule, nodeFeatures} of build.processed
     if nodeFeatures.__filename or nodeFeatures.__dirname
       files[id] = canonicalName
     useProcess = useProcess or nodeFeatures.process
@@ -120,7 +120,7 @@ bundle = (build) ->
       });
       """
     lineOffset += 2 # skip linefeed plus the 'require.define' line
-    if map
+    if build.npmSourceMaps or not isNpmModule
       orig = new SourceMapConsumer map
       orig.eachMapping (m) ->
         resultMap.addMapping
@@ -173,10 +173,9 @@ module.exports = (build) ->
 
   if build.minify
     uglifyAst = UglifyJS.parse code
-    # Enabling the compressor seems to break the source map, leave commented
-    # until a solution is found
-    # uglifyAst.figure_out_scope()
-    # uglifyAst = uglifyAst.transform UglifyJS.Compressor warnings: false
+    if build.compress
+      uglifyAst.figure_out_scope()
+      uglifyAst = uglifyAst.transform UglifyJS.Compressor warnings: false
     uglifyAst.figure_out_scope()
     uglifyAst.compute_char_frequency()
     uglifyAst.mangle_names()
