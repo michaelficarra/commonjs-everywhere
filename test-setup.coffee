@@ -1,3 +1,4 @@
+require('source-map-support').install()
 escodegen = require 'escodegen'
 fs = require 'scopedfs'
 path = require 'path'

@@ -98,7 +98,7 @@ wrapUmd = (exports, commonjs) -> """
 umdOffset = wrapUmd('', '').split('\n').length
 
 
-bundle = (build) ->
+bundle = (build, processed) ->
   result = ''
   resultMap = new SourceMapGenerator
     file: path.basename(build.output)
@@ -110,7 +110,7 @@ bundle = (build) ->
 
   files = {}
 
-  for own filename, {id, canonicalName, code, map, lineCount, isNpmModule, nodeFeatures} of build.processed
+  for own filename, {id, canonicalName, code, map, lineCount, isNpmModule, nodeFeatures} of processed
     if nodeFeatures.__filename or nodeFeatures.__dirname
       files[id] = canonicalName
     useProcess = useProcess or nodeFeatures.process
@@ -137,11 +137,11 @@ bundle = (build) ->
     lineOffset += lineCount
 
   if bufferPath
-    {id} = build.processed[bufferPath]
+    {id} = processed[bufferPath]
     result += "\nvar Buffer = require('#{id}');"
 
   if setImmediatePath
-    {id} = build.processed[setImmediatePath]
+    {id} = processed[setImmediatePath]
     result += "\nrequire('#{id}');"
 
   if useProcess and build.node
@@ -149,7 +149,7 @@ bundle = (build) ->
 
   for i in [0...build.entryPoints.length]
     entryPoint = build.entryPoints[i]
-    {id} = build.processed[entryPoint]
+    {id} = processed[entryPoint]
     if i == build.entryPoints.length - 1
       # export the last entry point
       result += "\nreturn require('#{id}');"
@@ -170,8 +170,8 @@ bundle = (build) ->
   return {code: result, map: resultMap.toString()}
 
 
-module.exports = (build) ->
-  {code, map} = bundle build
+module.exports = (build, processed) ->
+  {code, map} = bundle build, processed
 
   if build.minify
     uglifyAst = UglifyJS.parse code
@@ -190,7 +190,7 @@ module.exports = (build) ->
     map = sm.toString()
 
   if (build.sourceMap or build.inlineSourceMap) and build.inlineSources
-    for own filename, {code: src, canonicalName} of build.processed
+    for own filename, {code: src, canonicalName} of processed
       map.setSourceContent canonicalName, src
 
   sourceMappingUrl =

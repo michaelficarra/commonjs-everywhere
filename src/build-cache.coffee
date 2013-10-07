@@ -1,6 +1,13 @@
 fs = require 'fs'
 path = require 'path'
 
+initialized = false
+
+initSignalHandlers = ->
+  if initialized then return
+  initialized = true
+  process.on 'SIGINT', process.exit
+  process.on 'SIGTERM', process.exit
 
 caches = {}
 

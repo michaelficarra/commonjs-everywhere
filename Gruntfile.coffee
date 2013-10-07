@@ -11,7 +11,7 @@ module.exports = (grunt) ->
       all:
         files: [
           {src: ['test-setup.coffee', 'test/*.coffee'], dest: 'tests.js'}
-          # {src: 'src/index', dest: 'lib/main.js'}
+          {src: 'src/index.coffee', dest: 'lib/main.js'}
         ]
 
     mocha_debug:
@@ -19,7 +19,7 @@ module.exports = (grunt) ->
         ui: 'tdd'
         reporter: 'dot'
         check: ['test-setup.coffee', 'src/*.coffee', 'test/*.coffee']
-      nodejs:
+      all:
         options:
           src: ['tests.js']
 

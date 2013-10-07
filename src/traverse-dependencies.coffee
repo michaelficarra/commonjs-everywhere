@@ -29,7 +29,7 @@ badRequireError = (filename, node, msg) ->
       in #{filename}
   """
 
-module.exports = (build) ->
+module.exports = (build, processedCache) ->
   aliases = build.aliases ? {}
   root = build.root
   globalFeatures = {
@@ -48,7 +48,11 @@ module.exports = (build) ->
 
   build.entryPoints = resolvedEntryPoints
 
-  processed = build.processed
+  if processedCache
+    processed = _.clone processedCache
+  else
+    processed = {}
+
   checked = {}
 
   while worklist.length
@@ -186,26 +190,22 @@ module.exports = (build) ->
         return
 
     nodeFeatures = {
-      setImmediate: isImplicit 'setImmediate', scope
-      process: isImplicit 'process', scope
-      Buffer: isImplicit 'Buffer', scope
       __filename: isImplicit '__filename', scope
       __dirname: isImplicit '__dirname', scope
     }
 
     baseDir = path.dirname path.resolve __dirname
-    if nodeFeatures.process
-      globalFeatures.process = true
+    if isImplicit 'process', scope
+      nodeFeatures.process = globalFeatures.process = true
 
-    if not globalFeatures.setImmediate and nodeFeatures.setImmediate or
-        nodeFeatures.process
+    if not globalFeatures.setImmediate and (isImplicit 'setImmediate', scope) or nodeFeatures.process
       globalFeatures.setImmediate = true
       resolved = relativeResolve {extensions: build.extensions, aliases, root: build.root, cwd: baseDir, path: 'setimmediate'}
       resolved = _.extend resolved, isCoreModule: true, isNpmModule: true
       nodeFeatures.setImmediate = resolved.filename
       worklist.unshift(resolved)
 
-    if not globalFeatures.Buffer and nodeFeatures.Buffer
+    if not globalFeatures.Buffer and isImplicit 'Buffer', scope
       globalFeatures.Buffer = true
       resolved = relativeResolve {extensions: build.extensions, aliases, root: build.root, cwd: baseDir, path: 'buffer-browserify'}
       resolved = _.extend resolved, isCoreModule: true, isNpmModule: true
@@ -225,10 +225,12 @@ module.exports = (build) ->
     lineCount = code.split('\n').length
     processed[filename] = {id, canonicalName, code, map, lineCount, mtime,
       deps, nodeFeatures, isNpmModule, isCoreModule}
+    if processedCache
+      processedCache[filename] = processed[filename]
 
-  # remove old dependencies
-  for own k, {isCoreModule} of processed
+  # remove old dependencies and update the cache
+  for own k, {isCoreModule, nodeFeatures} of processed
     if not (isCoreModule or k of checked)
       delete processed[k]
 
-  processed
+  return processed

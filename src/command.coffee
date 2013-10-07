@@ -141,9 +141,6 @@ startBuild = ->
   buildBundle()
 
   if options.watch
-    process.on 'SIGINT', process.exit
-    process.on 'SIGTERM', process.exit
-
     console.error("Watching for changes...")
     # Flush the cache when the user presses CTRL+C or the process is
     # terminated from outside

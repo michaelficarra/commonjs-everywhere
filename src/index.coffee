@@ -12,15 +12,13 @@ class Powerbuild
       throw new Error('Can only set the export option with one entry point')
 
     options.inlineSources ?= false
-    options.log or= ->
-    options.processed or= {}
     if options.compress
       options.minify = true
     options.uids or= {next: 1, names: []}
     options.npmSourceMaps ?= false
     options.root or= process.cwd()
     options.node ?= true
-    {@output, @export, @entryPoints, @root, @node, @log, @inlineSources,
+    {@output, @export, @entryPoints, @root, @node, @inlineSources,
      @verbose, @ignoreMissing, @sourceMap, @inlineSourceMap,
      @mainModule, @minify, @aliases, @handlers, @processed, @uids,
      @npmSourceMaps, @compress} = options
@@ -44,14 +42,14 @@ class Powerbuild
 
 
   bundle: ->
-    @traverseDependencies()
-    return bundle this
+    return bundle this, @traverseDependencies()
 
 
   traverseDependencies: ->
-    traverseDependencies this
+    processed = traverseDependencies this, @processed
     if @verbose
-      @log "Included modules: #{(Object.keys @processed).sort()}"
+      console.error "Included modules: #{(Object.keys processed).sort()}"
+    return processed
 
 
   uidFor: (name) ->
