@@ -20,5 +20,5 @@ suite 'Module Spec', ->
   test 'module.children contains required modules', ->
     fixtures
       '/a.js': 'require("./b"); module.exports = module.children[0].exports'
-      '/b.js': 'module.exports = module.filename'
+      '/b.js': 'module.exports = __filename'
     eq 'b.js', bundleEval 'a.js'

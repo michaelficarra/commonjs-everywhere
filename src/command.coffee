@@ -11,7 +11,7 @@ knownOpts = {}
 # options
 knownOpts[opt] = Boolean for opt in [
   'deps', 'help', 'ignore-missing', 'inline-source-map', 'inline-sources',
-  'minify', 'node', 'verbose', 'watch', 'module-uids', 'cache-path'
+  'minify', 'node', 'verbose', 'watch', 'cache-path'
 ]
 # parameters
 knownOpts[opt] = String for opt in ['export', 'output', 'root', 'source-map']
@@ -41,7 +41,6 @@ options.sourceMap = options['source-map']
 options.inlineSources = options['inline-sources']
 options.inlineSourceMap = options['inline-source-map']
 options.cachePath = options['cache-path']
-options.moduleUids = options['module-uids']
 options.entryPoint = options['entry-point']
 
 if options.help
@@ -70,9 +69,6 @@ if options.help
   --cache-path              file where to read/write a json-encoded cache that will be
                             used to speed up future rebuilds. default:
                             '.powerbuild-cache~' in the current directory
-  --module-uids             Instead of replacing module names by their full path,
-                            use unique ids for better minification
-                            (breaks __dirname/__filename)
   --version                 display the version number and exit
 "
   process.exit 0

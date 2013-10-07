@@ -176,11 +176,13 @@ module.exports = (build) ->
             callee: node.callee
             arguments: [{
               type: 'Literal'
-              value: build.uidFor(dep.canonicalName)
+              value: build.uidFor(dep.canonicalName).toString()
             }, {
               type: 'Identifier'
               name: 'module'
             }]
+            loc: node.loc
+            range: node.range
           }
         return
 

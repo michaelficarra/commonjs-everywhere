@@ -14,16 +14,16 @@ class Powerbuild
     options.inlineSources ?= false
     options.log or= ->
     options.processed or= {}
+    options.uids or= {next: 1, names: []}
     options.checkNpmModules ?= false
     options.npmSourceMaps ?= false
     options.bundleNpmModules ?= true
-    options.moduleUids ?= false
     options.root or= process.cwd()
     options.node ?= true
     {@output, @export, @entryPoints, @root, @node, @log, @inlineSources,
-     @verbose, @ignoreMissing, @sourceMap, @inlineSourceMap, @moduleUids,
+     @verbose, @ignoreMissing, @sourceMap, @inlineSourceMap,
      @mainModule, @minify, @aliases, @handlers, @processed, @uids,
-     @moduleUids, @checkNpmModules, @npmSourceMaps} = options
+     @checkNpmModules, @npmSourceMaps} = options
 
     if @output
       @sourceMapRoot = path.relative(path.dirname(@output), @root)
@@ -55,12 +55,10 @@ class Powerbuild
 
 
   uidFor: (name) ->
-    if not @moduleUids
-      return name
     if not {}.hasOwnProperty.call(@uids.names, name)
       uid = @uids.next++
       @uids.names[name] = uid
-    @uids.names[name]
+    return @uids.names[name]
 
 
 module.exports = Powerbuild

@@ -22,56 +22,61 @@ PROCESS = """
 })()
 """
 
-REQUIRE = """
-(function() {
-  var outer;
-  if (typeof require === 'function') {
-    outer = require;
-  }
-  function inner(file, parentModule) {
-    if({}.hasOwnProperty.call(inner.cache, file))
-      return inner.cache[file];
-
-    var resolved = inner.resolve(file);
-    if(!resolved && outer) {
-      return inner.cache[file] = outer(file);
+commonjs = (filenameMap) -> """
+  (function() {
+    var files = #{JSON.stringify(filenameMap)};
+    var outer;
+    if (typeof require === 'function') {
+      outer = require;
     }
-    if(!resolved) throw new Error("Failed to resolve module '" + file + "'");
+    function inner(id, parentModule) {
+      if({}.hasOwnProperty.call(inner.cache, id))
+        return inner.cache[id];
 
-    var module$ = {
-      id: file,
-      require: inner,
-      filename: file,
-      exports: {},
-      loaded: false,
-      parent: parentModule,
-      children: []
+      var resolved = inner.resolve(id);
+      if(!resolved && outer) {
+        return inner.cache[id] = outer(id);
+      }
+      if(!resolved) throw new Error("Failed to resolve module '" + id + "'");
+
+      var dirname;
+      var filename = files[id] || '';
+      if (filename)
+        dirname = filename.slice(0, filename.lastIndexOf('/') + 1);
+      else
+        dirname = '';
+      var module$ = {
+        id: id,
+        require: inner,
+        exports: {},
+        loaded: false,
+        parent: parentModule,
+        children: []
+      };
+      if(parentModule) parentModule.children.push(module$);
+
+      inner.cache[id] = module$.exports;
+      resolved.call(this, module$, module$.exports, dirname, filename);
+      module$.loaded = true;
+      return inner.cache[id] = module$.exports;
+    }
+
+    inner.modules = {};
+    inner.cache = {};
+
+    inner.resolve = function(id){
+      return {}.hasOwnProperty.call(inner.modules, id) ? inner.modules[id] : void 0;
     };
-    if(parentModule) parentModule.children.push(module$);
-    var dirname = file.slice(0, file.lastIndexOf('/') + 1);
+    inner.define = function(id, fn){ inner.modules[id] = fn; };
 
-    inner.cache[file] = module$.exports;
-    resolved.call(this, module$, module$.exports, dirname, file);
-    module$.loaded = true;
-    return inner.cache[file] = module$.exports;
-  }
+    return inner;
+  })()
+  """
 
-  inner.modules = {};
-  inner.cache = {};
-
-  inner.resolve = function(file){
-    return {}.hasOwnProperty.call(inner.modules, file) ? inner.modules[file] : void 0;
-  };
-  inner.define = function(file, fn){ inner.modules[file] = fn; };
-
-  return inner;
-})()
-"""
-
-wrap = (modules) -> """
+wrap = (modules, commonjs) -> """
   (function(require, undefined) { var global = this;
   #{modules}
-  })(#{REQUIRE})
+  })(#{commonjs})
   """
 
 wrapUmd = (exports, commonjs) -> """
@@ -101,14 +106,16 @@ bundle = (build) ->
   bufferPath = false
   setImmediatePath = false
 
+  files = {}
+
   for own filename, {id, canonicalName, code, map, lineCount, nodeFeatures} of build.processed
+    if nodeFeatures.__filename or nodeFeatures.__dirname
+      files[id] = canonicalName
     useProcess = useProcess or nodeFeatures.process
     setImmediatePath = setImmediatePath or nodeFeatures.setImmediate
     bufferPath = bufferPath or nodeFeatures.Buffer
-    if typeof id != 'number'
-      id = "'#{id}'"
     result += """
-      \nrequire.define(#{id}, function(module, exports, __dirname, __filename, undefined){
+      \nrequire.define('#{id}', function(module, exports, __dirname, __filename, undefined){
       #{code}
       });
       """
@@ -129,15 +136,11 @@ bundle = (build) ->
 
   if bufferPath
     {id} = build.processed[bufferPath]
-    if typeof id != 'number'
-      id = "'#{id}'"
-    result += "\nvar Buffer = require(#{id});"
+    result += "\nvar Buffer = require('#{id}');"
 
   if setImmediatePath
     {id} = build.processed[setImmediatePath]
-    if typeof id != 'number'
-      id = "'#{id}'"
-    result += "\nrequire(#{id});"
+    result += "\nrequire('#{id}');"
 
   if useProcess and build.node
     result += "\nvar process = #{PROCESS};"
@@ -145,22 +148,22 @@ bundle = (build) ->
   for i in [0...build.entryPoints.length]
     entryPoint = build.entryPoints[i]
     {id} = build.processed[entryPoint]
-    if typeof id != 'number'
-      id = "'#{id}'"
     if i == build.entryPoints.length - 1
       # export the last entry point
-      result += "\nreturn require(#{id});"
+      result += "\nreturn require('#{id}');"
     else
-      result += "\nrequire(#{id});"
+      result += "\nrequire('#{id}');"
 
   if build.export
     exports = "#{build.export} = exported;"
   else
     exports = ''
 
-  commonjs = wrap(result)
+  req = commonjs(files)
 
-  result = wrapUmd(exports, commonjs)
+  cjs = wrap(result, req)
+
+  result = wrapUmd(exports, cjs)
 
   return {code: result, map: resultMap.toString()}
 
