@@ -32,8 +32,7 @@ sfs.reset = ->
   fs.mkdirpSync FIXTURES_DIR
 do sfs.reset
 
-# global[k] = v for own k, v of require './src'
-global.Powerbuild = require './src'
+global.Powerbuild = require './lib'
 global.FIXTURES_DIR = FIXTURES_DIR
 global.path = path
 global.escodegen = escodegen

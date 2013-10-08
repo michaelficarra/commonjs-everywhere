@@ -9,8 +9,6 @@ module.exports = (ast, srcMap) ->
     enter: (node) ->
       if not node.type
         return
-      if node.type == 'TryStatement' and not node.guardedHandlers
-        node.guardedHandlers = []
       origStart = map.originalPositionFor node.loc.start
       origEnd = map.originalPositionFor node.loc.end
       if origStart.source != origEnd.source

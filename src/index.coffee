@@ -23,6 +23,8 @@ class Powerbuild
      @mainModule, @minify, @aliases, @handlers, @processed, @uids,
      @npmSourceMaps, @compress} = options
 
+    @sourceMapRoot = if @sourceMap? then (path.relative (path.dirname @sourceMap), @root) or '.'
+
     if @output
       @sourceMapRoot = path.relative(path.dirname(@output), @root)
       if @sourceMap == true

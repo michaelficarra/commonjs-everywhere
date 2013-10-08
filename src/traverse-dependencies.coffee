@@ -7,6 +7,7 @@ esprima = require 'esprima'
 estraverse = require 'estraverse'
 escodegen = require 'escodegen'
 escope = require 'escope'
+{SourceMapConsumer} = require 'source-map'
 
 canonicalise = require './canonicalise'
 relativeResolve = require './relative-resolve'
@@ -87,31 +88,31 @@ module.exports = (build, processedCache) ->
       astOrJs = {code: astOrJs}
 
     adjustWrapperLocation = false
+    realCanonicalName = null
 
     if astOrJs.code?
       try
         # wrap into a function so top-level 'return' statements wont break
         # when parsing
         astOrJs.code = "(function(){#{astOrJs.code}})()"
-        ast = esprima.parse astOrJs.code,
-          loc: yes, comment: true, range: true, tokens: true
+        ast = esprima.parse astOrJs.code, loc: yes, comment: yes
         # unwrap the function
         ast.body = ast.body[0].expression.callee.body.body
-        # adjust the range/column offsets to ignore the wrapped function
+        # adjust the column offsets to ignore the wrapped function
         adjustWrapperLocation = true
-        # Remove the extra tokens
-        ast.tokens = ast.tokens.slice(5, ast.tokens.length - 4)
         # Fix comments/token position info
-        for t in ast.comments.concat(ast.tokens)
-          t.range[0] -= 12
-          t.range[1] -= 12
-          if t.loc.start.line == 1
-            t.loc.start.column -= 12
-          if t.loc.end.line == 1
-            t.loc.end.column -= 12
         # Also adjust top node end range/column
-        ast.range[1] -= 4
         ast.loc.end.column -= 4
+        lastComment = ast.comments[ast.comments.length - 1]
+        if lastComment and match = /[#@] sourceMappingURL=(.+)/.exec(lastComment.value)
+          dn = path.dirname(filename)
+          mapPath = path.join(dn, match[1])
+          m = fs.readFileSync(mapPath, 'utf8')
+          consumer = new SourceMapConsumer m
+          sources = consumer.sources
+          sources[0] = path.resolve(path.join(dn, sources[0]))
+          realCanonicalName = path.relative(build.sourceMapRoot, sources[0])
+          astOrJs.map = m
         if astOrJs.map
           sourceMapToAst ast, astOrJs.map
       catch e
@@ -131,15 +132,12 @@ module.exports = (build, processedCache) ->
     estraverse.replace ast,
       enter: (node, parents) ->
         if node.loc?
-          node.loc.source = canonicalName
           if node.type != 'Program' and adjustWrapperLocation
             # Adjust the location info to reflect the removed function wrapper 
             if node.loc.start.line == 1 and node.loc.start.column >= 12
               node.loc.start.column -= 12
             if node.loc.end.line == 1 and node.loc.end.column >= 12
               node.loc.end.column -= 12
-            node.range[0] -= 12
-            node.range[1] -= 12
         # ignore anything that's not a `require` call
         return unless node.type is 'CallExpression' and node.callee.type is 'Identifier' and node.callee.name is 'require'
         # illegal requires
@@ -169,7 +167,6 @@ module.exports = (build, processedCache) ->
           if build.ignoreMissing
             rv = { type: 'Literal', value: null }
             rv.loc = node.loc
-            rv.range = node.range
           return rv
         # rewrite the require to use the root-relative path or the uid if
         # enabled
@@ -185,7 +182,6 @@ module.exports = (build, processedCache) ->
               name: 'module'
             }]
             loc: node.loc
-            range: node.range
           }
         return
 
@@ -213,7 +209,6 @@ module.exports = (build, processedCache) ->
       worklist.unshift(resolved)
 
     {code, map} = escodegen.generate ast,
-      comment: true
       sourceMap: true
       format: escodegen.FORMAT_DEFAULTS
       sourceMapWithCode: true
@@ -224,13 +219,13 @@ module.exports = (build, processedCache) ->
     # later
     lineCount = code.split('\n').length
     processed[filename] = {id, canonicalName, code, map, lineCount, mtime,
-      deps, nodeFeatures, isNpmModule, isCoreModule}
+      deps, nodeFeatures, isNpmModule, isCoreModule, realCanonicalName}
     if processedCache
       processedCache[filename] = processed[filename]
 
   # remove old dependencies and update the cache
-  for own k, {isCoreModule, nodeFeatures} of processed
-    if not (isCoreModule or k of checked)
-      delete processed[k]
+  # for own k, {isCoreModule} of processed
+  #   if not (isCoreModule or k of checked)
+  #     delete processed[k]
 
   return processed

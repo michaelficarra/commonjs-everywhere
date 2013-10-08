@@ -110,9 +110,9 @@ bundle = (build, processed) ->
 
   files = {}
 
-  for own filename, {id, canonicalName, code, map, lineCount, isNpmModule, nodeFeatures} of processed
+  for own filename, {id, canonicalName, realCanonicalName, code, map, lineCount, isNpmModule, nodeFeatures} of processed
     if nodeFeatures.__filename or nodeFeatures.__dirname
-      files[id] = canonicalName
+      files[id] = realCanonicalName or canonicalName
     useProcess = useProcess or nodeFeatures.process
     setImmediatePath = setImmediatePath or nodeFeatures.setImmediate
     bufferPath = bufferPath or nodeFeatures.Buffer
@@ -132,7 +132,7 @@ bundle = (build, processed) ->
           original:
             line: m.originalLine or m.generatedLine
             column: m.originalColumn or m.generatedColumn
-          source: canonicalName
+          source: realCanonicalName or canonicalName
           name: m.name
     lineOffset += lineCount
 

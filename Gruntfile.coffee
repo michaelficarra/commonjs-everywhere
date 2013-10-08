@@ -4,6 +4,17 @@ module.exports = (grunt) ->
     clean:
       all: ['build']
 
+    coffee:
+      options:
+        sourceMap: true
+      all:
+        src: '*.coffee'
+        dest: 'lib'
+        cwd: 'src'
+        flatten: true
+        expand: true
+        ext: '.js'
+
     powerbuild:
       options:
         sourceMap: true
@@ -11,7 +22,6 @@ module.exports = (grunt) ->
       all:
         files: [
           {src: ['test-setup.coffee', 'test/*.coffee'], dest: 'tests.js'}
-          {src: 'src/index.coffee', dest: 'lib/main.js'}
         ]
 
     mocha_debug:
@@ -44,6 +54,8 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks('grunt-release')
   grunt.loadNpmTasks('grunt-mocha-debug')
   grunt.loadNpmTasks('grunt-contrib-watch')
+  grunt.loadNpmTasks('grunt-contrib-coffee')
+  grunt.loadNpmTasks('grunt-newer')
 
-  grunt.registerTask('test', ['powerbuild', 'mocha_debug'])
+  grunt.registerTask('test', ['newer:coffee', 'powerbuild', 'mocha_debug'])
   grunt.registerTask('default', ['test', 'watch'])

@@ -8,12 +8,20 @@ initSignalHandlers = ->
   initialized = true
   process.on 'SIGINT', process.exit
   process.on 'SIGTERM', process.exit
+  process.on 'uncaughtException', (e) ->
+    # to be safe, remove all cache files
+    for own k of caches
+      if fs.existsSync(k)
+        fs.unlinkSync(k)
+    throw e
 
 caches = {}
 
 module.exports = (cachePath = path.join(process.cwd(), '.powerbuild~')) ->
   if {}.hasOwnProperty.call caches, cachePath
     return caches[cachePath]
+
+  initSignalHandlers()
 
   process.on 'exit', ->
     fs.writeFileSync cachePath, JSON.stringify caches[cachePath]
