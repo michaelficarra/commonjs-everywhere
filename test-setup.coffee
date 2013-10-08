@@ -58,7 +58,7 @@ global.bundleEval = (entryPoint, opts = {}, env = {}) ->
   module$.exports
 
 extensions = ['.js', '.coffee']
-relativeResolve = require './src/relative-resolve'
+relativeResolve = require './lib/relative-resolve'
 global.resolve = (givenPath, cwd = '') ->
   realCwd = path.resolve path.join FIXTURES_DIR, cwd
   resolved = relativeResolve {extensions, root: FIXTURES_DIR, cwd: realCwd, path: givenPath}

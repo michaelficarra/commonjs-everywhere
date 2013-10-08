@@ -3,3 +3,4 @@ test/fixtures/*
 /lib/
 tests.js
 tests.js.map
+powerbuild-cache

@@ -9,9 +9,12 @@ DESC = 'Wraps node.js/commonjs projects into single umd function that will run
  anywhere, generating concatenated source maps to debug files individually.'
 
 
+defaultCachePath = path.join(__dirname, '..', 'powerbuild-cache')
+
+
 module.exports = (grunt) ->
   grunt.registerMultiTask NAME, DESC, ->
-    options = @options()
+    options = @options(cachePath: defaultCachePath)
     for f in @files
       opts = _.clone(options)
       if not opts.disableDiskCache

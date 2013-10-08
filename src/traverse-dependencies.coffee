@@ -221,11 +221,13 @@ module.exports = (build, processedCache) ->
     processed[filename] = {id, canonicalName, code, map, lineCount, mtime,
       deps, nodeFeatures, isNpmModule, isCoreModule, realCanonicalName}
     if processedCache
+      # Cache entries are only updated, never deleted, this enables multiple
+      # build configurations to share it
       processedCache[filename] = processed[filename]
 
-  # remove old dependencies and update the cache
-  # for own k, {isCoreModule} of processed
-  #   if not (isCoreModule or k of checked)
-  #     delete processed[k]
+  # remove old dependencies
+  for own k, {isCoreModule} of processed
+    if not (isCoreModule or k of checked)
+      delete processed[k]
 
   return processed

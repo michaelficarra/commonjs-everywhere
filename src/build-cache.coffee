@@ -39,6 +39,6 @@ module.exports = (cachePath = path.join(process.cwd(), '.powerbuild~')) ->
   if not caches[cachePath]
     caches[cachePath] =
       processed: {}
-      uids: {next: 1, names: []}
+      uids: {next: 1, names: {}}
 
   return caches[cachePath]

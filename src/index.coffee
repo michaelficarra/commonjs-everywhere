@@ -14,7 +14,7 @@ class Powerbuild
     options.inlineSources ?= false
     if options.compress
       options.minify = true
-    options.uids or= {next: 1, names: []}
+    options.uids or= {next: 1, names: {}}
     options.npmSourceMaps ?= false
     options.root or= process.cwd()
     options.node ?= true
