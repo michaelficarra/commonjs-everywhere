@@ -35,17 +35,3 @@ suite 'Process Spec', ->
     fixtures '/a.js': 'module.exports = Object.keys(process.env)'
     arrayEq [], bundleEval 'a.js'
 
-  test 'process.nextTick should use setImmediate if available', ->
-    fixtures '/a.js': 'module.exports = process.nextTick'
-    indicator = ->
-    eq indicator, bundleEval 'a.js', null, setImmediate: indicator
-
-  test 'process.nextTick should use setTimeout if setImmediate is not available', ->
-    fixtures '/a.js': 'process.nextTick(setTimeout)'
-    called = no
-    indicator = (fn, delay) ->
-      called = yes
-      eq indicator, fn
-      eq 0, delay
-    bundleEval 'a.js', null, setImmediate: null, setTimeout: indicator
-    ok called

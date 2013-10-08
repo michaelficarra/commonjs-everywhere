@@ -1,8 +1,8 @@
 {
-  "name": "commonjs-everywhere",
-  "version": "0.9.4",
-  "description": "CommonJS browser bundler with aliasing, extensibility, and source maps from the minified JS bundle",
-  "homepage": "https://github.com/michaelficarra/commonjs-everywhere",
+  "name": "powerbuild",
+  "version": "0.0.1",
+  "description": "CommonJS bundler with aliasing, extensibility, and source maps from the minified JS bundle. Forked from commonjs-everywhere adding speed improvements, persistent disk cache for incremental builds, support for reading '// [#@] sourceMappingURL' from input files and bundled grunt task",
+  "homepage": "https://github.com/tarruda/powerbuild",
   "keywords": [
     "CommonJS",
     "CommonJS Everywhere",
@@ -17,15 +17,21 @@
     "name": "Michael Ficarra",
     "email": "git@michael.ficarra.me"
   },
+  "contributors": [
+    {
+      "name": "Thiago de arruda",
+      "email": "tpadilha84@gmail.com"
+    }
+  ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/michaelficarra/commonjs-everywhere.git"
+    "url": "git://github.com/tarruda/powerbuild.git"
   },
-  "bugs": "https://github.com/michaelficarra/commonjs-everywhere/issues",
+  "bugs": "https://github.com/tarruda/powerbuild/issues",
   "engines": {
     "node": "0.8.x || 0.9.x || 0.10.x"
   },
-  "main": "lib/module",
+  "main": "lib/index",
   "directories": {
     "bin": "bin",
     "lib": "lib",
@@ -33,29 +39,27 @@
   },
   "dependencies": {
     "Base64": "~0.1.2",
-    "coffee-script-redux": "2.0.0-beta7",
-    "escodegen": "~0.0.24",
-    "esmangle": "~0.0.10",
-    "esprima": "~1.0.2",
-    "estraverse": "1.3.x",
-    "MD5": "1.x.x",
     "mktemp": "~0.3.0",
     "nopt": "~2.1.2",
     "resolve": "0.5.x",
-    "buffer-browserify": "*",
-    "constants-browserify": ">= 0.0.1",
-    "crypto-browserify": "*",
-    "events-browserify": "*",
-    "http-browserify": "*",
-    "punycode": "*",
-    "querystring": "*",
-    "vm-browserify": "*",
-    "zlib-browserify": "*"
+    "source-map": "~0.1.30",
+    "lodash": "~2.2.1",
+    "uglify-js": "~2.4.0",
+    "estraverse": "~1.3.1",
+    "escodegen": "0.0.27",
+    "esprima": "~1.0.4",
+    "escope": "~1.0.0"
   },
   "devDependencies": {
-    "mocha": "~1.8.1",
     "scopedfs": "~0.1.0",
-    "semver": "~1.1.4"
+    "grunt": "~0.4.1",
+    "grunt-release": "~0.6.0",
+    "grunt-mocha-debug": "0.0.6",
+    "grunt-contrib-watch": "~0.5.3",
+    "source-map-support": "~0.2.3",
+    "grunt-newer": "~0.5.4",
+    "grunt-contrib-coffee": "~0.7.0",
+    "coffee-script": "~1.6.3"
   },
   "scripts": {
     "test": "make test"
@@ -63,7 +67,7 @@
   "licenses": [
     {
       "type": "BSD",
-      "url": "https://github.com/michaelficarra/commonjs-everywhere/blob/master/LICENSE"
+      "url": "https://github.com/tarruda/powerbuild/blob/master/LICENSE"
     }
   ]
 }

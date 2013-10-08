@@ -7,7 +7,11 @@ CORE_MODULES = require './core-modules'
 isCore = require './is-core'
 canonicalise = require './canonicalise'
 
-resolvePath = ({extensions, aliases, root, cwd, path: givenPath}) ->
+resolvePath = ({extensions, aliases, root, cwd, path: givenPath}, pkgMainField = 'browser') ->
+  packageFilter = (pkg) ->
+    if pkg[pkgMainField]
+      pkg.main = pkg[pkgMainField]
+    return pkg
   aliases ?= {}
   if isCore givenPath
     return if {}.hasOwnProperty.call aliases, givenPath
@@ -16,11 +20,14 @@ resolvePath = ({extensions, aliases, root, cwd, path: givenPath}) ->
       throw new Error "Core module \"#{givenPath}\" has not yet been ported to the browser"
     givenPath = corePath
   # try regular CommonJS requires
-  try resolve givenPath, {extensions, basedir: cwd or root}
+  try
+    resolve givenPath, {extensions, basedir: cwd or root, packageFilter}
   catch e
     # support non-standard root-relative requires
-    try resolve (path.join root, givenPath), {extensions}
-    catch e then throw new Error "Cannot find module \"#{givenPath}\" in \"#{root}\""
+    try
+      resolve (path.join root, givenPath), {extensions, packageFilter}
+    catch e
+      throw new Error "Cannot find module \"#{givenPath}\" in \"#{root}\""
 
 module.exports = ({extensions, aliases, root, cwd, path: givenPath}) ->
   aliases ?= {}
