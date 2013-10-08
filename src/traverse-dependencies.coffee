@@ -163,11 +163,9 @@ module.exports = (build, processedCache) ->
             worklist.push dep
             deps.push dep
         catch e
-          rv = undefined
           if build.ignoreMissing
-            rv = { type: 'Literal', value: null }
-            rv.loc = node.loc
-          return rv
+            return
+          throw e
         # rewrite the require to use the root-relative path or the uid if
         # enabled
         if rewriteRequire

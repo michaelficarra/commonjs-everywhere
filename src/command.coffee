@@ -4,7 +4,7 @@ nopt = require 'nopt'
 _ = require 'lodash'
 
 Powerbuild = require './index'
-buildCache = require '../src/build-cache'
+buildCache = require './build-cache'
 traverseDependencies = require './traverse-dependencies'
 
 knownOpts = {}

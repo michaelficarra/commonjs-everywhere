@@ -1,5 +1,5 @@
 _ = require 'lodash'
-acorn = require 'acorn'
+esprima = require 'esprima'
 coffee = require 'coffee-script'
 path = require 'path'
 bundle = require './bundle'
@@ -31,11 +31,8 @@ class Powerbuild
         @sourceMap = "#{@output}.map"
 
     @handlers =
-      '.coffee': (src, canonicalName) ->
-        {js, v3SourceMap} = coffee.compile src, sourceMap: true, bare: true
-        return {code: js, map: v3SourceMap}
       '.json': (json, canonicalName) ->
-        acorn.parse "module.exports = #{json}", locations: yes
+        esprima.parse "module.exports = #{json}", loc: yes
 
     for own ext, handler of options.handlers ? {}
       @handlers[ext] = handler

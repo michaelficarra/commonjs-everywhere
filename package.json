@@ -1,7 +1,7 @@
 {
   "name": "powerbuild",
   "version": "0.0.1",
-  "description": "CommonJS browser bundler with aliasing, extensibility, and source maps from the minified JS bundle. Forked from commonjs-everywhere, speed improvements, persistent disk cache for incremental builds and bundled grunt task",
+  "description": "CommonJS bundler with aliasing, extensibility, and source maps from the minified JS bundle. Forked from commonjs-everywhere adding speed improvements, persistent disk cache for incremental builds, support for reading '// [#@] sourceMappingURL' from input files and bundled grunt task",
   "homepage": "https://github.com/tarruda/powerbuild",
   "keywords": [
     "CommonJS",
@@ -53,7 +53,6 @@
     "zlib-browserify": "*",
     "source-map": "~0.1.30",
     "handlebars": "~1.0.12",
-    "coffee-script": "~1.6.3",
     "lodash": "~2.2.1",
     "uglify-js": "~2.4.0",
     "estraverse": "~1.3.1",
@@ -78,7 +77,7 @@
   "licenses": [
     {
       "type": "BSD",
-      "url": "https://github.com/michaelficarra/commonjs-everywhere/blob/master/LICENSE"
+      "url": "https://github.com/tarruda/powerbuild/blob/master/LICENSE"
     }
   ]
 }
