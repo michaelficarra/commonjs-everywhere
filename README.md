@@ -6,16 +6,16 @@
 
   - Escodegen is only used when generating partial source maps, the final
     result is computed manually.
-  - Esmangle/escodegen is replaced by UglifyJS for two reasons:
+  - For minification esmangle/escodegen is replaced by UglifyJS for two
+    reasons:
     * It was breaking in some of my tests
-    * It is 10x slower than UglifyJS(literally 10x slower in my tests. For
-      a bundle with 50k lines of code UglifyJS took about 4 seconds versus
-      35 seconds from esmangle/escodegen)
+    * It is 10x slower than UglifyJS. For a bundle with 50k lines of code
+      UglifyJS took about 4 seconds versus 35 seconds from esmangle/escodegen)
   - Dependency on coffee-script-redux was removed. While its still possible
     to use the 'handlers' option to build compile-to-js languages directly,
     this tool now reads '// @sourceMappingURL' tags from the end of the file
     in order to map correctly to the original files. This means any
-    compile-to-js language is supported out-of-box.
+    compile-to-js language that produces source maps is supported out-of-box.
   - By default, source maps for npm dependencies are not included.
   - Module paths are replaced by unique identifiers, which leads to a small
     improvement in the resulting size. When the __filename or __dirname

@@ -3,7 +3,7 @@ path = require 'path'
 {btoa} = require 'Base64'
 UglifyJS = require 'uglify-js'
 sourceMapToAst = require './sourcemap-to-ast'
-UglifyJS.warn_function = ->
+UglifyJS.AST_Node.warn_function = ->
 
 
 PROCESS = """
