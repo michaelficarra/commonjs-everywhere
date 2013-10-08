@@ -34,8 +34,8 @@ module.exports = (build, processedCache) ->
   aliases = build.aliases ? {}
   root = build.root
   globalFeatures = {
+    console: false
     setImmediate: false
-    process: false
     Buffer: false
   }
 
@@ -190,19 +190,25 @@ module.exports = (build, processedCache) ->
     }
 
     baseDir = path.dirname path.resolve __dirname
-    if isImplicit 'process', scope
-      nodeFeatures.process = globalFeatures.process = true
 
-    if not globalFeatures.setImmediate and (isImplicit 'setImmediate', scope) or nodeFeatures.process
+    if not globalFeatures.setImmediate and
+        (isImplicit('setImmediate', scope) or isImplicit('process', scope))
       globalFeatures.setImmediate = true
-      resolved = relativeResolve {extensions: build.extensions, aliases, root: build.root, cwd: baseDir, path: 'setimmediate'}
+      resolved = relativeResolve {extensions: build.extensions, aliases, root: build.root, cwd: baseDir, path: 'timers'}
       resolved = _.extend resolved, isCoreModule: true, isNpmModule: true
       nodeFeatures.setImmediate = resolved.filename
       worklist.unshift(resolved)
 
+    if not globalFeatures.console and isImplicit 'console', scope
+      globalFeatures.console = true
+      resolved = relativeResolve {extensions: build.extensions, aliases, root: build.root, cwd: baseDir, path: 'console'}
+      resolved = _.extend resolved, isCoreModule: true, isNpmModule: true
+      nodeFeatures.console = resolved.filename
+      worklist.unshift(resolved)
+
     if not globalFeatures.Buffer and isImplicit 'Buffer', scope
       globalFeatures.Buffer = true
-      resolved = relativeResolve {extensions: build.extensions, aliases, root: build.root, cwd: baseDir, path: 'buffer-browserify'}
+      resolved = relativeResolve {extensions: build.extensions, aliases, root: build.root, cwd: baseDir, path: 'buffer'}
       resolved = _.extend resolved, isCoreModule: true, isNpmModule: true
       nodeFeatures.Buffer = resolved.filename
       worklist.unshift(resolved)

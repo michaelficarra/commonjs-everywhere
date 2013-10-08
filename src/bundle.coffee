@@ -105,17 +105,17 @@ bundle = (build, processed) ->
     file: path.basename(build.output)
     sourceRoot: build.sourceMapRoot
   lineOffset = umdOffset
-  useProcess = false
+  setImmediate = false
   bufferPath = false
-  setImmediatePath = false
+  consolePath = false
 
   files = {}
 
   for own filename, {id, canonicalName, realCanonicalName, code, map, lineCount, isNpmModule, nodeFeatures} of processed
     if nodeFeatures.__filename or nodeFeatures.__dirname
       files[id] = realCanonicalName or canonicalName
-    useProcess = useProcess or nodeFeatures.process
-    setImmediatePath = setImmediatePath or nodeFeatures.setImmediate
+    setImmediate = setImmediate or nodeFeatures.setImmediate
+    consolePath = consolePath or nodeFeatures.console
     bufferPath = bufferPath or nodeFeatures.Buffer
     result += """
       \nrequire.define('#{id}', function(module, exports, __dirname, __filename, undefined){
@@ -137,15 +137,17 @@ bundle = (build, processed) ->
           name: m.name
     lineOffset += lineCount
 
-  if bufferPath
+  if bufferPath and build.node
     {id} = processed[bufferPath]
     result += "\nvar Buffer = require('#{id}');"
 
-  if setImmediatePath
-    {id} = processed[setImmediatePath]
-    result += "\nrequire('#{id}');"
+  if consolePath and build.node
+    {id} = processed[consolePath]
+    result += "\nvar console = require('#{id}');"
 
-  if useProcess and build.node
+  if setImmediate and build.node
+    {id} = processed[setImmediate]
+    result += "\nvar setImmediate = require('#{id}').setImmediate;"
     result += "\nvar process = #{PROCESS};"
 
   for i in [0...build.entryPoints.length]

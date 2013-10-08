@@ -20,7 +20,7 @@ class Powerbuild
     {@output, @export, @entryPoints, @root, @node, @inlineSources,
      @verbose, @ignoreMissing, @sourceMap, @inlineSourceMap,
      @mainModule, @minify, @aliases, @handlers, @processed, @uids,
-     @npmSourceMaps, @compress} = options
+     @npmSourceMaps, @compress, @debug} = options
 
     @sourceMapRoot = if @sourceMap? then (path.relative (path.dirname @sourceMap), @root) or '.'
 
@@ -51,6 +51,8 @@ class Powerbuild
 
 
   uidFor: (name) ->
+    if @debug
+      return name
     if not {}.hasOwnProperty.call(@uids.names, name)
       uid = @uids.next++
       @uids.names[name] = uid
