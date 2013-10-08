@@ -165,7 +165,7 @@ module.exports = (build, processedCache) ->
             deps.push dep
         catch e
           if build.ignoreMissing
-            return
+            return { type: 'Literal', value: null }
           throw e
         # rewrite the require to use the root-relative path or the uid if
         # enabled

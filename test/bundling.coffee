@@ -36,7 +36,7 @@ suite 'Bundling', ->
   test 'ignoreMissing option throws resolve exception at runtime', ->
     fixtures '/a.js': 'module.exports = require("./b")'
     throws((-> bundleEval('a.js')), /Cannot find module/)
-    throws((-> bundleEval('a.js', ignoreMissing: true)), /Failed to resolve/)
+    eq bundleEval('a.js', ignoreMissing: true), null
 
   test '#78: fix canonicalisation of paths', ->
     fixtures '/src/main.coffee': 'module.exports = 1'
