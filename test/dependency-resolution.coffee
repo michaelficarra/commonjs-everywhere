@@ -48,7 +48,7 @@ suite 'Dependency Resolution', ->
 
   test 'core dependencies', ->
     fixtures 'a.js': 'require("freelist")'
-    arrayEq ['a.js', '../node/lib/freelist.js'], deps 'a.js'
+    arrayEq ['../core/freelist.js', 'a.js'], deps 'a.js'
 
   suite 'Aliasing', ->
 
@@ -69,7 +69,6 @@ suite 'Dependency Resolution', ->
 
     test 'alias a core module', ->
       fixtures 'a.js': 'require("fs")'
-      arrayEq ['a.js', '../node/lib/freelist.js'], deps 'a.js', aliases: {fs: 'freelist'}
-      fixtures 'a.js': 'require("path")'
-      arrayEq ['a.js', '../node/lib/path.js', '../node/lib/util.js'
-        '../node_modules/setimmediate/setImmediate.js'], deps 'a.js', aliases: {child_process: null, fs: null}
+      arrayEq(['../core/freelist.js', 'a.js'], deps 'a.js', aliases: {fs: 'freelist'})
+      fixtures 'a.js': 'require("freelist")'
+      arrayEq ['../core/freelist.js', 'a.js'], deps 'a.js', aliases: {child_process: null, fs: null}
