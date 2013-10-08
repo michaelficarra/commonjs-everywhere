@@ -9,8 +9,8 @@ CORE_MODULES =
   crypto: resolve 'crypto-browserify'
   events: resolve 'events-browserify'
   http: resolve 'http-browserify'
-  punycode: resolve './node_modules/punycode', basedir: CJS_DIR
-  querystring: resolve './node_modules/querystring', basedir: CJS_DIR
+  punycode: resolve('./node_modules/punycode', basedir: CJS_DIR)
+  querystring: resolve('./node_modules/querystring', basedir: CJS_DIR)
   vm: resolve 'vm-browserify'
   zlib: resolve 'zlib-browserify'
 

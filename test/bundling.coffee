@@ -33,10 +33,10 @@ suite 'Bundling', ->
     eq 5, obj.a
     eq 3, obj.b
 
-  test 'ignoreMissing option produces null values for missing dependencies', ->
+  test 'ignoreMissing option throws resolve exception at runtime', ->
     fixtures '/a.js': 'module.exports = require("./b")'
-    throws -> bundleEval 'a.js'
-    eq null, bundleEval 'a.js', ignoreMissing: yes
+    throws((-> bundleEval('a.js')), /Cannot find module/)
+    throws((-> bundleEval('a.js', ignoreMissing: true)), /Failed to resolve/)
 
   test '#78: fix canonicalisation of paths', ->
     fixtures '/src/main.coffee': 'module.exports = 1'

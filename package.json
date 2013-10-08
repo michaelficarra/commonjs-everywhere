@@ -69,7 +69,8 @@
     "grunt-contrib-watch": "~0.5.3",
     "source-map-support": "~0.2.3",
     "grunt-newer": "~0.5.4",
-    "grunt-contrib-coffee": "~0.7.0"
+    "grunt-contrib-coffee": "~0.7.0",
+    "coffee-script": "~1.6.3"
   },
   "scripts": {
     "test": "make test"

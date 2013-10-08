@@ -132,6 +132,7 @@ module.exports = (build, processedCache) ->
     estraverse.replace ast,
       enter: (node, parents) ->
         if node.loc?
+          node.loc.source = canonicalName
           if node.type != 'Program' and adjustWrapperLocation
             # Adjust the location info to reflect the removed function wrapper 
             if node.loc.start.line == 1 and node.loc.start.column >= 12
@@ -210,7 +211,7 @@ module.exports = (build, processedCache) ->
       sourceMap: true
       format: escodegen.FORMAT_DEFAULTS
       sourceMapWithCode: true
-      sourceMapRoot: if build.sourceMap? then (path.relative (path.dirname build.sourceMap), build.root) or '.'
+      sourceMapRoot: build.sourceMapRoot
     map = map.toString()
 
     # cache linecount for a little more efficiency when calculating offsets

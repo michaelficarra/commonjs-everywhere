@@ -1,6 +1,5 @@
 _ = require 'lodash'
 esprima = require 'esprima'
-coffee = require 'coffee-script'
 path = require 'path'
 bundle = require './bundle'
 traverseDependencies = require './traverse-dependencies'

@@ -1,3 +1,5 @@
+coffee = require 'coffee-script'
+
 module.exports = (grunt) ->
 
   grunt.initConfig
@@ -19,6 +21,11 @@ module.exports = (grunt) ->
       options:
         sourceMap: true
         node: false
+        handlers:
+          '.coffee': (src, canonicalName) ->
+            {js, v3SourceMap} = coffee.compile src, sourceMap: true, bare: true
+            return {code: js, map: v3SourceMap}
+
       all:
         files: [
           {src: ['test-setup.coffee', 'test/*.coffee'], dest: 'tests.js'}
