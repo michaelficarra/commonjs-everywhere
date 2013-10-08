@@ -1,6 +1,6 @@
 {
   "name": "powerbuild",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "CommonJS bundler with aliasing, extensibility, and source maps from the minified JS bundle. Forked from commonjs-everywhere adding speed improvements, persistent disk cache for incremental builds, support for reading '// [#@] sourceMappingURL' from input files and bundled grunt task",
   "homepage": "https://github.com/tarruda/powerbuild",
   "keywords": [
