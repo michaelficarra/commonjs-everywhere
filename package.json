@@ -41,7 +41,7 @@
     "MD5": "~1.2",
     "mktemp": "0.3.x",
     "nopt": "~2.1.2",
-    "resolve": "0.5.x",
+    "resolve": "0.6.x",
     "buffer-browserify": "*",
     "constants-browserify": ">= 0.0.1",
     "crypto-browserify": "*",
