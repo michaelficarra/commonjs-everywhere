@@ -1,4 +1,10 @@
+v0.9.5 (2014-01-21)
+- ad84e452: update to CoffeeScriptRedux version 2.0.0-beta8
+- b3ae6ebd: fixes #87: resolve core modules consistently
+- 9f41e754: update some dependency specifications
+
 v0.9.4 (2013-09-15)
+- c89df52b: Version 0.9.4
 - 7d969b72: fixes #81: improve documentation for aliasing
 - 58fc9a7c: update dependency versions
 - 65819399: remove some unnecessary parentheses
