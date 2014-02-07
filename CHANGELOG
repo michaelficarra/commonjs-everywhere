@@ -1,4 +1,10 @@
+v0.9.6 (2014-02-07)
+- 42e5c876: rebuild using new CSR version
+- 05019b93: Merge pull request #90 from Constellation/update-es-tools
+- 3722ced1: Update esmangle and escodegen
+
 v0.9.5 (2014-01-21)
+- 4e9a9e29: Version 0.9.5
 - ad84e452: update to CoffeeScriptRedux version 2.0.0-beta8
 - b3ae6ebd: fixes #87: resolve core modules consistently
 - 9f41e754: update some dependency specifications
