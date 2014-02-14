@@ -44,12 +44,16 @@ global.bundle = bundle = (entryPoint, opts) ->
   root = path.resolve FIXTURES_DIR, (opts.root ? '')
   escodegen.generate cjsify entryPoint, root, opts
 global.bundleEval = (entryPoint, opts = {}, env = {}) ->
-  global$ = Object.create null
-  global$.module$ = module$ = {}
+  global$ = env.global
+  unless global$
+    global$ = Object.create null
+    global$.module = {exports: global$.exports = Object.create null}
   global$[key] = val for own key, val of env
-  opts.export = 'module$.exports'
+  global$.global = global$
+  module$ = global$.module
+  opts.export = 'module.exports' unless 'export' of opts
   vm.runInNewContext (bundle entryPoint, opts), global$, ''
-  module$.exports
+  module$?.exports
 
 extensions = ['.js', '.coffee']
 relativeResolve = require './src/relative-resolve'

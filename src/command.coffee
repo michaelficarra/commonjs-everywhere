@@ -19,8 +19,8 @@ escodegenFormat =
 knownOpts = {}
 # options
 knownOpts[opt] = Boolean for opt in [
-  'deps', 'help', 'ignore-missing', 'inline-source-map', 'inline-sources',
-  'minify', 'node', 'verbose', 'watch'
+  'amd', 'deps', 'help', 'ignore-missing', 'inline-source-map',
+  'inline-sources', 'minify', 'node', 'verbose', 'watch'
 ]
 # parameters
 knownOpts[opt] = String for opt in ['export', 'output', 'root', 'source-map']
