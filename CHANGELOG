@@ -1,4 +1,10 @@
+v0.9.7 (2014-02-15)
+- 6e7c8f7c: fixes #92: allow handlers given via CLI to be resolved relative to CWD
+- 13a9addb: fixes #91: add amd support through --amd flag
+- bd0a55fd: update dependencies
+
 v0.9.6 (2014-02-07)
+- 2df23977: Version 0.9.6
 - 42e5c876: rebuild using new CSR version
 - 05019b93: Merge pull request #90 from Constellation/update-es-tools
 - 3722ced1: Update esmangle and escodegen
