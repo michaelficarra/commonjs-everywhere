@@ -17,10 +17,10 @@ lib/%.js: src/%.coffee
 
 .PHONY: release test loc clean
 
-VERSION = $(shell node -pe 'require("./package.json").version')
-release-patch: NEXT_VERSION = $(shell node -pe 'require("semver").inc("$(VERSION)", "patch")')
-release-minor: NEXT_VERSION = $(shell node -pe 'require("semver").inc("$(VERSION)", "minor")')
-release-major: NEXT_VERSION = $(shell node -pe 'require("semver").inc("$(VERSION)", "major")')
+VERSION = $(shell node -p 'require("./package.json").version')
+release-patch: NEXT_VERSION = $(shell node -p 'require("semver").inc("$(VERSION)", "patch")')
+release-minor: NEXT_VERSION = $(shell node -p 'require("semver").inc("$(VERSION)", "minor")')
+release-major: NEXT_VERSION = $(shell node -p 'require("semver").inc("$(VERSION)", "major")')
 release-patch: release
 release-minor: release
 release-major: release
