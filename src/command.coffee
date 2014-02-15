@@ -6,6 +6,7 @@ nopt = require 'nopt'
 {btoa} = require 'Base64'
 
 CJSEverywhere = require './module'
+relativeResolve = require './relative-resolve'
 
 escodegenFormat =
   indent:
@@ -95,18 +96,23 @@ for aliasPair in options.alias
     process.exit 1
 delete options.alias
 
+root = if options.root then path.resolve options.root else process.cwd()
+originalEntryPoint = positionalArgs[0]
+
 options.handlers = {}
 for handlerPair in options.handler
   match = handlerPair.match /([^:]+):(.*)/ ? []
   if match? then do (ext = ".#{match[1]}", mod = match[2]) ->
-    options.handlers[ext] = require mod
+    resolved = relativeResolve
+      extensions: Object.keys require.extensions
+      root: root
+      cwd: process.cwd()
+      path: mod
+    options.handlers[ext] = require resolved.filename
   else
     console.error "invalid handler: #{handlerPair}"
     process.exit 1
 delete options.handler
-
-root = if options.root then path.resolve options.root else process.cwd()
-originalEntryPoint = positionalArgs[0]
 
 if options.deps
   deps = CJSEverywhere.traverseDependencies originalEntryPoint, root, options
