@@ -7,6 +7,7 @@ LIB = $(SRC:src/%.coffee=lib/%.js)
 
 COFFEE=node_modules/.bin/coffee --js
 MOCHA=node_modules/.bin/mocha --compilers coffee:coffee-script-redux/register -r coffee-script-redux/register -r test-setup.coffee -u tdd
+SEMVER=node_modules/.bin/semver
 
 all: build test
 build: $(LIB)
@@ -18,9 +19,9 @@ lib/%.js: src/%.coffee
 .PHONY: all build release release-patch release-minor release-major test loc clean
 
 VERSION = $(shell node -p 'require("./package.json").version')
-release-patch: NEXT_VERSION = $(shell node -p 'require("semver").inc("$(VERSION)", "patch")')
-release-minor: NEXT_VERSION = $(shell node -p 'require("semver").inc("$(VERSION)", "minor")')
-release-major: NEXT_VERSION = $(shell node -p 'require("semver").inc("$(VERSION)", "major")')
+release-patch: NEXT_VERSION = $(shell $(SEMVER) -i patch $(VERSION))
+release-minor: NEXT_VERSION = $(shell $(SEMVER) -i minor $(VERSION))
+release-major: NEXT_VERSION = $(shell $(SEMVER) -i major $(VERSION))
 release-patch: release
 release-minor: release
 release-major: release
