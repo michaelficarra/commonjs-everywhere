@@ -58,14 +58,32 @@ suite 'Dependency Resolution', ->
         '/b.js': '' # /b.js still needs to exist
         '/c.js': ''
       arrayEq ['/a.js', '/c.js'], deps '/a.js', aliases: {'/b.js': '/c.js'}
+      arrayEq ['/a.js', '/c.js'], deps '/a.js', aliases: {'/b.js': 'c.js'}
+      arrayEq ['/a.js', '/c.js'], deps '/a.js', aliases: {'b.js': '/c.js'}
+      arrayEq ['/a.js', '/c.js'], deps '/a.js', aliases: {'b.js': 'c.js'}
+
+    test 'chained alias', ->
+      fixtures
+        '/a.js': 'require("./b")'
+        '/b.js': ''
+        '/c.js': ''
+        '/d.js': ''
+        '/e.js': ''
+        '/f.js': ''
+      arrayEq ['/a.js', '/f.js'], deps '/a.js', aliases:
+        '/b.js': '/c.js'
+        'c.js': '/d.js'
+        '/d.js': 'e.js'
+        'e.js': 'f.js'
 
     test 'alias to falsey value to omit', ->
       fixtures
         '/a.js': 'require("./b")'
         '/b.js': ''
+        '/c.js': ''
       arrayEq ['/a.js'], deps '/a.js', aliases: {'/b.js': ''}
-      arrayEq ['/a.js'], deps '/a.js', aliases: {'/b.js': null}
-      arrayEq ['/a.js'], deps '/a.js', aliases: {'/b.js': false}
+      arrayEq ['/a.js'], deps '/a.js', aliases: {'b.js': null}
+      arrayEq ['/a.js'], deps '/a.js', aliases: {'/b.js': '/c.js', '/c.js': false}
 
     test 'alias a core module', ->
       fixtures '/a.js': 'require("fs")'

@@ -26,6 +26,10 @@ module.exports = ({extensions, aliases, root, cwd, path: givenPath}) ->
   aliases ?= {}
   resolved = resolvePath {extensions, aliases, root, cwd, path: givenPath}
   canonicalName = if isCore givenPath then givenPath else canonicalise root, resolved
-  if {}.hasOwnProperty.call aliases, canonicalName
-    resolved = aliases[canonicalName] and resolvePath {extensions, aliases, root, path: aliases[canonicalName]}
+  while ({}.hasOwnProperty.call aliases, "/#{canonicalName}") or
+  ({}.hasOwnProperty.call aliases, canonicalName)
+    alias = aliases["/#{canonicalName}"] or aliases[canonicalName]
+    resolved = if alias then resolvePath {extensions, aliases, root, path: alias}
+    break unless resolved # aliased module cannot be resolved
+    canonicalName = canonicalise root, resolved
   {filename: resolved, canonicalName}
