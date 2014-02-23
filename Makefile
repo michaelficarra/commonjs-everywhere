@@ -16,7 +16,7 @@ lib/%.js: src/%.coffee
 	@mkdir -p "$(@D)"
 	$(COFFEE) <"$<" >"$@"
 
-.PHONY: all build release release-patch release-minor release-major test loc clean
+.PHONY: default all build release release-patch release-minor release-major test loc clean
 
 VERSION = $(shell node -p 'require("./package.json").version')
 release-patch: NEXT_VERSION = $(shell $(SEMVER) -i patch $(VERSION))
