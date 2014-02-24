@@ -16,17 +16,14 @@ lib/%.js: src/%.coffee
 	@mkdir -p "$(@D)"
 	$(COFFEE) <"$<" >"$@"
 
-.PHONY: default all build release release-patch release-minor release-major test loc clean
+.PHONY: default all build release-patch release-minor release-major test loc clean
 
 VERSION = $(shell node -p 'require("./package.json").version')
 release-patch: NEXT_VERSION = $(shell $(SEMVER) -i patch $(VERSION))
 release-minor: NEXT_VERSION = $(shell $(SEMVER) -i minor $(VERSION))
 release-major: NEXT_VERSION = $(shell $(SEMVER) -i major $(VERSION))
-release-patch: release
-release-minor: release
-release-major: release
 
-release: build test
+release-patch release-minor release-major: build test
 	@printf "Current version is $(VERSION). This will publish version $(NEXT_VERSION). Press [enter] to continue." >&2
 	@read
 	./changelog.sh "v$(NEXT_VERSION)" >"$(CHANGELOG)"
