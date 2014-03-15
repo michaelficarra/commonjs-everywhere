@@ -26,6 +26,9 @@
     "node": "0.8.x || 0.9.x || 0.10.x"
   },
   "main": "lib/module",
+  "bin": {
+    "cjsify": "./bin/cjsify"
+  },
   "directories": {
     "bin": "bin",
     "lib": "lib",
