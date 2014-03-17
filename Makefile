@@ -34,7 +34,7 @@ release-patch release-minor release-major: build test
 		require("fs").writeFileSync("./package.json", s);'
 	git commit package.json '$(CHANGELOG)' -m 'Version $(NEXT_VERSION)'
 	git tag -a 'v$(NEXT_VERSION)' -m 'Version $(NEXT_VERSION)'
-	git push --tags origin HEAD:master
+	git push origin refs/heads/master 'refs/tags/v$(NEXT_VERSION)'
 	npm publish
 
 test:
