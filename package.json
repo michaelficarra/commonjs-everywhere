@@ -59,7 +59,7 @@
     "coffee-script-redux": "2.0.0-beta8",
     "mocha": "~1.14.0",
     "scopedfs": "~0.1.0",
-    "semver": "~2.2.1"
+    "xyz": "0.5.x"
   },
   "scripts": {
     "test": "make test"
