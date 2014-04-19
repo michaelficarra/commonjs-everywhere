@@ -12,7 +12,7 @@ CORE_MODULES =
   punycode: resolve 'punycode'
   querystring: resolve 'querystring'
   vm: resolve 'vm-browserify'
-  zlib: resolve 'zlib-browserify'
+  zlib: resolve 'browserify-zlib'
 
 NODE_CORE_MODULES = [
   '_stream_duplex'
