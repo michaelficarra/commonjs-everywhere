@@ -9,7 +9,6 @@ canonicalise = require './canonicalise'
 
 resolvePath = ({extensions, aliases, root, cwd, path: givenPath, modulesDir }) ->
   aliases ?= {}
-  console.log( 'resolvePath: ' + modulesDir)
 
   if isCore givenPath
     return if {}.hasOwnProperty.call aliases, givenPath
@@ -26,7 +25,6 @@ resolvePath = ({extensions, aliases, root, cwd, path: givenPath, modulesDir }) -
 
 module.exports = ({extensions, aliases, root, cwd, path: givenPath, modulesDir } ) ->
   aliases ?= {}
-  console.log( 'relativeResolve: ' + modulesDir)
   resolved = resolvePath {extensions, aliases, root, cwd, path: givenPath, modulesDir }
   canonicalName = if isCore givenPath then givenPath else canonicalise root, resolved
   while ({}.hasOwnProperty.call aliases, "/#{canonicalName}") or
