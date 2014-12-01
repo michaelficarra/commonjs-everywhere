@@ -20,6 +20,7 @@ badRequireError = (filename, node, msg) ->
 
 module.exports = (entryPoint, root = process.cwd(), options = {}) ->
   aliases = options.aliases ? {}
+  modulesDir = options.modulesDir ? 'node_modules'
 
   handlers =
     '.coffee': (coffee, canonicalName) ->
@@ -30,7 +31,7 @@ module.exports = (entryPoint, root = process.cwd(), options = {}) ->
     handlers[ext] = handler
   extensions = ['.js', (ext for own ext of handlers)...]
 
-  worklist = [relativeResolve {extensions, aliases, root, path: entryPoint}]
+  worklist = [relativeResolve {extensions, aliases, root, path: entryPoint, modulesDir }]
   processed = {}
 
   while worklist.length
