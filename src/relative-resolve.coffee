@@ -9,6 +9,8 @@ canonicalise = require './canonicalise'
 
 resolvePath = ({extensions, aliases, root, cwd, path: givenPath, modulesDir }) ->
   aliases ?= {}
+  console.log( 'resolvePath: ' + modulesDir)
+
   if isCore givenPath
     return if {}.hasOwnProperty.call aliases, givenPath
     corePath = CORE_MODULES[givenPath]
@@ -22,8 +24,9 @@ resolvePath = ({extensions, aliases, root, cwd, path: givenPath, modulesDir }) -
     try resolve (path.join root, givenPath), {extensions}
     catch e then throw new Error "Cannot find module \"#{givenPath}\" in \"#{root}\""
 
-module.exports = ({extensions, aliases, root, cwd, path: givenPath}, modulesDir ) ->
+module.exports = ({extensions, aliases, root, cwd, path: givenPath, modulesDir } ) ->
   aliases ?= {}
+  console.log( 'relativeResolve: ' + modulesDir)
   resolved = resolvePath {extensions, aliases, root, cwd, path: givenPath, modulesDir }
   canonicalName = if isCore givenPath then givenPath else canonicalise root, resolved
   while ({}.hasOwnProperty.call aliases, "/#{canonicalName}") or

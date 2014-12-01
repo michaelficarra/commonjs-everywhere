@@ -88,7 +88,7 @@ module.exports = (entryPoint, root = process.cwd(), options = {}) ->
           console.error "required \"#{node.arguments[0].value}\" from \"#{canonicalName}\""
         # if we are including this file, its requires need to be processed as well
         try
-          resolved = relativeResolve {extensions, aliases, root, cwd, path: node.arguments[0].value}
+          resolved = relativeResolve {extensions, aliases, root, cwd, path: node.arguments[0].value, modulesDir }
           worklist.push resolved
         catch e
           if options.ignoreMissing
