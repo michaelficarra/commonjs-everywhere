@@ -21,7 +21,6 @@ badRequireError = (filename, node, msg) ->
 module.exports = (entryPoint, root = process.cwd(), options = {}) ->
   aliases = options.aliases ? {}
   modulesDir = options.modulesDir ? 'node_modules'
-
   handlers =
     '.coffee': (coffee, canonicalName) ->
       CoffeeScript.compile (CoffeeScript.parse coffee, raw: yes), bare: yes

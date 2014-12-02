@@ -9,7 +9,6 @@ canonicalise = require './canonicalise'
 
 resolvePath = ({extensions, aliases, root, cwd, path: givenPath, modulesDir }) ->
   aliases ?= {}
-
   if isCore givenPath
     return if {}.hasOwnProperty.call aliases, givenPath
     corePath = CORE_MODULES[givenPath]

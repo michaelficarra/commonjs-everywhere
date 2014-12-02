@@ -24,7 +24,7 @@ knownOpts[opt] = Boolean for opt in [
   'inline-sources', 'minify', 'node', 'verbose', 'watch'
 ]
 # parameters
-knownOpts[opt] = String for opt in ['export', 'output', 'root', 'source-map']
+knownOpts[opt] = String for opt in ['export', 'output', 'root', 'source-map', 'modules-dir']
 # list parameters
 knownOpts[opt] = [String, Array] for opt in ['alias', 'handler']
 
@@ -38,6 +38,7 @@ optAliases =
   v: '--verbose'
   w: '--watch'
   x: '--export'
+  d: '--modules-dir'
 
 options = nopt knownOpts, optAliases, process.argv, 2
 positionalArgs = options.argv.remain
@@ -53,6 +54,7 @@ options.ignoreMissing = options['ignore-missing']
 options.sourceMap = options['source-map']
 options.inlineSources = options['inline-sources']
 options.inlineSourceMap = options['inline-source-map']
+options.modulesDir = options['modules-dir']
 
 if options.help
   $0 = if process.argv[0] is 'node' then process.argv[1] else process.argv[0]
@@ -69,6 +71,7 @@ if options.help
   -v, --verbose             verbose output sent to stderr
   -w, --watch               watch input files/dependencies for changes and rebuild bundle
   -x, --export NAME         export the given entry module as NAME
+  -d, --modules-dir DIR     use this relative dir for looking up modules e.g. replace node_modules
   --deps                    do not bundle; just list the files that would be bundled
   --help                    display this help message and exit
   --ignore-missing          continue without error when dependency resolution fails
