@@ -23,6 +23,7 @@ CommonJS (node module) browser bundler with source maps from the minified JS bun
       -v, --verbose             verbose output sent to stderr
       -w, --watch               watch input files/dependencies for changes and rebuild bundle
       -x, --export NAME         export the given entry module as NAME
+      -d, --modules-dir DIR     use this relative dir for looking up third party modules e.g. replace node_modules
       --deps                    do not bundle; just list the files that would be bundled
       --help                    display this help message and exit
       --ignore-missing          continue without error when dependency resolution fails
@@ -69,6 +70,7 @@ Bundles the given file and its dependencies; returns a Spidermonkey AST represen
     * `node`: a falsey value causes the bundling phase to omit the `process` stub that emulates a node environment
     * `verbose`: log additional operational information to stderr
     * `ignoreMissing`: continue without error when dependency resolution fails
+    * `modulesDir`: use this relative dir for looking up third party modules
 
 ## Examples
 
