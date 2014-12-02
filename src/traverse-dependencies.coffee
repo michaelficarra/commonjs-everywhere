@@ -20,7 +20,7 @@ badRequireError = (filename, node, msg) ->
 
 module.exports = (entryPoint, root = process.cwd(), options = {}) ->
   aliases = options.aliases ? {}
-
+  modulesDir = options.modulesDir ? 'node_modules'
   handlers =
     '.coffee': (coffee, canonicalName) ->
       CoffeeScript.compile (CoffeeScript.parse coffee, raw: yes), bare: yes
@@ -30,7 +30,7 @@ module.exports = (entryPoint, root = process.cwd(), options = {}) ->
     handlers[ext] = handler
   extensions = ['.js', (ext for own ext of handlers)...]
 
-  worklist = [relativeResolve {extensions, aliases, root, path: entryPoint}]
+  worklist = [relativeResolve {extensions, aliases, root, path: entryPoint, modulesDir }]
   processed = {}
 
   while worklist.length
@@ -87,7 +87,7 @@ module.exports = (entryPoint, root = process.cwd(), options = {}) ->
           console.error "required \"#{node.arguments[0].value}\" from \"#{canonicalName}\""
         # if we are including this file, its requires need to be processed as well
         try
-          resolved = relativeResolve {extensions, aliases, root, cwd, path: node.arguments[0].value}
+          resolved = relativeResolve {extensions, aliases, root, cwd, path: node.arguments[0].value, modulesDir }
           worklist.push resolved
         catch e
           if options.ignoreMissing
