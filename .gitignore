@@ -1,2 +1,3 @@
 commonjs-everywhere-*.tgz
+node_modules
 test/fixtures/*

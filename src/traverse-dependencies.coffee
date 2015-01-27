@@ -2,6 +2,7 @@ fs = require 'fs'
 path = require 'path'
 
 CoffeeScript = require 'coffee-script-redux'
+LiveScript = require 'LiveScript'
 esprima = require 'esprima'
 estraverse = require 'estraverse'
 md5 = require 'MD5'
@@ -26,6 +27,9 @@ module.exports = (entryPoint, root = process.cwd(), options = {}) ->
       CoffeeScript.compile (CoffeeScript.parse coffee, raw: yes), bare: yes
     '.json': (json, canonicalName) ->
       esprima.parse "module.exports = #{json}", loc: yes, source: canonicalName
+    '.ls': (livescript, canonicalName) ->
+      LiveScript.compile livescript
+
   for own ext, handler of options.handlers ? {}
     handlers[ext] = handler
   extensions = ['.js', (ext for own ext of handlers)...]
